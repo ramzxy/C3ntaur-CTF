@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  alias         String    @unique
+  password      String
+  name          String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  teamId        String?
+  team          Team?     @relation(fields: [teamId], references: [id])
+  isTeamLeader  Boolean   @default(false)
+  isAdmin       Boolean   @default(false)
+  submissions   Submission[]
+}
+
+model Team {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  code        String       @unique
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  members     User[]
+  submissions Submission[]
+  score       Int          @default(0)
+}
+
+model Challenge {
+  id          String       @id @default(cuid())
+  title       String
+  description String
+  points      Int
+  flag        String
+  category    String
+  difficulty  String
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  submissions Submission[]
+}
+
+model Submission {
+  id          String    @id @default(cuid())
+  flag        String
+  isCorrect   Boolean
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userId      String
+  challengeId String
+  teamId      String
+  user        User      @relation(fields: [userId], references: [id])
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+  team        Team      @relation(fields: [teamId], references: [id])
+} 
