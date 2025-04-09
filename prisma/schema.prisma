@@ -11,28 +11,29 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  alias         String    @unique
-  password      String
-  name          String
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  teamId        String?
-  team          Team?     @relation(fields: [teamId], references: [id])
-  isTeamLeader  Boolean   @default(false)
-  isAdmin       Boolean   @default(false)
-  submissions   Submission[]
+  id           String       @id @default(cuid())
+  alias        String       @unique
+  password     String
+  name         String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  teamId       String?
+  team         Team?        @relation(fields: [teamId], references: [id])
+  isTeamLeader Boolean      @default(false)
+  isAdmin      Boolean      @default(false)
+  submissions  Submission[]
 }
 
 model Team {
-  id          String       @id @default(cuid())
-  name        String       @unique
-  code        String       @unique
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id          String        @id @default(cuid())
+  name        String        @unique
+  code        String        @unique
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
   members     User[]
   submissions Submission[]
-  score       Int          @default(0)
+  score       Int           @default(0)
+  ActivityLog ActivityLog[]
 }
 
 model Challenge {
@@ -61,4 +62,31 @@ model Submission {
   user        User      @relation(fields: [userId], references: [id])
   challenge   Challenge @relation(fields: [challengeId], references: [id])
   team        Team      @relation(fields: [teamId], references: [id])
-} 
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isActive  Boolean  @default(true)
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  type        String // e.g., "SUBMISSION", "TEAM_JOIN", "ANNOUNCEMENT"
+  description String
+  teamId      String?
+  team        Team?    @relation(fields: [teamId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model GameConfig {
+  id        String   @id @default(cuid())
+  startTime DateTime
+  endTime   DateTime
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
