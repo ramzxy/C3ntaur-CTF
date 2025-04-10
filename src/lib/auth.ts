@@ -35,7 +35,7 @@ export const authOptions: NextAuthOptions = {
           alias: user.alias,
           name: user.name,
           isAdmin: user.isAdmin,
-          teamId: user.teamId,
+          teamId: user.teamId || undefined,
           isTeamLeader: user.isTeamLeader,
         };
       },
@@ -45,6 +45,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.alias = user.alias;
         token.isAdmin = user.isAdmin;
         token.teamId = user.teamId;
         token.isTeamLeader = user.isTeamLeader;
@@ -54,8 +55,9 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
+        session.user.alias = token.alias as string;
         session.user.isAdmin = token.isAdmin as boolean;
-        session.user.teamId = token.teamId as string;
+        session.user.teamId = token.teamId as string | undefined;
         session.user.isTeamLeader = token.isTeamLeader as boolean;
       }
       return session;

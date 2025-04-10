@@ -1,17 +1,15 @@
-import WireframeEarth from '@/components/WireframeEarth';
 import Link from 'next/link';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center relative">
+    <div className="min-h-screen flex items-center justify-center relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center">
           <h1 className="text-4xl font-extrabold text-white sm:text-5xl sm:tracking-tight lg:text-6xl">
             Welcome to Orbital CTF
           </h1>
           <p className="mt-5 max-w-xl mx-auto text-xl text-gray-300">
-            A space-themed Capture The Flag platform for cybersecurity enthusiasts.
-            Test your skills, solve challenges, and compete with others!
+            80s retro ui, space-themed, batteries included.
           </p>
           <div className="mt-10 flex justify-center space-x-4">
             <Link
@@ -27,7 +25,6 @@ export default function Home() {
               Log In
             </Link>
           </div>
-          <WireframeEarth />
         </div>
       </div>
     </div>

@@ -3,7 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
+import SpaceScene from '@/components/SpaceScene';
+import Leaderboard from '@/components/dashboard/Leaderboard';
+import Announcements from '@/components/dashboard/Announcements';
+import Activity from '@/components/dashboard/Activity';
+import GameClock from '@/components/dashboard/GameClock';
 
 interface Team {
   id: string;
@@ -122,131 +126,49 @@ export default function Dashboard() {
     );
   }
 
-  const AccordionSection = ({ 
-    title, 
-    isOpen, 
-    setIsOpen, 
-    children 
-  }: { 
-    title: string; 
-    isOpen: boolean; 
-    setIsOpen: (open: boolean) => void; 
-    children: React.ReactNode;
-  }) => (
-    <div className="bg-transparent border-2 border-white p-4">
-      <button
-        className="flex items-center justify-between w-full text-white"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <h3 className="text-lg font-semibold">{title}</h3>
-        {isOpen ? (
-          <ChevronUpIcon className="h-5 w-5" />
-        ) : (
-          <ChevronDownIcon className="h-5 w-5" />
-        )}
-      </button>
-      {isOpen && <div className="mt-4">{children}</div>}
-    </div>
-  );
-
   return (
-    <div className="h-[calc(100vh-8rem)] p-6">
-      <div className="grid grid-cols-3 gap-4 h-[calc(100vh-8rem)]">
+    <div className="relative h-[calc(100vh-8rem)] p-6">
+      <SpaceScene />
+      <div className="relative grid grid-cols-3 gap-8 h-[calc(100vh-8rem)] pointer-events-none">
         {/* Top Left - Leaderboard */}
-        <div className="col-span-1">
-          <AccordionSection
-            title="Leaderboard"
+        <div className="col-span-1 pointer-events-auto">
+          <Leaderboard
+            teams={leaderboard.teams}
+            currentUserTeam={leaderboard.currentUserTeam}
             isOpen={isLeaderboardOpen}
             setIsOpen={setIsLeaderboardOpen}
-          >
-            <div className="space-y-2">
-              {leaderboard.currentUserTeam && (
-                <div className="border-1 border-white p-3 ">
-                  <div className="flex justify-between">
-                    <span className="font-bold text-white">Your Team</span>
-                    <span className="text-white">{leaderboard.currentUserTeam.score} pts</span>
-                  </div>
-                  <div className="text-white">{leaderboard.currentUserTeam.name}</div>
-                </div>
-              )}
-              {leaderboard.teams.map((team, index) => (
-                <div key={team.id} className="border-2 border-white p-3 ">
-                  <div className="flex justify-between">
-                    <span className="text-white">#{index + 1} {team.name}</span>
-                    <span className="text-white">{team.score} pts</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </AccordionSection>
+          />
         </div>
 
         {/* Top Right - Announcements */}
-        <div className="col-span-1 col-start-3">
-          <AccordionSection
-            title="Announcements"
+        <div className="col-span-1 col-start-3 pointer-events-auto">
+          <Announcements
+            announcements={announcements}
             isOpen={isAnnouncementsOpen}
             setIsOpen={setIsAnnouncementsOpen}
-          >
-            <div className="space-y-2">
-              {announcements.map((announcement) => (
-                <div key={announcement.id} className="border-2 border-white p-3 ">
-                  <h4 className="text-white font-semibold">{announcement.title}</h4>
-                  <p className="text-white mt-1">{announcement.content}</p>
-                  <p className="text-white text-sm mt-2">
-                    {new Date(announcement.createdAt).toLocaleString()}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </AccordionSection>
+          />
         </div>
 
         {/* Bottom Left - Activity */}
-        <div className="col-span-1 relative">
+        <div className="col-span-1 relative pointer-events-auto">
           <div className="absolute bottom-0 left-0 right-0">
-            <AccordionSection
-              title="Activity"
+            <Activity
+              activities={activities}
               isOpen={isActivityOpen}
               setIsOpen={setIsActivityOpen}
-            >
-              <div className="space-y-2 max-h-[50vh] overflow-y-auto">
-                {activities.map((activity) => (
-                  <div key={activity.id} className="border-2 border-white p-3">
-                    <div className="flex justify-between">
-                      <span className="text-white">{activity.description}</span>
-                      {activity.team && (
-                        <span className="text-white">{activity.team.name}</span>
-                      )}
-                    </div>
-                    <p className="text-white text-sm mt-1">
-                      {new Date(activity.createdAt).toLocaleString()}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </AccordionSection>
+            />
           </div>
         </div>
 
         {/* Bottom Right - Game Clock */}
-        <div className="col-span-1 col-start-3 relative">
+        <div className="col-span-1 col-start-3 relative pointer-events-auto">
           <div className="absolute bottom-0 left-0 right-0">
-            <AccordionSection
-              title="Game Clock"
+            <GameClock
+              timeLeft={timeLeft}
+              gameConfig={gameConfig}
               isOpen={isGameClockOpen}
               setIsOpen={setIsGameClockOpen}
-            >
-              <div className="text-center">
-                <div className="text-4xl font-bold text-white mb-2">{timeLeft}</div>
-                {gameConfig && (
-                  <div className="text-white">
-                    <div>Start: {new Date(gameConfig.startTime).toLocaleString()}</div>
-                    <div>End: {new Date(gameConfig.endTime).toLocaleString()}</div>
-                  </div>
-                )}
-              </div>
-            </AccordionSection>
+            />
           </div>
         </div>
       </div>

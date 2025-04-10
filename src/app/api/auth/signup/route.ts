@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 
 export async function POST(req: Request) {
   try {
-    const { alias, password, name, teamName, teamCode, teamOption } = await req.json();
+    const { alias, password, name, teamName, teamCode, teamOption, teamIcon, teamColor } = await req.json();
 
     // Check if user already exists
     const existingUser = await prisma.user.findFirst({
@@ -45,6 +45,8 @@ export async function POST(req: Request) {
         data: {
           name: teamName,
           code: code,
+          icon: teamIcon || 'GiSpaceship',
+          color: teamColor || '#ffffff'
         },
       });
 

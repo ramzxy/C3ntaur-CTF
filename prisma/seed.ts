@@ -1,4 +1,7 @@
 import { PrismaClient } from '@prisma/client';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const prisma = new PrismaClient();
 
@@ -43,6 +46,21 @@ async function main() {
     await prisma.challenge.create({
       data: challenge,
     });
+  }
+
+  // Seed site configuration
+  const siteConfig = await prisma.siteConfig.findFirst();
+  
+  if (!siteConfig) {
+    await prisma.siteConfig.create({
+      data: {
+        siteTitle: process.env.SITE_TITLE || 'Orbital CTF',
+        headerText: process.env.HEADER_TEXT || 'Welcome to Orbital CTF',
+      },
+    });
+    console.log('Site configuration seeded successfully');
+  } else {
+    console.log('Site configuration already exists');
   }
 
   console.log('Database has been seeded. 🌱');

@@ -3,12 +3,30 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import * as icons from "react-icons/gi";
+import { AiOutlineDoubleLeft } from 'react-icons/ai';
 import toast from 'react-hot-toast';
 
 export default function SignUp() {
   const router = useRouter();
   const [error, setError] = useState('');
   const [teamOption, setTeamOption] = useState('create');
+  const [selectedIcon, setSelectedIcon] = useState('GiSpaceship');
+  const [selectedColor, setSelectedColor] = useState('#ffffff');
+  const [iconIndex, setIconIndex] = useState(() => {
+    const iconNames = Object.keys(icons);
+    return Math.floor(Math.random() * iconNames.length);
+  });
+
+  const iconNames = Object.keys(icons);
+  const IconComponent = icons[selectedIcon as keyof typeof icons];
+
+  const handleSetIcon = (newIndex: number) => {
+    // Ensure the index stays within bounds
+    const boundedIndex = Math.max(0, Math.min(newIndex, iconNames.length - 1));
+    setIconIndex(boundedIndex);
+    setSelectedIcon(iconNames[boundedIndex]);
+  };
 
   const handleTeamOptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTeamOption(e.target.value);
@@ -50,7 +68,9 @@ export default function SignUp() {
           password,
           teamOption,
           teamName,
-          teamCode
+          teamCode,
+          teamIcon: selectedIcon,
+          teamColor: selectedColor
         }),
       });
 
@@ -72,6 +92,17 @@ export default function SignUp() {
         toast.error('An error occurred');
       }
     }
+  };
+
+  const renderIcon = (index: number) => {
+    const Icon = icons[iconNames[index] as keyof typeof icons];
+    const isActive = index === iconIndex;
+    return Icon ? (
+      <Icon 
+        className="w-9 h-9" 
+        style={{ color: isActive ? selectedColor : '#6B7280' }} 
+      />
+    ) : null;
   };
 
   return (
@@ -164,6 +195,54 @@ export default function SignUp() {
               className="input-field"
               placeholder="Team Name"
             />
+            
+            <div className="mt-4">
+              <label className="block text-white mb-2">Team Icon</label>
+              <div className="flex items-center justify-between w-full">
+                <button 
+                  className="p-2 text-white hover:bg-gray-700 rounded-full"
+                  onClick={() => handleSetIcon(iconIndex - 1)}
+                  disabled={iconIndex <= 0}
+                >
+                  <AiOutlineDoubleLeft className="w-5 h-5" />
+                </button>
+                
+                <div className="flex items-center space-x-4">
+                  {[iconIndex - 2, iconIndex - 1, iconIndex, iconIndex + 1, iconIndex + 2].map((idx) => {
+                    if (idx >= 0 && idx < iconNames.length) {
+                      return (
+                        <div
+                          key={idx}
+                          className="w-8 h-8 flex items-center justify-center rounded-full cursor-pointer"
+                          onClick={() => handleSetIcon(idx)}
+                        >
+                          {renderIcon(idx)}
+                        </div>
+                      );
+                    }
+                    return null;
+                  })}
+                </div>
+
+                <button
+                  className="p-2 text-white hover:bg-gray-700 rounded-full"
+                  onClick={() => handleSetIcon(iconIndex + 1)}
+                  disabled={iconIndex >= iconNames.length - 1}
+                >
+                  <AiOutlineDoubleLeft className="w-5 h-5 transform rotate-180" />
+                </button>
+              </div>
+
+              <div className="mt-4">
+                <label className="block text-white mb-2">Team Color</label>
+                <input
+                  type="color"
+                  value={selectedColor}
+                  onChange={(e) => setSelectedColor(e.target.value)}
+                  className="w-12 h-12 rounded cursor-pointer"
+                />
+              </div>
+            </div>
           </div>
 
           <div id="joinTeamFields" className="hidden">

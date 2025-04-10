@@ -3,18 +3,22 @@
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { useSiteConfig } from "./SiteConfigProvider";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
+  const router = useRouter();
+  const { config } = useSiteConfig();
 
   return (
-    <nav className="fixed w-full bg-black/30 backdrop-blur-md border-b border-white/20">
+    <nav className="z-10 fixed w-full bg-black/30 backdrop-blur-md border-b border-white/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <Link href="/" className="text-white font-bold text-xl">
-              Orbital CTF
+            <Link href="/" className="text-xl font-bold text-white">
+              {config?.siteTitle || "Orbital CTF"}
             </Link>
           </div>
           <div className="flex items-center space-x-4">
@@ -22,17 +26,25 @@ export default function Navbar() {
               <>
                 <Link
                   href="/dashboard"
-                  className={`text-white hover:text-gray-300 border border-white/30 px-4 py-2 hover:bg-white/10 transition-colors ${
-                    pathname === '/dashboard' ? 'bg-white/20' : ''
+                  className={`text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium ${
+                    pathname === '/dashboard' ? 'bg-gray-700' : ''
                   }`}
                 >
                   Dashboard
                 </Link>
+                <Link
+                  href="/scoreboard"
+                  className={`text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium ${
+                    pathname === '/scoreboard' ? 'bg-gray-700' : ''
+                  }`}
+                >
+                  Scoreboard
+                </Link>
                 {session?.user?.isAdmin && (
                   <Link
                     href="/admin"
-                    className={`text-white hover:text-gray-300 border border-white/30 px-4 py-2 hover:bg-white/10 transition-colors ${
-                      pathname === '/admin' ? 'bg-white/20' : ''
+                    className={`text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium ${
+                      pathname === '/admin' ? 'bg-gray-700' : ''
                     }`}
                   >
                     Admin
@@ -44,27 +56,27 @@ export default function Navbar() {
                 >
                   {session?.user?.name?.[0]?.toUpperCase() || '?'}
                 </Link>
-                <button
-                  onClick={() => signOut()}
-                  className="text-white hover:text-gray-300 border border-white/30 px-4 py-2 hover:bg-white/10 transition-colors"
+                <Link
+                  href="/api/auth/signout"
+                  className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Sign Out
-                </button>
+                </Link>
               </>
             ) : (
               <>
                 <Link
-                  href="/auth/signin"
-                  className={`text-white hover:text-gray-300 border border-white/30 px-4 py-2 rounded-md hover:bg-white/10 transition-colors ${
-                    pathname === '/auth/signin' ? 'bg-white/20' : ''
+                  href="/api/auth/signin"
+                  className={`text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium ${
+                    pathname === '/auth/signin' ? 'bg-gray-700' : ''
                   }`}
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/auth/signup"
-                  className={`text-white hover:text-gray-300 border border-white/30 px-4 py-2 rounded-md hover:bg-white/10 transition-colors ${
-                    pathname === '/auth/signup' ? 'bg-white/20' : ''
+                  className={`text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium ${
+                    pathname === '/auth/signup' ? 'bg-gray-700' : ''
                   }`}
                 >
                   Sign Up

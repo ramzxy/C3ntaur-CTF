@@ -20,6 +20,9 @@
 # production
 /build
 dev.db
+/prisma/generated
+/prisma/migrations
+/public/uploads
 
 # misc
 .DS_Store

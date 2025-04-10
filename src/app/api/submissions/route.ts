@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-
-const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
   try {
@@ -25,12 +23,27 @@ export async function POST(request: Request) {
     // Check if the challenge exists and get the correct flag
     const challenge = await prisma.challenge.findUnique({
       where: { id: challengeId },
+      select: {
+        id: true,
+        title: true,
+        points: true,
+        flag: true,
+        isLocked: true,
+      },
     });
 
     if (!challenge) {
       return NextResponse.json(
         { message: 'Challenge not found' },
         { status: 404 }
+      );
+    }
+
+    // Check if the challenge is locked
+    if (challenge.isLocked && !session.user.isAdmin) {
+      return NextResponse.json(
+        { message: 'This challenge is locked. Complete previous challenges to unlock it.' },
+        { status: 403 }
       );
     }
 
@@ -65,6 +78,22 @@ export async function POST(request: Request) {
     });
 
     if (isCorrect) {
+      // Get team name for activity log
+      const team = await prisma.team.findUnique({
+        where: { id: session.user.teamId },
+        select: { name: true },
+      });
+
+      // Create score record
+      await prisma.score.create({
+        data: {
+          userId: session.user.id,
+          teamId: session.user.teamId ?? "",
+          challengeId,
+          points: challenge.points,
+        },
+      });
+
       // Update team score
       await prisma.team.update({
         where: { id: session.user.teamId },
@@ -74,6 +103,43 @@ export async function POST(request: Request) {
           },
         },
       });
+
+      // Create activity log for successful challenge completion
+      await prisma.activityLog.create({
+        data: {
+          type: 'SUBMISSION',
+          description: `Team ${team?.name} solved challenge "${challenge.title}" for ${challenge.points} points`,
+          teamId: session.user.teamId ?? "",
+        },
+      });
+
+      // Check for and unlock dependent challenges
+      const dependentChallenges = await prisma.challengeDependency.findMany({
+        where: {
+          challengeId: challenge.id,
+        },
+        include: {
+          unlocks: true,
+        },
+      });
+
+      for (const dependency of dependentChallenges) {
+        if (dependency.unlocks.isLocked) {
+          // Unlock the dependent challenge
+          await prisma.challenge.update({
+            where: { id: dependency.unlocksId },
+            data: { isLocked: false },
+          });
+
+          // Log the unlock in the activity feed
+          await prisma.activityLog.create({
+            data: {
+              type: 'CHALLENGE_UNLOCKED',
+              description: `Challenge "${dependency.unlocks.title}" has been unlocked by solving "${challenge.title}"`,
+            },
+          });
+        }
+      }
     }
 
     return NextResponse.json(

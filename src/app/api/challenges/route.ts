@@ -11,8 +11,25 @@ export async function GET() {
   }
 
   try {
-    const challenges = await prisma.challenge.findMany();
-    return NextResponse.json(challenges);
+    const challenges = await prisma.challenge.findMany({
+      include: {
+        files: true
+      }
+    });
+
+    // For non-admin users, hide description and flag for locked challenges
+    const processedChallenges = challenges.map(challenge => {
+      if (challenge.isLocked && !session.user.isAdmin) {
+        return {
+          ...challenge,
+          description: 'This challenge is locked. Complete previous challenges to unlock it.',
+          flag: null
+        };
+      }
+      return challenge;
+    });
+
+    return NextResponse.json(processedChallenges);
   } catch (error) {
     console.error('Error fetching challenges:', error);
     return NextResponse.json(

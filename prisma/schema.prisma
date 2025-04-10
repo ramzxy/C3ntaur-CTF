@@ -1,8 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
+  output   = "./generated/client"
 }
 
 datasource db {
@@ -18,36 +16,59 @@ model User {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
   teamId       String?
-  team         Team?        @relation(fields: [teamId], references: [id])
   isTeamLeader Boolean      @default(false)
   isAdmin      Boolean      @default(false)
   submissions  Submission[]
+  scores       Score[]
+  team         Team?        @relation(fields: [teamId], references: [id])
 }
 
 model Team {
   id          String        @id @default(cuid())
   name        String        @unique
   code        String        @unique
+  icon        String        @default("GiSpaceship")
+  color       String        @default("#ffffff")
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-  members     User[]
-  submissions Submission[]
   score       Int           @default(0)
   ActivityLog ActivityLog[]
+  submissions Submission[]
+  scores      Score[]
+  teamHints   TeamHint[]
+  members     User[]
 }
 
 model Challenge {
-  id          String       @id @default(cuid())
+  id          String                @id @default(cuid())
   title       String
   description String
   points      Int
   flag        String
   category    String
   difficulty  String
-  isActive    Boolean      @default(true)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  isActive    Boolean               @default(true)
+  isLocked    Boolean               @default(false)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  lockedBy    ChallengeDependency[] @relation("Unlocks")
+  unlocks     ChallengeDependency[] @relation("UnlockedBy")
+  files       ChallengeFile[]
+  hints       Hint[]
   submissions Submission[]
+  scores      Score[]
+}
+
+model ChallengeDependency {
+  id          String    @id @default(cuid())
+  challengeId String
+  unlocksId   String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  unlocks     Challenge @relation("Unlocks", fields: [unlocksId], references: [id])
+  challenge   Challenge @relation("UnlockedBy", fields: [challengeId], references: [id])
+
+  @@unique([challengeId, unlocksId])
 }
 
 model Submission {
@@ -59,9 +80,9 @@ model Submission {
   userId      String
   challengeId String
   teamId      String
-  user        User      @relation(fields: [userId], references: [id])
-  challenge   Challenge @relation(fields: [challengeId], references: [id])
   team        Team      @relation(fields: [teamId], references: [id])
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
 }
 
 model Announcement {
@@ -75,11 +96,11 @@ model Announcement {
 
 model ActivityLog {
   id          String   @id @default(cuid())
-  type        String // e.g., "SUBMISSION", "TEAM_JOIN", "ANNOUNCEMENT"
+  type        String
   description String
   teamId      String?
-  team        Team?    @relation(fields: [teamId], references: [id])
   createdAt   DateTime @default(now())
+  team        Team?    @relation(fields: [teamId], references: [id])
 }
 
 model GameConfig {
@@ -89,4 +110,63 @@ model GameConfig {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model ChallengeFile {
+  id          String    @id @default(cuid())
+  name        String
+  path        String
+  size        Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+}
+
+model Hint {
+  id          String     @id @default(cuid())
+  content     String
+  cost        Int        @default(0)
+  challengeId String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  challenge   Challenge  @relation(fields: [challengeId], references: [id])
+  teamHints   TeamHint[]
+}
+
+model TeamHint {
+  id        String   @id @default(cuid())
+  teamId    String
+  hintId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  hint      Hint     @relation(fields: [hintId], references: [id])
+  team      Team     @relation(fields: [teamId], references: [id])
+
+  @@unique([teamId, hintId])
+}
+
+model SiteConfig {
+  id          String   @id @default(cuid())
+  siteTitle   String   @default("Orbital CTF")
+  headerText  String   @default("Welcome to Orbital CTF")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Score {
+  id          String    @id @default(cuid())
+  points      Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userId      String
+  teamId      String
+  challengeId String
+  team        Team      @relation(fields: [teamId], references: [id])
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@index([teamId])
+  @@index([userId])
+  @@index([challengeId])
 }
