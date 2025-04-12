@@ -11,6 +11,40 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
+    // Get current game config
+    const gameConfig = await prisma.gameConfig.findFirst({
+      where: { isActive: true }
+    });
+
+    // Get current time
+    const now = new Date();
+
+    // For non-admin users, check if the game time restrictions apply
+    if (!session.user.isAdmin && gameConfig) {
+      const gameStarted = new Date(gameConfig.startTime) <= now;
+      
+      // If game hasn't started yet, reject submissions
+      if (!gameStarted) {
+        return NextResponse.json(
+          { message: "The competition hasn't started yet. Please check back later." },
+          { status: 403 }
+        );
+      }
+      
+      // Only check for end time if this is not an infinite competition
+      if (gameConfig.endTime !== null) {
+        const gameEnded = new Date(gameConfig.endTime) <= now;
+        
+        // If game has ended, reject submissions
+        if (gameEnded) {
+          return NextResponse.json(
+            { message: "The competition has ended. Flag submissions are no longer accepted." },
+            { status: 403 }
+          );
+        }
+      }
+    }
+
     const { challengeId, flag } = await request.json();
 
     if (!challengeId || !flag) {
@@ -156,4 +190,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-} 
+}

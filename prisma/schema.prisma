@@ -106,7 +106,7 @@ model ActivityLog {
 model GameConfig {
   id        String   @id @default(cuid())
   startTime DateTime
-  endTime   DateTime
+  endTime   DateTime?
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

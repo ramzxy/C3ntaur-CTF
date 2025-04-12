@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Text } from '@react-three/drei';
+import { Billboard, OrbitControls, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { useRouter } from 'next/navigation';
 
@@ -32,23 +32,23 @@ interface CategorySatellite {
 function generateOrbitConfigurations(count: number): { angle: number; tilt: number }[] {
   const configurations: { angle: number; tilt: number }[] = [];
   const goldenRatio = (1 + Math.sqrt(5)) / 2;
-  
+
   for (let i = 0; i < count; i++) {
     const y = count === 1 ? 0 : 1 - (i / Math.max(count - 1, 1)) * 2;
     const radius = Math.sqrt(1 - y * y);
     const theta = 2 * Math.PI * i / goldenRatio;
     const angle = theta;
     const tilt = Math.acos(y);
-    
+
     configurations.push({ angle, tilt });
   }
-  
+
   return configurations;
 }
 
 function Earth() {
   const earthRef = useRef<THREE.Mesh>(null);
-  
+
   useFrame((state, delta) => {
     if (earthRef.current) {
       earthRef.current.rotation.y += delta * 0.03;
@@ -67,76 +67,96 @@ function CategorySatellite({ satellite, onSelect }: { satellite: CategorySatelli
   const [hovered, setHovered] = useState(false);
   const satelliteRef = useRef<THREE.Group>(null);
   const timeRef = useRef(0);
+  const [textWidth, setTextWidth] = useState(2.5);
+  const text = satellite.name.toUpperCase();
+  const padding = 0.1; // Horizontal padding for the text
+
+  useEffect(() => {
+    // Approximate the text width based on character count and font size
+    const approximateWidth = text.length * 0.4; // 0.4 units per character
+    setTextWidth(Math.max(2.5, approximateWidth));
+  }, [text]);
 
   // Calculate base size based on number of challenges
-  const baseSize = 0.3;
-  const sizeMultiplier = 1 + (satellite.challenges.length / 10);
+  const baseSize = 0.1;
+  const sizeMultiplier = 1 + (satellite.challenges.length / 2);
   const satelliteSize = baseSize * sizeMultiplier;
 
   // Calculate color based on solved challenges
   const getSatelliteColor = () => {
     if (satellite.solvedCount === 0) return "#ffffff";
-    
+
     // Get the most common team color among solved challenges
     const teamColors = satellite.challenges
       .filter(c => c.isSolved)
       .flatMap(c => c.solvedBy.map(s => s.teamColor));
-    
+
     if (teamColors.length === 0) return "#ffffff";
-    
+
     // Count occurrences of each color
     const colorCounts = teamColors.reduce((acc, color) => {
       acc[color] = (acc[color] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    
+
     // Find the most common color
     const mostCommonColor = Object.entries(colorCounts)
       .sort((a, b) => b[1] - a[1])[0][0];
-    
+
     return mostCommonColor;
   };
 
   useFrame((state, delta) => {
     if (satelliteRef.current) {
       timeRef.current += delta * satellite.orbitSpeed;
-      
+
       const x = Math.cos(timeRef.current) * satellite.orbitRadius;
       const z = Math.sin(timeRef.current) * satellite.orbitRadius;
-      
+
       const rotationMatrix = new THREE.Matrix4();
       rotationMatrix.makeRotationY(satellite.orbitAngle);
       rotationMatrix.multiply(new THREE.Matrix4().makeRotationX(satellite.orbitTilt));
-      
+
       const position = new THREE.Vector3(x, 0, z);
       position.applyMatrix4(rotationMatrix);
-      
+
       satelliteRef.current.position.copy(position);
       satelliteRef.current.rotation.y += delta * satellite.rotationSpeed;
     }
   });
 
   return (
-    <group ref={satelliteRef}>
+    <group ref={satelliteRef} onClick={onSelect}
+    onPointerOver={() => setHovered(true)}
+    onPointerOut={() => setHovered(false)}>
       <mesh
-        onClick={onSelect}
-        onPointerOver={() => setHovered(true)}
-        onPointerOut={() => setHovered(false)}
+        
       >
         <sphereGeometry args={[satelliteSize, 8, 8]} />
-        <meshBasicMaterial 
-          color={hovered ? "teal" : getSatelliteColor()} 
+        <meshBasicMaterial
+          color={hovered ? "#4a90e2" : getSatelliteColor()}
         />
       </mesh>
-      <Text
-        position={[1, 0.6, 0]}
-        fontSize={0.5}
-        color="white"
-        anchorX="center"
-        anchorY="middle"
-      >
-        {satellite.name}
-      </Text>
+      <Billboard>
+        <mesh position={[2, 0.8, -0.1]}>
+          <planeGeometry args={[textWidth + padding, 0.9]} />
+          <meshBasicMaterial color="black" />
+        </mesh>
+        <mesh position={[2, 0.8, -0.11]}>
+          <planeGeometry args={[textWidth + padding + 0.15, 1]} />
+          <meshBasicMaterial color={hovered ? "#4a90e2":  "white"} />
+        </mesh>
+        <Text
+          position={[0.8, 0.8, 0]}
+          fontSize={0.8}
+          color={hovered ? "#4a90e2":  "white"}
+          anchorX="left"
+          anchorY="middle"
+          font="/SquadaOne-Regular.ttf"
+        >
+          {text}
+        </Text>
+      </Billboard>
     </group>
   );
 }
@@ -145,48 +165,51 @@ function OrbitTrail({ satellite }: { satellite: CategorySatellite }) {
   const points = useRef<THREE.Vector3[]>([]);
   const lineRef = useRef<THREE.Line>(null);
   const geometryRef = useRef<THREE.BufferGeometry>(new THREE.BufferGeometry());
-  
+
   useEffect(() => {
     const segments = 64;
     const newPoints: THREE.Vector3[] = [];
-    
+
     for (let i = 0; i <= segments; i++) {
       const angle = (i / segments) * Math.PI * 2;
       const x = Math.cos(angle) * satellite.orbitRadius;
       const z = Math.sin(angle) * satellite.orbitRadius;
-      
+
       const rotationMatrix = new THREE.Matrix4();
       rotationMatrix.makeRotationY(satellite.orbitAngle);
       rotationMatrix.multiply(new THREE.Matrix4().makeRotationX(satellite.orbitTilt));
-      
+
       const position = new THREE.Vector3(x, 0, z);
       position.applyMatrix4(rotationMatrix);
-      
+
       if (!isNaN(position.x) && !isNaN(position.y) && !isNaN(position.z)) {
         newPoints.push(position);
       }
     }
-    
+
     points.current = newPoints;
     geometryRef.current.setFromPoints(points.current);
-    
+
     if (lineRef.current) {
       lineRef.current.geometry = geometryRef.current;
+      lineRef.current.computeLineDistances(); // Required for dashed lines
     }
   }, [satellite.orbitRadius, satellite.orbitAngle, satellite.orbitTilt]);
 
   return (
-    <primitive 
+    <primitive
       ref={lineRef}
       object={new THREE.Line(
         geometryRef.current,
-        new THREE.LineBasicMaterial({ 
-          color: "#ffffff", 
-          transparent: true, 
+        new THREE.LineDashedMaterial({
+          color: "#ffffff",
+          transparent: true,
           opacity: 0.5,
-          linewidth: 1
+          dashSize: 0.5,
+          gapSize: 0.3,
+          scale: 1 // This multiplies both dashSize and gapSize
         })
-      )} 
+      )}
     />
   );
 }
@@ -208,7 +231,7 @@ export default function SpaceScene() {
           const config = configs[index];
           const challenges = challengesByCategory[category];
           const solvedCount = challenges.filter((c: Challenge) => c.isSolved).length;
-          
+
           return {
             id: category,
             name: category,
@@ -241,13 +264,13 @@ export default function SpaceScene() {
         {categories.map((category) => (
           <group key={category.id}>
             <OrbitTrail satellite={category} />
-            <CategorySatellite 
-              satellite={category} 
-              onSelect={() => router.push(`/categories/${category.id}`)} 
+            <CategorySatellite
+              satellite={category}
+              onSelect={() => router.push(`/categories/${category.id}`)}
             />
           </group>
         ))}
-        <OrbitControls 
+        <OrbitControls
           enableZoom={true}
           enablePan={true}
           enableRotate={true}
@@ -257,4 +280,4 @@ export default function SpaceScene() {
       </Canvas>
     </div>
   );
-} 
+}

@@ -2,11 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ReactNode, ComponentPropsWithoutRef, HTMLAttributes } from 'react';
+import { Righteous } from 'next/font/google';
+
+const monoton = Righteous({weight: '400'});
 
 interface Challenge {
   id: string;
@@ -58,6 +62,7 @@ const MarkdownComponents = {
 export default function ChallengePage() {
   const params = useParams();
   const router = useRouter();
+  const { data: session } = useSession();
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [hints, setHints] = useState<Hint[]>([]);
   const [flag, setFlag] = useState('');
@@ -97,7 +102,7 @@ export default function ChallengePage() {
       try {
         const [challengeRes, hintsRes] = await Promise.all([
           fetch(`/api/challenges/${challengeId}`),
-          fetch(`/api/hints?challengeId=${challengeId}`)
+          session ? fetch(`/api/hints?challengeId=${challengeId}`) : Promise.resolve({ json: () => [] })
         ]);
 
         if (!challengeRes.ok) {
@@ -107,7 +112,7 @@ export default function ChallengePage() {
 
         const [challengeData, hintsData] = await Promise.all([
           challengeRes.json(),
-          hintsRes.json()
+          hintsRes.json ? hintsRes.json() : []
         ]);
 
         setChallenge(challengeData);
@@ -119,7 +124,7 @@ export default function ChallengePage() {
     };
 
     fetchChallenge();
-  }, [challengeId, router]);
+  }, [challengeId, router, session]);
 
   const handlePurchaseHint = async (hintId: string) => {
     setIsPurchasing(true);
@@ -188,11 +193,11 @@ export default function ChallengePage() {
   }
 
   return (
-    <div className="min-h-screen text-white">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="p-6">
-            <h1 className="text-5xl font-bold mb-4 float-start">{challenge.title.toUpperCase()}</h1>
+    <div className="flex items-center justify-center min-h-screen text-white">
+      <div className="container mx-auto px-4 py-8 flex justify-center items-center">
+        <div className="w-full max-w-4xl shadow-lg overflow-hidden">
+          <div className="h-[60vh] overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
+            <h1 className={`text-5xl font-bold mb-4 float-start ${monoton.className}`}>{challenge.title}</h1>
             <div className="float-end flex items-baseline h-max">
               <span className="px-3 py-1">
                 {challenge.category}
@@ -204,7 +209,7 @@ export default function ChallengePage() {
                 {challenge.points} points
               </span>
             </div>
-            <div className="border border-gray-400 w-full h-5 flex items-center justify-center relative">
+            <div className="border border-gray-400 w-full h-5 flex items-center justify-center relative clear-both">
               <div className="absolute inset-x-0 border-t-2 border-gray-400 w-full"></div>
             </div>
             <div className="prose prose-invert max-w-none mb-6 min-h-52">
@@ -242,21 +247,16 @@ export default function ChallengePage() {
               </div>
             )}
 
-            {/* Hints Section */}
-            {hints.length > 0 && (
+            {/* Hints Section - Only show if user is authenticated */}
+            {session && hints.length > 0 && (
               <div className="mb-6">
                 <h2 className="text-xl font-semibold mb-4">Hints</h2>
                 <div className="h-2 border-t-2 border-gray-700 border-b-2 mb-6"></div>
                 <div className="space-y-4">
                   {hints.map((hint) => (
-                    <div
-                      key={hint.id}
-                      className=""
-                    >
+                    <div key={hint.id} className="">
                       <div className="flex justify-between items-center mb-2">
-                        <span>
-                          Cost: {hint.cost} points
-                        </span>
+                        <span>Cost: {hint.cost} points</span>
                         {!hint.isPurchased ? (
                           <button
                             onClick={() => handlePurchaseHint(hint.id)}
@@ -266,9 +266,7 @@ export default function ChallengePage() {
                             {isPurchasing ? 'Purchasing...' : 'Purchase Hint'}
                           </button>
                         ) : (
-                          <span className="px-3 py-1">
-                            Purchased
-                          </span>
+                          <span className="px-3 py-1">Purchased</span>
                         )}
                       </div>
                       {hint.isPurchased && (
@@ -282,42 +280,50 @@ export default function ChallengePage() {
               </div>
             )}
 
-            {!challenge.isSolved && (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label htmlFor="flag" className="block text-xl font-semibold mb-4">
-                    Submit Flag
-                  </label>
-                  <input
-                    type="text"
-                    id="flag"
-                    value={flag}
-                    onChange={(e) => setFlag(e.target.value)}
-                    className="w-full px-4 py-2 bg-black border-2 border-white focus:outline-none"
-                    placeholder="Enter your flag here"
-                    required
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full px-4 py-2 border-2 border-white hover:bg-white hover:text-black transition-colors disabled:opacity-50"
-                >
-                  {isSubmitting ? 'Submitting...' : 'Submit Flag'}
-                </button>
-              </form>
-            )}
+            {/* Flag submission - Only show if user is authenticated */}
+            {session ? (
+              <>
+                {!challenge.isSolved && (
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                      <label htmlFor="flag" className="block text-xl font-semibold mb-4">
+                        Submit Flag
+                      </label>
+                      <input
+                        type="text"
+                        id="flag"
+                        value={flag}
+                        onChange={(e) => setFlag(e.target.value)}
+                        className="w-full px-4 py-2 bg-black border-2 border-white focus:outline-none"
+                        placeholder="Enter your flag here"
+                        required
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full px-4 py-2 border-2 border-white hover:bg-white hover:text-black transition-colors disabled:opacity-50"
+                    >
+                      {isSubmitting ? 'Submitting...' : 'Submit Flag'}
+                    </button>
+                  </form>
+                )}
 
-            {submissionStatus && (
-              <div className={`mt-4 p-4 border-2 ${submissionStatus.isCorrect ? 'border-green-500' : 'border-red-500'
-                }`}>
-                {submissionStatus.message}
-              </div>
-            )}
+                {submissionStatus && (
+                  <div className={`mt-4 p-4 border-2 ${submissionStatus.isCorrect ? 'border-green-500' : 'border-red-500'}`}>
+                    {submissionStatus.message}
+                  </div>
+                )}
 
-            {challenge.isSolved && (
-              <div className="mt-4 p-4 border-2 border-green-500">
-                Challenge solved! 🎉
+                {challenge.isSolved && (
+                  <div className="mt-4 p-4 border-2 border-green-500">
+                    Challenge solved! 🎉
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="mt-4 p-4 border-2 border-white">
+                <p>Please <a href="/auth/signin" className="text-blue-400 hover:underline">sign in</a> to submit a flag for this challenge.</p>
               </div>
             )}
           </div>
@@ -325,4 +331,4 @@ export default function ChallengePage() {
       </div>
     </div>
   );
-} 
+}

@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import * as icons from "react-icons/gi";
 import { AiOutlineDoubleLeft } from 'react-icons/ai';
 import toast from 'react-hot-toast';
+import { signIn } from 'next-auth/react';
 
 export default function SignUp() {
   const router = useRouter();
@@ -79,10 +80,22 @@ export default function SignUp() {
         throw new Error(data.error || 'Failed to register');
       }
 
-      toast.success('Account created successfully! Redirecting to login...');
-      setTimeout(() => {
-        router.push('/auth/signin');
-      }, 1500);
+      const data = await response.json();
+      toast.success('Account created successfully! Signing you in...');
+
+      // Attempt to sign in with the new credentials
+      const result = await signIn('credentials', {
+        alias: data.user.alias,
+        password: data.user.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        throw new Error('Failed to sign in automatically');
+      }
+
+      // Successful sign in, redirect to dashboard
+      router.push('/dashboard');
     } catch (error) {
       if (error instanceof Error) {
         setError(error.message);
@@ -279,4 +292,4 @@ export default function SignUp() {
       </div>
     </div>
   );
-} 
+}

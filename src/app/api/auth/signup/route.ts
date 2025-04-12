@@ -77,40 +77,31 @@ export async function POST(req: Request) {
       teamId = team.id;
     }
 
+    // Create the user
     const user = await prisma.user.create({
       data: {
-        alias: alias,
+        alias,
         password: hashedPassword,
-        name: name,
-        isAdmin: isAdmin,
-        isTeamLeader: isTeamLeader,
-        team: teamId ? {
-          connect: {
-            id: teamId
-          }
-        } : undefined
+        name,
+        isAdmin,
+        teamId,
+        isTeamLeader,
       },
-      select: {
-        id: true,
-        alias: true,
-        isAdmin: true,
-        teamId: true,
-        isTeamLeader: true
-      }
     });
 
-    return NextResponse.json(
-      { 
-        message: 'User created successfully', 
-        user
-      },
-      { status: 201 }
-    );
+    // Return success with credentials for auto-login
+    return NextResponse.json({
+      success: true,
+      user: {
+        alias: user.alias,
+        password: password // Send back original password for auto-login
+      }
+    });
   } catch (error) {
-    console.error('Signup error:', error);
+    console.error('Error creating user:', error);
     return NextResponse.json(
-      { error: 'Error creating user' },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
-} 
+}

@@ -4,13 +4,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    const session = await getServerSession(authOptions);
+    
     // Get all challenges
     const challenges = await prisma.challenge.findMany({
       include: {
@@ -31,18 +27,20 @@ export async function GET() {
       }
     });
 
-    // Get solved challenges for the current team
-    const solvedChallenges = await prisma.submission.findMany({
-      where: {
-        teamId: session.user.teamId ?? "",
-        isCorrect: true,
-      },
-      select: {
-        challengeId: true,
-      },
-    });
-
-    const solvedChallengeIds = new Set(solvedChallenges.map(sub => sub.challengeId));
+    // Get solved challenges for the current team if authenticated
+    const solvedChallengeIds = new Set();
+    if (session?.user?.teamId) {
+      const solvedChallenges = await prisma.submission.findMany({
+        where: {
+          teamId: session.user.teamId,
+          isCorrect: true,
+        },
+        select: {
+          challengeId: true,
+        },
+      });
+      solvedChallenges.forEach(sub => solvedChallengeIds.add(sub.challengeId));
+    }
 
     // Group challenges by category
     const challengesByCategory = challenges.reduce((acc, challenge) => {
@@ -74,4 +72,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-} 
+}

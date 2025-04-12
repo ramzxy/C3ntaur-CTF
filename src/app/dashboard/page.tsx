@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import SpaceScene from '@/components/SpaceScene';
 import Leaderboard from '@/components/dashboard/Leaderboard';
 import Announcements from '@/components/dashboard/Announcements';
@@ -38,7 +37,6 @@ interface GameConfig {
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
-  const router = useRouter();
   
   // State for each section
   const [leaderboard, setLeaderboard] = useState<{
@@ -55,12 +53,6 @@ export default function Dashboard() {
   const [isAnnouncementsOpen, setIsAnnouncementsOpen] = useState(true);
   const [isActivityOpen, setIsActivityOpen] = useState(true);
   const [isGameClockOpen, setIsGameClockOpen] = useState(true);
-
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin');
-    }
-  }, [status, router]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -118,20 +110,12 @@ export default function Dashboard() {
     }
   }, [gameConfig]);
 
-  if (status === 'loading') {
-    return (
-      <div className="flex items-center justify-center">
-        <div className="text-white">Loading...</div>
-      </div>
-    );
-  }
-
   return (
-    <div className="relative h-[calc(100vh-8rem)] p-6">
+    <div className="relative h-screen p-6">
       <SpaceScene />
-      <div className="relative grid grid-cols-3 gap-8 h-[calc(100vh-8rem)] pointer-events-none">
+      <div className="relative grid grid-cols-4 gap-8 h-full pointer-events-none">
         {/* Top Left - Leaderboard */}
-        <div className="col-span-1 pointer-events-auto">
+        <div className="col-span-1 pointer-events-auto w-3/4">
           <Leaderboard
             teams={leaderboard.teams}
             currentUserTeam={leaderboard.currentUserTeam}
@@ -141,7 +125,7 @@ export default function Dashboard() {
         </div>
 
         {/* Top Right - Announcements */}
-        <div className="col-span-1 col-start-3 pointer-events-auto">
+        <div className="col-span-1 col-start-4 pointer-events-auto w-3/4 ml-auto">
           <Announcements
             announcements={announcements}
             isOpen={isAnnouncementsOpen}
@@ -161,7 +145,7 @@ export default function Dashboard() {
         </div>
 
         {/* Bottom Right - Game Clock */}
-        <div className="col-span-1 col-start-3 relative pointer-events-auto">
+        <div className="col-span-1 col-start-4 relative pointer-events-auto">
           <div className="absolute bottom-0 left-0 right-0">
             <GameClock
               timeLeft={timeLeft}
@@ -174,4 +158,4 @@ export default function Dashboard() {
       </div>
     </div>
   );
-} 
+}

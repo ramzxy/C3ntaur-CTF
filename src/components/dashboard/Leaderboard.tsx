@@ -38,11 +38,11 @@ export default function Leaderboard({ teams, currentUserTeam, isOpen, setIsOpen 
   };
 
   return (
-    <div className="relative h-[33vh] border-t-white border-t-2 ">
-      <div className="h-full flex flex-col ">
+    <div className="border bg-black">
+      <div className="flex flex-col">
         {/* Fixed header at top */}
         <button
-          className="flex items-center justify-between w-full text-white p-2 z-10 relative"
+          className="flex items-center justify-between w-full text-white p-2 relative border-b-2 "
           onClick={() => setIsOpen(!isOpen)}
         >
           <h3 className="text-lg font-semibold">LEADERBOARD</h3>
@@ -55,14 +55,14 @@ export default function Leaderboard({ teams, currentUserTeam, isOpen, setIsOpen 
 
         {/* Content area with scroll */}
         <div 
-          className={`flex-1 overflow-y-auto duration-300  ${
-            isOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+          className={`overflow-hidden transition-[max-height] duration-300 ease-in-out ${
+            isOpen ? 'max-h-[calc(33vh-2.5rem)]' : 'max-h-0'
           }`}
         >
           <div className="space-y-1 p-2">
             {/* Current user's team details */}
             {currentUserTeam && (
-              <div className="p-2 ">
+              <div className="p-2">
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2">
                     {getTeamIcon(currentUserTeam.icon, currentUserTeam.color)}
@@ -104,4 +104,4 @@ export default function Leaderboard({ teams, currentUserTeam, isOpen, setIsOpen 
       </div>
     </div>
   );
-} 
+}

@@ -21,6 +21,8 @@ export async function GET(
         name: true,
         code: true,
         score: true,
+        icon: true,
+        color: true,
         members: {
           select: {
             id: true,
@@ -50,4 +52,4 @@ export async function GET(
       { status: 500 }
     );
   }
-} 
+}

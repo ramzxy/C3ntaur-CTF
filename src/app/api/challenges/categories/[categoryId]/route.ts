@@ -9,11 +9,7 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const {categoryId} = await params;
+    const {categoryId} = params;
     const categoryId2 = decodeURIComponent(categoryId);
     
     const challenges = await prisma.challenge.findMany({
@@ -44,18 +40,20 @@ export async function GET(
       }
     });
 
-    // Get solved challenges for the current team
-    const solvedChallenges = await prisma.submission.findMany({
-      where: {
-        teamId: session.user.teamId ?? "",
-        isCorrect: true,
-      },
-      select: {
-        challengeId: true,
-      },
-    });
-
-    const solvedChallengeIds = new Set(solvedChallenges.map(sub => sub.challengeId));
+    // Get solved challenges for the current team if authenticated
+    const solvedChallengeIds = new Set();
+    if (session?.user?.teamId) {
+      const solvedChallenges = await prisma.submission.findMany({
+        where: {
+          teamId: session.user.teamId,
+          isCorrect: true,
+        },
+        select: {
+          challengeId: true,
+        },
+      });
+      solvedChallenges.forEach(sub => solvedChallengeIds.add(sub.challengeId));
+    }
 
     // Transform the challenges to include isSolved based on current team's submissions
     const transformedChallenges = challenges.map(challenge => ({
@@ -81,4 +79,4 @@ export async function GET(
       { status: 500 }
     );
   }
-} 
+}

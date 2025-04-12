@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 
 const ScoreboardChart = dynamic(() => import('@/components/ScoreboardChart'), {
   ssr: false,
@@ -26,17 +24,10 @@ interface Score {
 }
 
 export default function ScoreboardPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
   const [scores, setScores] = useState<Score[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin');
-      return;
-    }
-
     const fetchScores = async () => {
       try {
         const response = await fetch('/api/scores');
@@ -51,7 +42,7 @@ export default function ScoreboardPage() {
     };
 
     fetchScores();
-  }, [status, router]);
+  }, []);
 
   if (loading) {
     return (
@@ -62,8 +53,8 @@ export default function ScoreboardPage() {
   }
 
   return (
-    <div className="min-h-screen text-white p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen text-white flex items-center justify-center">
+      <div className="max-w-7xl w-full px-8">
         <h1 className="text-4xl font-bold mb-8">SCOREBOARD</h1>
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <div className="lg:col-span-3">
@@ -76,4 +67,4 @@ export default function ScoreboardPage() {
       </div>
     </div>
   );
-} 
+}

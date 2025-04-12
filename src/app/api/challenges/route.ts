@@ -11,6 +11,28 @@ export async function GET() {
   }
 
   try {
+    // Get current game config
+    const gameConfig = await prisma.gameConfig.findFirst({
+      where: { isActive: true }
+    });
+
+    // Get current time
+    const now = new Date();
+
+    // For non-admin users, check if the game has started
+    // Admins can always see all challenges
+    if (!session.user.isAdmin && gameConfig) {
+      const gameStarted = new Date(gameConfig.startTime) <= now;
+      
+      // If game hasn't started yet, return empty array or a message
+      if (!gameStarted) {
+        return NextResponse.json({
+          message: "The competition hasn't started yet. Please check back later.",
+          challenges: []
+        });
+      }
+    }
+
     const challenges = await prisma.challenge.findMany({
       include: {
         files: true
@@ -37,4 +59,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-} 
+}

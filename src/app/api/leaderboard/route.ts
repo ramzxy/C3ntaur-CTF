@@ -6,10 +6,6 @@ import { prisma } from '@/lib/prisma';
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const teams = await prisma.team.findMany({
       orderBy: {
         score: 'desc',
@@ -17,8 +13,8 @@ export async function GET() {
       take: 10,
     });
 
-    // Get current user's team
-    const currentUserTeam = session.user?.teamId 
+    // Get current user's team only if authenticated
+    const currentUserTeam = session?.user?.teamId 
       ? await prisma.team.findUnique({
           where: { id: session.user.teamId },
         })
@@ -35,4 +31,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-} 
+}
