@@ -1,5 +1,6 @@
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import * as GiIcons from 'react-icons/gi';
+import { IconType } from 'react-icons';
 
 interface Team {
   id: string;
@@ -29,7 +30,7 @@ export default function Leaderboard({ teams, currentUserTeam, isOpen, setIsOpen,
   // Helper function to get the icon component
   const getTeamIcon = (iconName?: string, color?: string) => {
     if (!iconName) return null;
-    const IconComponent = (GiIcons as any)[iconName];
+    const IconComponent: IconType | undefined = (GiIcons as Record<string, IconType>)[iconName];
     return IconComponent ? (
       <IconComponent 
         className="w-9 h-9" 

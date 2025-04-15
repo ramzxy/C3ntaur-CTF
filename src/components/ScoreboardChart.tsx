@@ -10,7 +10,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import * as GiIcons from 'react-icons/gi';
 
 interface Score {
   id: string;
@@ -36,29 +35,40 @@ interface ScoreboardChartProps {
 }
 
 export default function ScoreboardChart({ scores, gameConfig }: ScoreboardChartProps) {
-  const [hoveredTeam, setHoveredTeam] = useState<string | null>(null);
+  const [hoveredTeam] = useState<string | null>(null);
 
-  // Process scores into chart data
-  const chartData = useMemo(() => {
-    const teamScores: { [key: string]: { [key: string]: number } } = {};
+  // Pre-calculate time points
+  const timePoints = useMemo(() => {
+    if (!gameConfig) return [];
     
-    // Use game start time
     const startDate = new Date(gameConfig.startTime);
     startDate.setHours(startDate.getHours(), 0, 0, 0); // Round to hour
 
-    // Generate hour markers - if game has end time, use that to determine duration
     const endDate = gameConfig.endTime 
       ? new Date(gameConfig.endTime) 
-      : new Date(startDate.getTime() + 24 * 60 * 60 * 1000); // 24 hours from start if no end time
+      : new Date(Math.min(
+          startDate.getTime() + 24 * 60 * 60 * 1000, // 24 hours from start
+          new Date().getTime() // or current time if sooner
+        ));
 
-    const timePoints: Date[] = [];
-    let currentTime = new Date(startDate);
+    const points: Date[] = [];
+    const currentTime = new Date(startDate);
     
     while (currentTime <= endDate) {
-      timePoints.push(new Date(currentTime));
+      points.push(new Date(currentTime));
       currentTime.setHours(currentTime.getHours() + 1);
     }
+    
+    return points;
+  }, [gameConfig]);
 
+  // Process scores into chart data with optimized memoization
+  const chartData = useMemo(() => {
+    if (!timePoints.length) return [];
+    
+    const teamScores: { [key: string]: { [key: string]: number } } = {};
+    const runningTotals: { [key: string]: number } = {};
+    
     // Initialize all teams with 0 points at all timestamps
     scores.forEach((score) => {
       if (!teamScores[score.team.id]) {
@@ -70,47 +80,39 @@ export default function ScoreboardChart({ scores, gameConfig }: ScoreboardChartP
     });
 
     // Calculate running totals for each team
-    const sortedScores = [...scores].sort(
-      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-    );
-
-    const runningTotals: { [key: string]: number } = {};
-    sortedScores.forEach((score) => {
-      const scoreTime = new Date(score.createdAt);
-      const teamId = score.team.id;
-      
-      // Initialize running total for team if not exists
-      if (runningTotals[teamId] === undefined) {
-        runningTotals[teamId] = 0;
-      }
-
-      // Update running total
-      runningTotals[teamId] += score.points;
-      
-      // Update the score for this hour and all following hours
-      timePoints.forEach(time => {
-        if (scoreTime <= time) {
-          teamScores[teamId][time.toISOString()] = runningTotals[teamId];
-        }
+    [...scores]
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+      .forEach((score) => {
+        const scoreTime = new Date(score.createdAt);
+        const teamId = score.team.id;
+        
+        runningTotals[teamId] = (runningTotals[teamId] || 0) + score.points;
+        
+        // Update the score for this hour and all following hours
+        timePoints.forEach(time => {
+          if (scoreTime <= time) {
+            teamScores[teamId][time.toISOString()] = runningTotals[teamId];
+          }
+        });
       });
-    });
 
-    // Convert to chart data format
-    return timePoints.map((time) => {
-      const dataPoint: any = { 
-        timestamp: time.toLocaleTimeString([], { 
-          hour: '2-digit', 
-          minute: '2-digit',
-          hour12: false 
-        })
-      };
-      Object.entries(teamScores).forEach(([teamId, scores]) => {
-        dataPoint[teamId] = scores[time.toISOString()] || 0;
-      });
-      return dataPoint;
-    });
-  }, [scores, gameConfig]);
+    // Convert to chart data format - limit to last 24 data points if more exist
+    return timePoints.slice(-24).map((time) => ({
+      timestamp: time.toLocaleTimeString([], { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: false 
+      }),
+      ...Object.fromEntries(
+        Object.entries(teamScores).map(([teamId, scores]) => [
+          teamId,
+          scores[time.toISOString()] || 0
+        ])
+      )
+    }));
+  }, [scores, timePoints]);
 
+  // Memoize unique teams list
   const teams = useMemo(() => {
     const uniqueTeams = new Map<string, Score['team']>();
     scores.forEach((score) => {
@@ -120,14 +122,6 @@ export default function ScoreboardChart({ scores, gameConfig }: ScoreboardChartP
     });
     return Array.from(uniqueTeams.values());
   }, [scores]);
-
-  const getTeamIcon = (iconName?: string, color?: string) => {
-    if (!iconName) return null;
-    const IconComponent = (GiIcons as any)[iconName];
-    return IconComponent ? (
-      <IconComponent className="w-7 h-7" style={{ color: color || '#fff' }} />
-    ) : null;
-  };
 
   return (
     <div className="bg-gray-900/50 p-4 border border-gray-700 h-full">

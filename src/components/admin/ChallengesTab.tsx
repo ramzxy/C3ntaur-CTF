@@ -11,7 +11,8 @@ interface ChallengesTabProps {
 export default function ChallengesTab({ challenges, fetchData }: ChallengesTabProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingChallenge, setEditingChallenge] = useState<Challenge | null>(null);
+  const [editingChallenge, setEditingChallenge] = useState<Challenge | NewChallenge | null>(null);
+  const [challengeToDelete, setChallengeToDelete] = useState<Challenge | null>(null);
   const [newChallenge, setNewChallenge] = useState<NewChallenge>({
     title: '',
     description: '',
@@ -66,6 +67,7 @@ export default function ChallengesTab({ challenges, fetchData }: ChallengesTabPr
       });
 
       if (response.ok) {
+        setChallengeToDelete(null);
         fetchData();
       }
     } catch (error) {
@@ -164,8 +166,8 @@ export default function ChallengesTab({ challenges, fetchData }: ChallengesTabPr
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex gap-2">
+      <div className="flex justify-between items-start mb-4">
+        <div className="flex flex-col sm:flex-row gap-2">
           <button
             onClick={() => setIsModalOpen(true)}
             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -174,7 +176,6 @@ export default function ChallengesTab({ challenges, fetchData }: ChallengesTabPr
             Add Challenge
           </button>
           
-          {/* Export Button */}
           <button
             onClick={handleExportChallenges}
             className="flex items-center px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
@@ -183,7 +184,6 @@ export default function ChallengesTab({ challenges, fetchData }: ChallengesTabPr
             Export All
           </button>
 
-          {/* Import Button */}
           <label className="flex items-center px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 cursor-pointer">
             <FaUpload className="h-5 w-5 mr-2" />
             Import
@@ -196,14 +196,14 @@ export default function ChallengesTab({ challenges, fetchData }: ChallengesTabPr
           </label>
         </div>
       </div>
-      <div className="border border-gray-700 rounded-lg overflow-hidden">
-        <table className="min-w-full">
+      {/* Table Container with horizontal scroll on mobile */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-700">
           <thead>
-            <tr className="bg-gray-800">
+            <tr>
               <th className="px-6 py-3 text-left">Title</th>
-              <th className="px-6 py-3 text-left">Category</th>
               <th className="px-6 py-3 text-left">Points</th>
-              <th className="px-6 py-3 text-left">Difficulty</th>
+              <th className="px-6 py-3 text-left">Category</th>
               <th className="px-6 py-3 text-left">Status</th>
               <th className="px-6 py-3 text-left">Actions</th>
             </tr>
@@ -212,9 +212,8 @@ export default function ChallengesTab({ challenges, fetchData }: ChallengesTabPr
             {challenges.map((challenge) => (
               <tr key={challenge.id} className="border-t border-gray-700 hover:bg-gray-800/50 transition-colors">
                 <td className="px-6 py-4">{challenge.title}</td>
-                <td className="px-6 py-4">{challenge.category}</td>
                 <td className="px-6 py-4">{challenge.points}</td>
-                <td className="px-6 py-4 capitalize">{challenge.difficulty}</td>
+                <td className="px-6 py-4">{challenge.category}</td>
                 <td className="px-6 py-4">
                   <span className={`px-2 py-1 rounded ${
                     challenge.isActive ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'
@@ -227,19 +226,29 @@ export default function ChallengesTab({ challenges, fetchData }: ChallengesTabPr
                     </span>
                   )}
                 </td>
-                <td className="px-6 py-4 space-x-2">
-                  <button
-                    onClick={() => handleEdit(challenge)}
-                    className="bg-blue-900 text-blue-300 px-3 py-1 rounded hover:bg-blue-800 transition-colors"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(challenge.id)}
-                    className="bg-red-900 text-red-300 px-3 py-1 rounded hover:bg-red-800 transition-colors"
-                  >
-                    Delete
-                  </button>
+                <td className="px-6 py-4">
+                  <div className="flex flex-row gap-2 justify-end">
+                    <button
+                      onClick={() => handleEdit(challenge)}
+                      className="bg-blue-900 text-blue-300 px-3 py-1 rounded hover:bg-blue-800 transition-colors"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => challengeToDelete?.id === challenge.id 
+                        ? handleDelete(challenge.id)
+                        : setChallengeToDelete(challenge)
+                      }
+                      onMouseLeave={() => setChallengeToDelete(null)}
+                      className={`px-3 py-1 rounded transition-colors ${
+                        challengeToDelete?.id === challenge.id
+                          ? 'bg-red-700 text-red-200 hover:bg-red-600'
+                          : 'bg-red-900 text-red-300 hover:bg-red-800'
+                      }`}
+                    >
+                      {challengeToDelete?.id === challenge.id ? 'Confirm?' : 'Delete'}
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -264,7 +273,17 @@ export default function ChallengesTab({ challenges, fetchData }: ChallengesTabPr
         <ChallengeModal
           title="Edit Challenge"
           challenge={editingChallenge}
-          setChallenge={setEditingChallenge}
+          setChallenge={(value) => {
+            // Handle both direct value and function updates
+            if (typeof value === 'function') {
+              setEditingChallenge((prev) => {
+                if (!prev) return null;
+                return value(prev);
+              });
+            } else {
+              setEditingChallenge(value);
+            }
+          }}
           onSubmit={handleUpdate}
           onClose={() => {
             setIsEditModalOpen(false);

@@ -101,7 +101,7 @@ export async function POST(request: Request) {
     const isCorrect = flag === challenge.flag;
 
     // Create submission record
-    const submission = await prisma.submission.create({
+    await prisma.submission.create({
       data: {
         userId: session.user.id,
         teamId: session.user.teamId ?? "",

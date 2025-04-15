@@ -20,8 +20,8 @@ export default function TeamsTab({ teams, fetchData }: TeamsTabProps) {
       });
 
       if (response.ok) {
-        fetchData();
         setTeamToDelete(null);
+        fetchData();
       }
     } catch (error) {
       console.error('Error deleting team:', error);
@@ -30,11 +30,11 @@ export default function TeamsTab({ teams, fetchData }: TeamsTabProps) {
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-4">Teams</h2>
-      <div className="border border-gray-700 rounded-lg overflow-hidden">
-        <table className="min-w-full">
+      {/* Table Container with horizontal scroll on mobile */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-700">
           <thead>
-            <tr className="bg-gray-800">
+            <tr>
               <th className="px-6 py-3 text-left">Name</th>
               <th className="px-6 py-3 text-left">Code</th>
               <th className="px-6 py-3 text-left">Score</th>
@@ -54,29 +54,31 @@ export default function TeamsTab({ teams, fetchData }: TeamsTabProps) {
                   </span>
                 </td>
                 <td className="px-6 py-4">
-                  {teamToDelete?.id === team.id ? (
-                    <div className="flex space-x-2">
+                  <div className="flex flex-row gap-2 justify-end">
+                    {teamToDelete?.id === team.id ? (
+                      <>
+                        <button
+                          onClick={() => handleDeleteTeam(team.id)}
+                          className="bg-red-900 text-red-300 px-3 py-1 rounded hover:bg-red-800 transition-colors"
+                        >
+                          Confirm
+                        </button>
+                        <button
+                          onClick={() => setTeamToDelete(null)}
+                          className="bg-gray-700 text-gray-300 px-3 py-1 rounded hover:bg-gray-600 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
                       <button
-                        onClick={() => handleDeleteTeam(team.id)}
+                        onClick={() => setTeamToDelete(team)}
                         className="bg-red-900 text-red-300 px-3 py-1 rounded hover:bg-red-800 transition-colors"
                       >
-                        Confirm Delete
+                        Delete
                       </button>
-                      <button
-                        onClick={() => setTeamToDelete(null)}
-                        className="bg-gray-700 text-gray-300 px-3 py-1 rounded hover:bg-gray-600 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setTeamToDelete(team)}
-                      className="bg-red-900 text-red-300 px-3 py-1 rounded hover:bg-red-800 transition-colors"
-                    >
-                      Delete
-                    </button>
-                  )}
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}

@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import * as GiIcons from 'react-icons/gi';
+import { IconType } from 'react-icons';
 
 interface Score {
   id: string;
@@ -40,7 +41,7 @@ export default function ScoreboardStandings({ scores }: ScoreboardStandingsProps
 
   const getTeamIcon = (iconName?: string, color?: string) => {
     if (!iconName) return null;
-    const IconComponent = (GiIcons as any)[iconName];
+    const IconComponent: IconType | undefined = (GiIcons as Record<string, IconType>)[iconName];
     return IconComponent ? (
       <IconComponent
         className="w-7 h-7"

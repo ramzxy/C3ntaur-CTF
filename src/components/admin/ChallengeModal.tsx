@@ -1,10 +1,10 @@
 import React from 'react';
-import { Challenge, NewChallenge, ChallengeFile, Hint } from './types';
+import { Challenge, NewChallenge } from './types';
 
 interface ChallengeModalProps {
   title: string;
   challenge: Challenge | NewChallenge;
-  setChallenge: React.Dispatch<React.SetStateAction<any>>;
+  setChallenge: React.Dispatch<React.SetStateAction<Challenge | NewChallenge>>;
   onSubmit: (e: React.FormEvent) => Promise<void>;
   onClose: () => void;
   submitText: string;

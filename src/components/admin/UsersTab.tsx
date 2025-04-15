@@ -12,10 +12,18 @@ export default function UsersTab({ users, teams, fetchData }: UsersTabProps) {
 
   const handleDeleteUser = async (id: string) => {
     try {
-      await fetch(`/api/users/${id}`, {
+      const response = await fetch('/api/admin/users', {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id }),
       });
-      fetchData();
+
+      if (response.ok) {
+        setUserToDelete(null);
+        fetchData();
+      }
     } catch (error) {
       console.error('Error deleting user:', error);
     }
@@ -24,10 +32,11 @@ export default function UsersTab({ users, teams, fetchData }: UsersTabProps) {
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-4">Users</h2>
-      <div className="border border-gray-700 rounded-lg overflow-hidden">
-        <table className="min-w-full">
+      {/* Table Container with horizontal scroll on mobile */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-700">
           <thead>
-            <tr className="bg-gray-800">
+            <tr>
               <th className="px-6 py-3 text-left">Alias</th>
               <th className="px-6 py-3 text-left">Name</th>
               <th className="px-6 py-3 text-left">Team</th>
@@ -57,36 +66,38 @@ export default function UsersTab({ users, teams, fetchData }: UsersTabProps) {
                   </span>
                 </td>
                 <td className="px-6 py-4">
-                  {userToDelete?.id === user.id ? (
-                    <div className="flex space-x-2">
+                  <div className="flex flex-row gap-2 justify-end">
+                    {userToDelete?.id === user.id ? (
+                      <>
+                        <button
+                          onClick={() => handleDeleteUser(user.id)}
+                          className="bg-red-900 text-red-300 px-3 py-1 rounded hover:bg-red-800 transition-colors"
+                          disabled={user.isAdmin}
+                        >
+                          Confirm
+                        </button>
+                        <button
+                          onClick={() => setUserToDelete(null)}
+                          className="bg-gray-700 text-gray-300 px-3 py-1 rounded hover:bg-gray-600 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
                       <button
-                        onClick={() => handleDeleteUser(user.id)}
-                        className="bg-red-900 text-red-300 px-3 py-1 rounded hover:bg-red-800 transition-colors"
+                        onClick={() => setUserToDelete(user)}
+                        className={`px-3 py-1 rounded transition-colors ${
+                          user.isAdmin 
+                            ? 'bg-gray-700 text-gray-400 cursor-not-allowed' 
+                            : 'bg-red-900 text-red-300 hover:bg-red-800'
+                        }`}
                         disabled={user.isAdmin}
+                        title={user.isAdmin ? "Cannot delete admin users" : "Delete user"}
                       >
-                        Confirm Delete
+                        Delete
                       </button>
-                      <button
-                        onClick={() => setUserToDelete(null)}
-                        className="bg-gray-700 text-gray-300 px-3 py-1 rounded hover:bg-gray-600 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setUserToDelete(user)}
-                      className={`px-3 py-1 rounded transition-colors ${
-                        user.isAdmin 
-                          ? 'bg-gray-700 text-gray-400 cursor-not-allowed' 
-                          : 'bg-red-900 text-red-300 hover:bg-red-800'
-                      }`}
-                      disabled={user.isAdmin}
-                      title={user.isAdmin ? "Cannot delete admin users" : "Delete user"}
-                    >
-                      Delete
-                    </button>
-                  )}
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}

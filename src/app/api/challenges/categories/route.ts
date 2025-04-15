@@ -3,6 +3,37 @@ import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
+interface ChallengeFile {
+  id: string;
+  name: string;
+  path: string;
+  size: number;
+  challengeId: string;
+}
+
+interface Challenge {
+  id: string;
+  category: string;
+  title: string;
+  description: string;
+  points: number;
+  difficulty: string;
+  isLocked: boolean;
+  isActive: boolean;
+  submissions: Array<{
+    teamId: string;
+    team: {
+      color: string;
+    };
+  }>;
+  files: ChallengeFile[];
+  isSolved?: boolean;
+  solvedBy?: Array<{
+    teamId: string;
+    teamColor: string;
+  }>;
+}
+
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -56,7 +87,7 @@ export async function GET() {
         }))
       });
       return acc;
-    }, {} as Record<string, any[]>);
+    }, {} as Record<string, Challenge[]>);
 
     // Get unique categories
     const categories = Object.keys(challengesByCategory);

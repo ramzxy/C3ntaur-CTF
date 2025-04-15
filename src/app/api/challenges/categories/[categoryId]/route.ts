@@ -5,16 +5,15 @@ import { authOptions } from '@/lib/auth';
 
 export async function GET(
   request: Request,
-  { params }: { params: { categoryId: string } }
+  { params }: { params: Promise<{ categoryId: string }> }
 ) {
+  const { categoryId } = await params;
   try {
     const session = await getServerSession(authOptions);
-    const { categoryId } = await params;
-    const categoryId2 = decodeURIComponent(categoryId);
 
     const challenges = await prisma.challenge.findMany({
       where: {
-        category: categoryId2
+        category: categoryId
       },
       select: {
         id: true,
@@ -55,7 +54,6 @@ export async function GET(
       solvedChallenges.forEach(sub => solvedChallengeIds.add(sub.challengeId));
     }
 
-    // Transform the challenges to include isSolved based on current team's submissions
     const transformedChallenges = challenges.map(challenge => ({
       id: challenge.id,
       title: challenge.title,

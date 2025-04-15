@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
 import SpaceScene from '@/components/SpaceScene';
 import Leaderboard from '@/components/dashboard/Leaderboard';
 import Announcements from '@/components/dashboard/Announcements';
@@ -40,9 +39,6 @@ interface GameConfig {
 }
 
 export default function Dashboard() {
-  const { data: session, status } = useSession();
-  const [isMobileView, setIsMobileView] = useState(false);
-  
   // State for each section
   const [leaderboard, setLeaderboard] = useState<{
     teams: Team[];
@@ -53,17 +49,16 @@ export default function Dashboard() {
   const [gameConfig, setGameConfig] = useState<GameConfig | null>(null);
   const [timeLeft, setTimeLeft] = useState<string>('');
   
-  // State for accordion sections - now initialized based on mobile view
+  // State for accordion sections
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(true);
   const [isAnnouncementsOpen, setIsAnnouncementsOpen] = useState(true);
   const [isActivityOpen, setIsActivityOpen] = useState(true);
   const [isGameClockOpen, setIsGameClockOpen] = useState(true);
 
-  // Add window resize listener to detect mobile view
+  // Add window resize listener for mobile view
   useEffect(() => {
     const checkMobileView = () => {
       const isMobile = window.innerWidth < 1100;
-      setIsMobileView(isMobile);
       
       // If switching to mobile view, collapse all panels
       if (isMobile) {
@@ -83,7 +78,7 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchAndUpdate = async () => {
       try {
         const [leaderboardRes, announcementsRes, activitiesRes, gameConfigRes] = await Promise.all([
           fetch('/api/leaderboard'),
@@ -103,40 +98,31 @@ export default function Dashboard() {
         setAnnouncements(announcementsData);
         setActivities(activitiesData);
         setGameConfig(gameConfigData);
+
+        // Update time left in the same interval if game is active
+        if (gameConfigData?.isActive && gameConfigData.hasEndTime) {
+          const endTime = new Date(gameConfigData.endTime).getTime();
+          const now = new Date().getTime();
+          const timeLeftMs = endTime - now;
+
+          if (timeLeftMs <= 0) {
+            setTimeLeft('Game Over');
+          } else {
+            const hours = Math.floor(timeLeftMs / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeftMs % (1000 * 60)) / 1000);
+            setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
+          }
+        }
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       }
     };
 
-    fetchData();
-    const interval = setInterval(fetchData, 30000); // Refresh every 30 seconds
+    fetchAndUpdate(); // Initial call
+    const interval = setInterval(fetchAndUpdate, 30000);
     return () => clearInterval(interval);
   }, []);
-
-  useEffect(() => {
-    if (gameConfig?.isActive) {
-      const updateTimeLeft = () => {
-        const endTime = new Date(gameConfig.endTime).getTime();
-        const now = new Date().getTime();
-        const timeLeftMs = endTime - now;
-
-        if (timeLeftMs <= 0) {
-          setTimeLeft('Game Over');
-          return;
-        }
-
-        const hours = Math.floor(timeLeftMs / (1000 * 60 * 60));
-        const minutes = Math.floor((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((timeLeftMs % (1000 * 60)) / 1000);
-
-        setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
-      };
-
-      updateTimeLeft();
-      const interval = setInterval(updateTimeLeft, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [gameConfig]);
 
   return (
     <div className="relative h-screen">

@@ -77,15 +77,15 @@ export default function AnnouncementsTab({ announcements, fetchData }: Announcem
           </div>
           <button
             type="submit"
-            className="inline-flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
           >
             Create Announcement
           </button>
         </form>
       </div>
 
-      <div>
-        <h2 className="text-xl font-medium mb-4">Announcements</h2>
+      <div className="bg-gray-800/50 rounded-lg p-6">
+        <h2 className="text-xl font-medium mb-4">Existing Announcements</h2>
         <div className="space-y-4">
           {announcements.length === 0 ? (
             <p className="text-gray-400 italic">No announcements yet</p>
@@ -95,17 +95,17 @@ export default function AnnouncementsTab({ announcements, fetchData }: Announcem
                 key={announcement.id}
                 className="border border-gray-700 p-4 rounded-lg bg-gray-800/50 hover:bg-gray-800 transition-colors"
               >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-lg font-medium">{announcement.title}</h3>
-                    <p className="text-gray-300 mt-1">{announcement.content}</p>
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-medium truncate">{announcement.title}</h3>
+                    <p className="text-gray-300 mt-1 break-words">{announcement.content}</p>
                     <p className="text-sm text-gray-400 mt-2">
                       Created: {new Date(announcement.createdAt).toLocaleString()}
                     </p>
                   </div>
                   <button
                     onClick={() => handleDeleteAnnouncement(announcement.id)}
-                    className="px-3 py-1 text-sm rounded-md bg-red-900 text-red-300 hover:bg-red-800 transition-colors"
+                    className="px-3 py-1 text-sm rounded-md bg-red-900 text-red-300 hover:bg-red-800 transition-colors shrink-0"
                   >
                     Delete
                   </button>

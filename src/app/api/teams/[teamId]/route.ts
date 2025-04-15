@@ -5,8 +5,9 @@ import { authOptions } from '@/lib/auth';
 
 export async function GET(
   request: Request,
-  { params }: { params: { teamId: string } }
+  { params }: { params: Promise<{ teamId: string }> }
 ) {
+  const { teamId } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -14,7 +15,6 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { teamId } = await params;
 
     const team = await prisma.team.findUnique({
       where: { id: teamId },

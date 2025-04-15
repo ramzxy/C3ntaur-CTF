@@ -28,7 +28,7 @@ export default function SignIn() {
         router.push('/dashboard');
       }
     } catch (error) {
-      setError('An error occurred');
+      setError('An error occurred: ' + (error as Error).message);
     }
   };
 
@@ -83,7 +83,7 @@ export default function SignIn() {
         </form>
         <div className="text-center pt-6">
           <Link href="/auth/signup" className="text-gray-500  hover:text-blue-500">
-            Don't have an account? Sign up
+            {"Don't have an account? Sign up"}
           </Link>
         </div>
       </div>

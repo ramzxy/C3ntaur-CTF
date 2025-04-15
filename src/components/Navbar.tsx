@@ -3,7 +3,6 @@
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { TfiMenu } from "react-icons/tfi";
 
@@ -22,7 +21,6 @@ interface SiteConfig {
 export default function Navbar() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
-  const router = useRouter();
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isCrtMenuOpen, setIsCrtMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

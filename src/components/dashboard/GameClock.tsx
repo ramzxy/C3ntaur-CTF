@@ -20,34 +20,30 @@ interface GameClockProps {
   isMobile: boolean;
 }
 
-const shareTechMono = Share_Tech_Mono({weight: '400'});
+const shareTechMono = Share_Tech_Mono({weight: '400', subsets: ['latin']});
 
-export default function GameClock({ timeLeft, gameConfig, isOpen, setIsOpen, isMobile }: GameClockProps) {
+export default function GameClock({ gameConfig, isOpen, setIsOpen, isMobile }: GameClockProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [animatedMs, setAnimatedMs] = useState(99);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 100);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  // Add animation effect for milliseconds
-  useEffect(() => {
-    let animationTimer: NodeJS.Timeout;
-    
-    // Only run animation if the game is active
-    if (gameConfig?.isActive && 
-        (!gameConfig.hasEndTime || new Date().getTime() < new Date(gameConfig.endTime).getTime()) &&
-        new Date().getTime() >= new Date(gameConfig.startTime).getTime()) {
-      animationTimer = setInterval(() => {
+    let frameId: number;
+    const animate = () => {
+      const now = new Date();
+      setCurrentTime(now);
+      
+      // Only animate milliseconds if game is active and within time bounds
+      if (gameConfig?.isActive && 
+          (!gameConfig.hasEndTime || now.getTime() < new Date(gameConfig.endTime).getTime()) &&
+          now.getTime() >= new Date(gameConfig.startTime).getTime()) {
         setAnimatedMs(prev => (prev - 1 + 100) % 100);
-      }, 10);
-    }
-
-    return () => clearInterval(animationTimer);
+      }
+      
+      frameId = requestAnimationFrame(animate);
+    };
+    
+    frameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameId);
   }, [gameConfig]);
 
   const calculateTimeComponents = () => {

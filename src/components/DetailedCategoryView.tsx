@@ -33,7 +33,7 @@ export default function DetailedCategoryView({
   const startY = -0.8; // Start near the bottom of the main box
   const startZ = 0;
 
-  useFrame((state, delta) => {
+  useFrame((state) => {
     if (groupRef.current) {
       // Subtle floating animation instead of rotation
       groupRef.current.position.y = Math.sin(state.clock.elapsedTime) * 0.1;

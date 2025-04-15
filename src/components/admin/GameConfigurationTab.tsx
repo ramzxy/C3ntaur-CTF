@@ -1,12 +1,7 @@
 import { useState, useEffect } from 'react';
-import { SiteConfig, GameConfig } from './types';
+import { GameConfig } from './types';
 
-interface GameConfigurationTabProps {
-  siteConfig: SiteConfig;
-  fetchConfig: () => Promise<void>;
-}
-
-export default function GameConfigurationTab({ siteConfig, fetchConfig }: GameConfigurationTabProps) {
+export default function GameConfigurationTab() {
   const [gameConfig, setGameConfig] = useState<GameConfig>({
     startTime: new Date(Date.now() + 3600000),
     endTime: new Date(Date.now() + 86400000),

@@ -5,16 +5,15 @@ import { authOptions } from '@/lib/auth';
 
 export async function GET(
   request: Request,
-  { params }: { params: { challengeId: string } }
+  { params }: { params: Promise<{ challengeId: string }> }
 ) {
+  const { challengeId } = await params;
   try {
     const session = await getServerSession(authOptions);
-    const { challengeId } = await params;
-    const challengeId2 = decodeURIComponent(challengeId);
 
     const challenge = await prisma.challenge.findUnique({
       where: {
-        id: challengeId2
+        id: challengeId
       },
       select: {
         id: true,

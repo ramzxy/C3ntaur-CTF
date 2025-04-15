@@ -7,7 +7,6 @@ interface SiteConfig {
 }
 
 export default function SiteConfigurationTab() {
-  const [configs, setConfigs] = useState<SiteConfig[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState<Record<string, string>>({});
 
@@ -26,16 +25,16 @@ export default function SiteConfigurationTab() {
     try {
       const res = await fetch('/api/config');
       const data = await res.json();
-      setConfigs(data);
       setFormData(
-        data.reduce((acc: { [x: string]: any; }, config: { key: string | number; value: any; }) => {
+        data.reduce((acc: Record<string, string>, config: SiteConfig) => {
           acc[config.key] = config.value;
           return acc;
-        }, {} as Record<string, string>)
+        }, {})
       );
       setIsLoading(false);
-    } catch (error) {
+    } catch (fetchError) {
       toast.error('Failed to fetch configurations');
+      console.error('Error fetching configs:', fetchError);
       setIsLoading(false);
     }
   };
@@ -57,8 +56,9 @@ export default function SiteConfigurationTab() {
       await Promise.all(updates);
       toast.success('All configurations updated successfully');
       fetchConfigs();
-    } catch (error) {
+    } catch (updateError) {
       toast.error('Failed to update some configurations');
+      console.error('Error updating configs:', updateError);
     }
   };
 
@@ -75,7 +75,7 @@ export default function SiteConfigurationTab() {
 
   return (
     <div className="space-y-8">
-      <div className="p-6 bg-gray-800/50 rounded-lg">
+      <div className="bg-gray-800/50 rounded-lg p-6">
         <h2 className="text-2xl font-semibold mb-6">Site Configuration</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           {configKeys.map((key) => (
@@ -83,12 +83,12 @@ export default function SiteConfigurationTab() {
               <label htmlFor={key} className="block text-sm font-medium text-gray-300">
                 {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
               </label>
-              {key.includes('text') ? (
+              {key === 'rules_text' ? (
                 <textarea
                   id={key}
                   value={formData[key] || ''}
                   onChange={(e) => handleInputChange(key, e.target.value)}
-                  rows={4}
+                  rows={8}
                   className="mt-1 block w-full bg-gray-700 border-gray-600 rounded text-white focus:border-blue-500 focus:ring-blue-500 p-2"
                 />
               ) : (
@@ -107,7 +107,7 @@ export default function SiteConfigurationTab() {
           ))}
           <button
             type="submit"
-            className="w-full inline-flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            className="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
           >
             Save All Configuration
           </button>

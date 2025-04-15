@@ -35,7 +35,6 @@ function generateOrbitConfigurations(count: number): { angle: number; tilt: numb
 
   for (let i = 0; i < count; i++) {
     const y = count === 1 ? 0 : 1 - (i / Math.max(count - 1, 1)) * 2;
-    const radius = Math.sqrt(1 - y * y);
     const theta = 2 * Math.PI * i / goldenRatio;
     const angle = theta;
     const tilt = Math.acos(y);
@@ -69,11 +68,11 @@ function CategorySatellite({ satellite, onSelect }: { satellite: CategorySatelli
   const timeRef = useRef(0);
   const [textWidth, setTextWidth] = useState(2.5);
   const text = satellite.name.toUpperCase();
-  const padding = 0.1; // Horizontal padding for the text
+  const padding = 0.05; // Horizontal padding for the text
 
   useEffect(() => {
     // Approximate the text width based on character count and font size
-    const approximateWidth = text.length * 0.4; // 0.4 units per character
+    const approximateWidth = text.length * 0.365; // 0.4 units per character
     setTextWidth(Math.max(2.5, approximateWidth));
   }, [text]);
 
@@ -127,30 +126,29 @@ function CategorySatellite({ satellite, onSelect }: { satellite: CategorySatelli
 
   return (
     <group ref={satelliteRef} onClick={onSelect}
-    onPointerOver={() => setHovered(true)}
-    onPointerOut={() => setHovered(false)}>
-      <mesh
-        
-      >
+      onPointerOver={() => setHovered(true)}
+      onPointerOut={() => setHovered(false)}>
+      <mesh>
         <sphereGeometry args={[satelliteSize, 8, 8]} />
         <meshBasicMaterial
           color={hovered ? "#4a90e2" : getSatelliteColor()}
         />
       </mesh>
       <Billboard>
-        <mesh position={[2, 0.8, -0.1]}>
+        <mesh position={[0.8, 0.8, -0.1]}>
           <planeGeometry args={[textWidth + padding, 0.9]} />
           <meshBasicMaterial color="black" />
         </mesh>
-        <mesh position={[2, 0.8, -0.11]}>
+        <mesh
+          position={[0.8, 0.8, -0.11]}>
           <planeGeometry args={[textWidth + padding + 0.15, 1]} />
-          <meshBasicMaterial color={hovered ? "#4a90e2":  "white"} />
+          <meshBasicMaterial color={hovered ? "#4a90e2" : "white"} />
         </mesh>
         <Text
           position={[0.8, 0.8, 0]}
           fontSize={0.8}
-          color={hovered ? "#4a90e2":  "white"}
-          anchorX="left"
+          color={hovered ? "#4a90e2" : "white"}
+          anchorX="center"
           anchorY="middle"
           font="/SquadaOne-Regular.ttf"
         >
@@ -257,7 +255,7 @@ export default function SpaceScene({ isMobile }: { isMobile?: boolean }) {
 
   return (
     <div className={`${isMobile ? 'h-full' : 'fixed inset-0'}`}>
-      <Canvas camera={{ position: [0, 10, 15], fov: 60 }}>
+      <Canvas camera={{ position: [0, 10, 15], fov: 90 }}>
         <ambientLight intensity={0.5} />
         <pointLight position={[10, 10, 10]} />
         <Earth />

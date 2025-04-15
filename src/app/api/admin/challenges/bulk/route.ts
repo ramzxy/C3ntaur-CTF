@@ -52,14 +52,14 @@ export async function POST(req: Request) {
           data: {
             ...challengeData,
             files: files ? {
-              create: files.map((file: any) => ({
+              create: files.map((file: { name: string; path: string; size: number }) => ({
                 name: file.name,
                 path: file.path,
                 size: file.size
               }))
             } : undefined,
             hints: hints ? {
-              create: hints.map((hint: any) => ({
+              create: hints.map((hint: { content: string; cost: number }) => ({
                 content: hint.content,
                 cost: hint.cost
               }))

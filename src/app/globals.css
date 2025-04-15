@@ -77,6 +77,15 @@
   scrollbar-color: var(--secondary) var(--primary);
 }
 
+/* Hide scrollbar while keeping functionality */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
 
 /* Chrome, Edge, and Safari */
 *::-webkit-scrollbar {

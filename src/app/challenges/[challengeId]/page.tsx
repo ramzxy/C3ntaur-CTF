@@ -3,15 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { ReactNode } from 'react';
 import { Righteous } from 'next/font/google';
 import { MarkdownComponents } from '@/components/MarkdownComponents';
 
-const monoton = Righteous({weight: '400'});
+const righteous = Righteous({weight: '400', subsets: ['latin']});
 
 interface Challenge {
   id: string;
@@ -174,7 +171,7 @@ export default function ChallengePage() {
       <div className="container mx-auto px-4 py-8 flex justify-center items-center">
         <div className="w-full max-w-4xl shadow-lg overflow-hidden">
           <div className="h-[80vh] overflow-y-auto">
-            <h1 className={`text-5xl font-bold mb-4 float-start ${monoton.className}`}>{challenge.title}</h1>
+            <h1 className={`text-5xl font-bold mb-4 float-start ${righteous.className}`}>{challenge.title}</h1>
             <div className="float-end flex items-baseline h-max">
               <span className="px-3 py-1">
                 {challenge.category}

@@ -26,14 +26,14 @@ export async function POST(req: Request) {
         difficulty,
         isLocked: isLocked || false,
         files: files ? {
-          create: files.map((file: any) => ({
+          create: files.map((file: { name: string; path: string; size: number }) => ({
             name: file.name,
             path: file.path,
             size: file.size
           }))
         } : undefined,
         hints: hints ? {
-          create: hints.map((hint: any) => ({
+          create: hints.map((hint: { content: string; cost: number }) => ({
             content: hint.content,
             cost: hint.cost
           }))
@@ -126,7 +126,7 @@ export async function PATCH(req: Request) {
         isLocked,
         files: files ? {
           deleteMany: {}, // Remove existing files
-          create: files.map((file: any) => ({
+          create: files.map((file: { name: string; path: string; size: number }) => ({
             name: file.name,
             path: file.path,
             size: file.size
@@ -134,7 +134,7 @@ export async function PATCH(req: Request) {
         } : undefined,
         hints: hints ? {
           deleteMany: {}, // Remove existing hints
-          create: hints.map((hint: any) => ({
+          create: hints.map((hint: { content: string; cost: number }) => ({
             content: hint.content,
             cost: hint.cost
           }))
@@ -164,4 +164,4 @@ export async function PATCH(req: Request) {
       { status: 500 }
     );
   }
-} 
+}

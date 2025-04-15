@@ -1,13 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import * as GiIcons from 'react-icons/gi';
 import { Righteous } from 'next/font/google';
 
-const monoton = Righteous({weight: '400'});
+const righteous = Righteous({weight: '400', subsets: ['latin']});
 
 interface Team {
   id: string;
@@ -30,15 +30,7 @@ export default function Profile() {
   const [team, setTeam] = useState<Team | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin');
-    } else if (status === 'authenticated' && session?.user?.teamId) {
-      fetchTeamData();
-    }
-  }, [status, session, router]);
-
-  const fetchTeamData = async () => {
+  const fetchTeamData = useCallback(async () => {
     try {
       const response = await fetch(`/api/teams/${session?.user?.teamId}`);
       if (response.ok) {
@@ -50,7 +42,15 @@ export default function Profile() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [session?.user?.teamId]);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin');
+    } else if (status === 'authenticated' && session?.user?.teamId) {
+      fetchTeamData();
+    }
+  }, [status, session, router, fetchTeamData]);
 
   if (status === 'loading' || loading) {
     return (
@@ -65,7 +65,7 @@ export default function Profile() {
       <div className="container mx-auto px-4 py-8 flex justify-center items-center">
         <div className="w-full max-w-5xl overflow-hidden">
           <div className="h-[80vh] overflow-y-auto">
-            <h1 className={`text-5xl font-bold mb-4 float-start uppercase ${monoton.className}`}>Profile</h1>
+            <h1 className={`text-5xl font-bold mb-4 float-start uppercase ${righteous.className}`}>Profile</h1>
             <div className="border border-gray-400 w-full h-5 flex items-center justify-center relative clear-both">
               <div className="absolute inset-x-0 border-t-2 border-gray-400 w-full"></div>
             </div>

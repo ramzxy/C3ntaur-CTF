@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Righteous } from 'next/font/google';
 
-const monoton = Righteous({weight: '400'});
+const righteous = Righteous({weight: '400', subsets: ['latin']});
 
 const ScoreboardChart = dynamic(() => import('@/components/ScoreboardChart'), {
   ssr: false,
@@ -80,7 +80,7 @@ export default function ScoreboardPage() {
       <div className="container mx-auto px-4 py-8 flex justify-center items-center">
         <div className="w-full max-w-7xl overflow-hidden">
           <div className="h-[80vh] overflow-y-auto">
-            <h1 className={`text-5xl font-bold mb-4 float-start uppercase ${monoton.className}`}>Scoreboard</h1>
+            <h1 className={`text-5xl font-bold mb-4 float-start uppercase ${righteous.className}`}>Scoreboard</h1>
             <div className="border border-gray-400 w-full h-5 flex items-center justify-center relative clear-both">
               <div className="absolute inset-x-0 border-t-2 border-gray-400 w-full"></div>
             </div>
