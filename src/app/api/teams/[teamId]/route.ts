@@ -14,8 +14,10 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { teamId } = await params;
+
     const team = await prisma.team.findUnique({
-      where: { id: params.teamId },
+      where: { id: teamId },
       select: {
         id: true,
         name: true,

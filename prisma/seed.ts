@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from './generated/client';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -15,88 +15,12 @@ async function main() {
       category: 'Misc',
       difficulty: 'Easy',
       flag: 'CTF{Welcome_To_Space}',
-    },
-    {
-      title: 'Galactic Encryption',
-      description: 'Decrypt this message from the aliens: ZW5jcnlwdGVkX2ZsYWc=',
-      points: 200,
-      category: 'Cryptography',
-      difficulty: 'Medium',
-      flag: 'CTF{encrypted_flag}',
-    },
-    {
-      title: 'Space Station Access',
-      description: 'Find a way to bypass the login page.',
-      points: 300,
-      category: 'Web Security',
-      difficulty: 'Hard',
-      flag: 'CTF{SQL_Injection_Is_Fun}',
-    },
-    {
-      title: 'Alien Communication',
-      description: 'Analyze this binary file to find the hidden message.',
-      points: 250,
-      category: 'Reverse Engineering',
-      difficulty: 'Medium',
-      flag: 'CTF{Binary_Is_Cool}',
-    },
+    }
   ];
 
   // Create seed data
   console.log('Starting database seed...');
 
-  // Create teams
-  const team1 = await prisma.team.create({
-    data: {
-      name: 'Space Explorers',
-      code: 'SPACE123',
-      icon: 'GiSpaceship',
-      color: '#ff4500',
-    },
-  });
-
-  const team2 = await prisma.team.create({
-    data: {
-      name: 'Cosmic Coders',
-      code: 'COSMIC456',
-      icon: 'GiRocket',
-      color: '#4169e1',
-    },
-  });
-
-  console.log('Teams created successfully');
-
-  // Create users
-  const admin = await prisma.user.create({
-    data: {
-      alias: 'admin',
-      password: '$2a$10$GtU.Aatf9h5jr6bjwA1TAO6I.KJQQu0sB7XPOvMRIeduLOcCIi8h2', // "password" hashed
-      name: 'Administrator',
-      isAdmin: true,
-    },
-  });
-
-  const user1 = await prisma.user.create({
-    data: {
-      alias: 'astronaut',
-      password: '$2a$10$GtU.Aatf9h5jr6bjwA1TAO6I.KJQQu0sB7XPOvMRIeduLOcCIi8h2', // "password" hashed
-      name: 'Space Astronaut',
-      teamId: team1.id,
-      isTeamLeader: true,
-    },
-  });
-
-  const user2 = await prisma.user.create({
-    data: {
-      alias: 'cosmic',
-      password: '$2a$10$GtU.Aatf9h5jr6bjwA1TAO6I.KJQQu0sB7XPOvMRIeduLOcCIi8h2', // "password" hashed
-      name: 'Cosmic Explorer',
-      teamId: team2.id,
-      isTeamLeader: true,
-    },
-  });
-
-  console.log('Users created successfully');
 
   // Create challenges
   const createdChallenges = [];
@@ -109,48 +33,6 @@ async function main() {
 
   console.log('Challenges created successfully');
 
-  // Create a sample file for a challenge
-  await prisma.challengeFile.create({
-    data: {
-      name: 'encrypted_message.txt',
-      path: '/files/encrypted_message.txt',
-      size: 1024,
-      challengeId: createdChallenges[1].id, // Attach to the Galactic Encryption challenge
-    },
-  });
-
-  console.log('Challenge files created successfully');
-
-  // Create hints
-  await prisma.hint.create({
-    data: {
-      content: 'Try looking at the page source!',
-      cost: 50,
-      challengeId: createdChallenges[0].id,
-    },
-  });
-
-  await prisma.hint.create({
-    data: {
-      content: 'This is using Base64 encoding.',
-      cost: 75,
-      challengeId: createdChallenges[1].id,
-    },
-  });
-
-  console.log('Hints created successfully');
-
-  // Create a sample announcement
-  await prisma.announcement.create({
-    data: {
-      title: 'Welcome to Orbital CTF!',
-      content: 'The competition has begun. Good luck to all teams!',
-      isActive: true,
-    },
-  });
-
-  console.log('Announcements created successfully');
-
   // Create game config
   await prisma.gameConfig.create({
     data: {
@@ -162,39 +44,67 @@ async function main() {
 
   console.log('Game config created successfully');
 
-  // Create an activity log entry
-  await prisma.activityLog.create({
-    data: {
-      type: 'GAME_START',
-      description: 'The CTF competition has started!',
+  // Create initial site configurations
+  const siteConfigs: { key: string; value: string }[] = [
+    {
+      key: 'homepage_title',
+      value: 'Welcome to Orbital CTF'
     },
-  });
-
-  await prisma.activityLog.create({
-    data: {
-      type: 'TEAM_REGISTRATION',
-      description: 'Team Space Explorers has registered',
-      teamId: team1.id,
+    {
+      key: 'site_title',
+      value: 'Orbital CTF'
     },
-  });
+    {
+      key: 'homepage_subtitle',
+      value: '80s retro ui, space-themed, batteries included CTF platform.'
+    },
+    {
+      key: 'rules_text',
+      value: `
+Following actions are prohibited, unless explicitly told otherwise by event Admins.
 
-  console.log('Activity log entries created successfully');
+### Rule 1 - Cooperation
 
-  // Seed site configuration
-  const siteConfig = await prisma.siteConfig.findFirst();
-  
-  if (!siteConfig) {
-    await prisma.siteConfig.create({
-      data: {
-        siteTitle: process.env.SITE_TITLE || 'Orbital CTF',
-        headerText: process.env.HEADER_TEXT || 'Welcome to Orbital CTF',
-      },
+No cooperation between teams with independent accounts. Sharing of keys or providing revealing hints to other teams is cheating, don't do it.
+
+### Rule 2 - Attacking Scoreboard
+
+No attacking the competition infrastructure. If bugs or vulns are found, please alert the competition organizers immediately.
+
+### Rule 3 - Sabotage
+
+Absolutely no sabotaging of other competing teams, or in any way hindering their independent progress.
+
+### Rule 4 - Bruteforcing
+
+No brute forcing of challenge flag/ keys against the scoring site.
+
+### Rule 5 - Denial Of Service
+
+DoSing the CTF platform or any of the challenges is forbidden.
+
+##### Legal Disclaimer
+
+By participating in the contest, you agree to release the organizer, and the hosting organization from any and all liability, claims or actions of any kind whatsoever for injuries, damages or losses to persons and property which may be sustained in connection with the contest. You acknowledge and agree that Facebook et al is not responsible for technical, hardware or software failures, or other errors or problems which may occur in connection with the contest.
+
+If you have any questions about what is or is not allowed, please ask an organizer.
+
+Have fun!`
+    }
+  ];
+
+  for (const config of siteConfigs) {
+    await prisma.siteConfig.upsert({
+      where: { key: config.key },
+      update: { value: config.value },
+      create: {
+        key: config.key,
+        value: config.value
+      }
     });
-    console.log('Site configuration seeded successfully');
-  } else {
-    console.log('Site configuration already exists');
   }
 
+  console.log('Site configurations created successfully');
   console.log('Database has been seeded. 🌱');
 }
 

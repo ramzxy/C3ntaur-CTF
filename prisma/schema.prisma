@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -91,7 +91,6 @@ model Announcement {
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  isActive  Boolean  @default(true)
 }
 
 model ActivityLog {
@@ -147,11 +146,10 @@ model TeamHint {
 }
 
 model SiteConfig {
-  id          String   @id @default(cuid())
-  siteTitle   String   @default("Orbital CTF")
-  headerText  String   @default("Welcome to Orbital CTF")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
 }
 
 model Score {

@@ -1,4 +1,4 @@
-import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
+import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { useEffect, useState } from 'react';
 import { Share_Tech_Mono } from "next/font/google";
 
@@ -17,11 +17,12 @@ interface GameClockProps {
   gameConfig: GameConfig | null;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
+  isMobile: boolean;
 }
 
 const shareTechMono = Share_Tech_Mono({weight: '400'});
 
-export default function GameClock({ timeLeft, gameConfig, isOpen, setIsOpen }: GameClockProps) {
+export default function GameClock({ timeLeft, gameConfig, isOpen, setIsOpen, isMobile }: GameClockProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [animatedMs, setAnimatedMs] = useState(99);
 
@@ -108,26 +109,28 @@ export default function GameClock({ timeLeft, gameConfig, isOpen, setIsOpen }: G
   };
 
   return (
-    <div className="relative bg-black border">
+    <div className={`relative bg-black ${!isMobile && 'border'}`}>
       <button
-        className="flex items-center justify-between w-full z-20 text-white p-2 border-t-2 relative"
+        className="flex items-center justify-between w-full z-20 text-white p-2 relative border-b-2 lg:border-t-2 lg:border-b-0"
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
       >
         <h3 className="text-lg font-semibold">GAMECLOCK</h3>
         {isOpen ? (
-          <ChevronUpIcon className="h-5 w-5 transition-transform" />
+          <FaChevronUp className="h-5 w-5 transition-transform" />
         ) : (
-          <ChevronDownIcon className="h-5 w-5 transition-transform" />
+          <FaChevronDown className="h-5 w-5 transition-transform" />
         )}
       </button>
 
       <div 
-        className={`absolute bottom-full left-0 right-0 transition-all duration-300 ease-in-out bg-black origin-bottom border border-b-0 ${
-          isOpen ? 'max-h-[27vh] opacity-100' : 'max-h-0 opacity-0'
+        className={`overflow-y-hidden transition-[max-height] duration-300 ease-in-out bg-black ${
+          isMobile ? '' : 'absolute bottom-full left-0 right-0 border border-b-0'
+        } ${
+          isOpen ? (isMobile ? 'max-h-[50vh]' : 'max-h-[27vh]') : 'max-h-0'
         }`}
       >
-        <div className="overflow-y-auto max-h-[27vh] min-h-[27vh]">
+        <div className={`overflow-y-auto ${isMobile ? 'max-h-[245px] min-h-[245px]' : 'max-h-[245px] min-h-[245px]'}`}>
           <div className="text-center p-6">
             {gameConfig && (
               <div className={`text-white p-4 max-w-xl mx-auto flex flex-col items-center space-y-6 ${shareTechMono.className}`}>

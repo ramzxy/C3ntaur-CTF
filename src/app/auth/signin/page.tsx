@@ -75,7 +75,7 @@ export default function SignIn() {
           <div>
             <button
               type="submit"
-              className="button w-full"
+              className="button w-full hover:bg-white hover:text-black transition duration-300"
             >
               Log in
             </button>

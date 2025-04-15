@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PlusIcon, ArrowDownTrayIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
+import { FaPlus, FaDownload, FaUpload } from "react-icons/fa";
 import { Challenge, NewChallenge } from './types';
 import ChallengeModal from './ChallengeModal';
 
@@ -170,7 +170,7 @@ export default function ChallengesTab({ challenges, fetchData }: ChallengesTabPr
             onClick={() => setIsModalOpen(true)}
             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
-            <PlusIcon className="h-5 w-5 mr-2" />
+            <FaPlus className="h-5 w-5 mr-2" />
             Add Challenge
           </button>
           
@@ -179,13 +179,13 @@ export default function ChallengesTab({ challenges, fetchData }: ChallengesTabPr
             onClick={handleExportChallenges}
             className="flex items-center px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
           >
-            <ArrowDownTrayIcon className="h-5 w-5 mr-2" />
+            <FaDownload className="h-5 w-5 mr-2" />
             Export All
           </button>
 
           {/* Import Button */}
           <label className="flex items-center px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 cursor-pointer">
-            <ArrowUpTrayIcon className="h-5 w-5 mr-2" />
+            <FaUpload className="h-5 w-5 mr-2" />
             Import
             <input
               type="file"

@@ -26,6 +26,9 @@ const config: Config = {
       animation: {
         'battery-blink': 'battery-blink 4s infinite',
       },
+      screens: {
+        'xl': '1150px',
+      },
     },
   },
   plugins: [],

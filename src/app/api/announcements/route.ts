@@ -24,7 +24,6 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    console.log(session)
     if (!session?.user?.alias) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -38,7 +37,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { title, content, isActive } = await request.json();
+    const { title, content } = await request.json();
 
     if (!title || !content) {
       return NextResponse.json(
@@ -51,7 +50,6 @@ export async function POST(request: Request) {
       data: {
         title,
         content,
-        isActive: isActive ?? true,
       },
     });
 
@@ -63,4 +61,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-} 
+}

@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 export async function GET(
   request: Request,
   { params }: { params: { challengeId: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions);
     const { challengeId } = await params;
     const challengeId2 = decodeURIComponent(challengeId);
 
@@ -26,17 +29,12 @@ export async function GET(
         updatedAt: true,
         submissions: {
           where: {
-            isCorrect: true
+            isCorrect: true,
+            teamId: session?.user?.teamId || ''
           },
           select: {
-            id: true
-          }
-        },
-        hints: {
-          select: {
             id: true,
-            content: true,
-            cost: true
+            teamId: true
           }
         }
       }
@@ -49,10 +47,11 @@ export async function GET(
       );
     }
 
-    // Transform the challenge to include isSolved based on submissions
+    // Transform the challenge to include isSolved and solvedByTeamId
     const transformedChallenge = {
       ...challenge,
       isSolved: challenge.submissions.length > 0,
+      solvedByTeamId: challenge.submissions[0]?.teamId,
       submissions: undefined // Remove the submissions field from the response
     };
 
@@ -64,4 +63,4 @@ export async function GET(
       { status: 500 }
     );
   }
-} 
+}

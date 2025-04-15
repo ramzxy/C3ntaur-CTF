@@ -1,8 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { IconContext } from 'react-icons';
-import { GiSpaceship } from 'react-icons/gi';
+import * as GiIcons from 'react-icons/gi';
 
 interface Score {
   id: string;
@@ -16,11 +15,11 @@ interface Score {
   };
 }
 
-interface LeaderboardProps {
+interface ScoreboardStandingsProps {
   scores: Score[];
 }
 
-export default function Leaderboard({ scores }: LeaderboardProps) {
+export default function ScoreboardStandings({ scores }: ScoreboardStandingsProps) {
   const teamScores = useMemo(() => {
     const scoresByTeam = new Map<string, { team: Score['team']; total: number }>();
 
@@ -39,28 +38,37 @@ export default function Leaderboard({ scores }: LeaderboardProps) {
     return Array.from(scoresByTeam.values()).sort((a, b) => b.total - a.total);
   }, [scores]);
 
+  const getTeamIcon = (iconName?: string, color?: string) => {
+    if (!iconName) return null;
+    const IconComponent = (GiIcons as any)[iconName];
+    return IconComponent ? (
+      <IconComponent
+        className="w-7 h-7"
+        style={{ color: color || '#fff' }}
+      />
+    ) : null;
+  };
+
   return (
-    <div className="bg-black/30 backdrop-blur-md rounded-lg p-4">
-      <h2 className="text-xl font-bold mb-4">Current Standings</h2>
-      <div className="space-y-4">
+    <div className="bg-gray-900/50 p-4 border border-gray-700 h-full">
+      <h2 className="text-2xl font-semibold mb-6 text-blue-400">Current Standings</h2>
+      <div className="space-y-3">
         {teamScores.map(({ team, total }, index) => (
           <div
             key={team.id}
-            className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+            className="flex items-center justify-between p-3 rounded bg-black/30 hover:bg-black/50 transition-colors border border-gray-800"
           >
-            <div className="flex items-center gap-3">
-              <span className="text-lg font-bold w-6">{index + 1}</span>
-              <IconContext.Provider value={{ color: team.color, size: '1.5em' }}>
-                <GiSpaceship />
-              </IconContext.Provider>
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-bold w-6 text-gray-400">{index + 1}</span>
+              {getTeamIcon(team.icon, team.color)}
               <span className="font-medium" style={{ color: team.color }}>
                 {team.name}
               </span>
             </div>
-            <span className="font-bold">{total} pts</span>
+            <span className="font-bold text-blue-400">{total}</span>
           </div>
         ))}
       </div>
     </div>
   );
-} 
+}

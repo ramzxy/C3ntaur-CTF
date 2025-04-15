@@ -42,8 +42,8 @@ export interface Announcement {
   id: string;
   title: string;
   content: string;
-  isActive: boolean;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface Hint {
@@ -83,7 +83,6 @@ export interface NewChallenge {
 export interface NewAnnouncement {
   title: string;
   content: string;
-  isActive: boolean;
 }
 
-export type Tab = 'challenges' | 'users' | 'teams' | 'announcements' | 'configuration';
+export type Tab = 'challenges' | 'users' | 'teams' | 'announcements' | 'configuration' | 'siteconfig';

@@ -10,7 +10,6 @@ export default function AnnouncementsTab({ announcements, fetchData }: Announcem
   const [newAnnouncement, setNewAnnouncement] = useState<NewAnnouncement>({
     title: '',
     content: '',
-    isActive: true
   });
 
   const handleCreateAnnouncement = async (e: React.FormEvent) => {
@@ -23,7 +22,7 @@ export default function AnnouncementsTab({ announcements, fetchData }: Announcem
         },
         body: JSON.stringify(newAnnouncement),
       });
-      setNewAnnouncement({ title: '', content: '', isActive: true });
+      setNewAnnouncement({ title: '', content: '' });
       fetchData();
     } catch (error) {
       console.error('Error creating announcement:', error);
@@ -38,21 +37,6 @@ export default function AnnouncementsTab({ announcements, fetchData }: Announcem
       fetchData();
     } catch (error) {
       console.error('Error deleting announcement:', error);
-    }
-  };
-
-  const handleToggleAnnouncement = async (id: string, isActive: boolean) => {
-    try {
-      await fetch(`/api/announcements/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ isActive: !isActive }),
-      });
-      fetchData();
-    } catch (error) {
-      console.error('Error toggling announcement:', error);
     }
   };
 
@@ -91,20 +75,6 @@ export default function AnnouncementsTab({ announcements, fetchData }: Announcem
               required
             />
           </div>
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="isActive"
-              checked={newAnnouncement.isActive}
-              onChange={(e) =>
-                setNewAnnouncement({ ...newAnnouncement, isActive: e.target.checked })
-              }
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-600"
-            />
-            <label htmlFor="isActive" className="ml-2 block text-sm text-gray-300">
-              Active
-            </label>
-          </div>
           <button
             type="submit"
             className="inline-flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
@@ -133,24 +103,12 @@ export default function AnnouncementsTab({ announcements, fetchData }: Announcem
                       Created: {new Date(announcement.createdAt).toLocaleString()}
                     </p>
                   </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleToggleAnnouncement(announcement.id, announcement.isActive)}
-                      className={`px-3 py-1 text-sm rounded-md ${
-                        announcement.isActive
-                          ? 'bg-green-900 text-green-300 hover:bg-green-800'
-                          : 'bg-red-900 text-red-300 hover:bg-red-800'
-                      } transition-colors`}
-                    >
-                      {announcement.isActive ? 'Active' : 'Inactive'}
-                    </button>
-                    <button
-                      onClick={() => handleDeleteAnnouncement(announcement.id)}
-                      className="px-3 py-1 text-sm rounded-md bg-red-900 text-red-300 hover:bg-red-800 transition-colors"
-                    >
-                      Delete
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => handleDeleteAnnouncement(announcement.id)}
+                    className="px-3 py-1 text-sm rounded-md bg-red-900 text-red-300 hover:bg-red-800 transition-colors"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             ))

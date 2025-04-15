@@ -14,7 +14,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    const filename = params.filename;
+    const { filename } = await params;
     const filePath = join(process.cwd(), 'public', 'uploads', filename);
 
     // Delete the file from the filesystem

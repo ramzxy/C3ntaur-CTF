@@ -9,9 +9,9 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const {categoryId} = params;
+    const { categoryId } = await params;
     const categoryId2 = decodeURIComponent(categoryId);
-    
+
     const challenges = await prisma.challenge.findMany({
       where: {
         category: categoryId2

@@ -1,4 +1,4 @@
-import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
+import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 
 interface Team {
   id: string;
@@ -18,35 +18,35 @@ interface ActivityProps {
   activities: ActivityLog[];
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
+  isMobile: boolean;
 }
 
-export default function Activity({ activities, isOpen, setIsOpen }: ActivityProps) {
+export default function Activity({ activities, isOpen, setIsOpen, isMobile = false }: ActivityProps) {
   return (
-    <div className="relative bg-black border">
+    <div className={`bg-black ${!isMobile && 'border'}`}>
       <button
-        className="flex items-center justify-between w-full z-20 text-white p-2 border-t-2 relative"
+        className="flex items-center justify-between w-full text-white p-2 relative border-b-2"
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
       >
         <h3 className="text-lg font-semibold">ACTIVITY</h3>
         {isOpen ? (
-          <ChevronUpIcon className="h-5 w-5 transition-transform" />
+          <FaChevronUp className="h-5 w-5 transition-transform" />
         ) : (
-          <ChevronDownIcon className="h-5 w-5 transition-transform" />
+          <FaChevronDown className="h-5 w-5 transition-transform" />
         )}
       </button>
 
-      <div 
-        className={`absolute bottom-full left-0 right-0 transition-all duration-300 ease-in-out bg-black origin-bottom border border-b-0 ${
-          isOpen ? 'max-h-[33vh] opacity-100' : 'max-h-0 opacity-0'
-        }`}
+      <div
+        className={`overflow-y-auto transition-[max-height] duration-300 ease-in-out ${isOpen ? (isMobile ? 'max-h-[50vh]' : 'max-h-[33vh]') : 'max-h-0'
+          }`}
       >
-        <div className="overflow-y-auto max-h-[33vh] min-h-[33vh]">
+        <div className={`${isMobile ? 'max-h-[50vh]' : 'max-h-[33vh]'} min-h-[33vh]`}>
           <div className="space-y-1 p-2">
             {activities[0] ? (
               activities.map((activity) => (
-                <div 
-                  key={activity.id} 
+                <div
+                  key={activity.id}
                   className="p-2"
                 >
                   <div className="flex flex-col">

@@ -214,7 +214,7 @@ function OrbitTrail({ satellite }: { satellite: CategorySatellite }) {
   );
 }
 
-export default function SpaceScene() {
+export default function SpaceScene({ isMobile }: { isMobile?: boolean }) {
   const [categories, setCategories] = useState<CategorySatellite[]>([]);
   const router = useRouter();
 
@@ -256,7 +256,7 @@ export default function SpaceScene() {
   }, []);
 
   return (
-    <div className="fixed inset-0">
+    <div className={`${isMobile ? 'h-full' : 'fixed inset-0'}`}>
       <Canvas camera={{ position: [0, 10, 15], fov: 60 }}>
         <ambientLight intensity={0.5} />
         <pointLight position={[10, 10, 10]} />

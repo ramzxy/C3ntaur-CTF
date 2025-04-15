@@ -30,13 +30,18 @@ interface ActivityLog {
 }
 
 interface GameConfig {
+  id: string;
   startTime: string;
   endTime: string;
   isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  hasEndTime: boolean;
 }
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
+  const [isMobileView, setIsMobileView] = useState(false);
   
   // State for each section
   const [leaderboard, setLeaderboard] = useState<{
@@ -48,11 +53,34 @@ export default function Dashboard() {
   const [gameConfig, setGameConfig] = useState<GameConfig | null>(null);
   const [timeLeft, setTimeLeft] = useState<string>('');
   
-  // State for accordion sections
+  // State for accordion sections - now initialized based on mobile view
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(true);
   const [isAnnouncementsOpen, setIsAnnouncementsOpen] = useState(true);
   const [isActivityOpen, setIsActivityOpen] = useState(true);
   const [isGameClockOpen, setIsGameClockOpen] = useState(true);
+
+  // Add window resize listener to detect mobile view
+  useEffect(() => {
+    const checkMobileView = () => {
+      const isMobile = window.innerWidth < 1100;
+      setIsMobileView(isMobile);
+      
+      // If switching to mobile view, collapse all panels
+      if (isMobile) {
+        setIsLeaderboardOpen(false);
+        setIsAnnouncementsOpen(false);
+        setIsActivityOpen(false);
+        setIsGameClockOpen(false);
+      }
+    };
+
+    // Check initial state
+    checkMobileView();
+
+    // Add resize listener
+    window.addEventListener('resize', checkMobileView);
+    return () => window.removeEventListener('resize', checkMobileView);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -111,48 +139,98 @@ export default function Dashboard() {
   }, [gameConfig]);
 
   return (
-    <div className="relative h-screen p-6">
-      <SpaceScene />
-      <div className="relative grid grid-cols-4 gap-8 h-full pointer-events-none">
+    <div className="relative h-screen">
+      {/* Desktop Layout - Grid */}
+      <div className="relative hidden xl:grid grid-cols-4 gap-0 h-full pointer-events-none p-6">
+        <SpaceScene isMobile={false} />
         {/* Top Left - Leaderboard */}
-        <div className="col-span-1 pointer-events-auto w-3/4">
+        <div className="col-span-1 pointer-events-auto w-11/12 z-10">
           <Leaderboard
             teams={leaderboard.teams}
             currentUserTeam={leaderboard.currentUserTeam}
             isOpen={isLeaderboardOpen}
             setIsOpen={setIsLeaderboardOpen}
+            isMobile={false}
           />
         </div>
 
         {/* Top Right - Announcements */}
-        <div className="col-span-1 col-start-4 pointer-events-auto w-3/4 ml-auto">
+        <div className="col-span-1 col-start-4 pointer-events-auto w-3/4 ml-auto z-10">
           <Announcements
             announcements={announcements}
             isOpen={isAnnouncementsOpen}
             setIsOpen={setIsAnnouncementsOpen}
+            isMobile={false}
           />
         </div>
 
         {/* Bottom Left - Activity */}
-        <div className="col-span-1 relative pointer-events-auto">
+        <div className="col-span-1 relative pointer-events-auto z-10">
           <div className="absolute bottom-0 left-0 right-0">
             <Activity
               activities={activities}
               isOpen={isActivityOpen}
               setIsOpen={setIsActivityOpen}
+              isMobile={false}
             />
           </div>
         </div>
 
         {/* Bottom Right - Game Clock */}
-        <div className="col-span-1 col-start-4 relative pointer-events-auto">
+        <div className="col-span-1 col-start-4 relative pointer-events-auto z-10">
           <div className="absolute bottom-0 left-0 right-0">
             <GameClock
               timeLeft={timeLeft}
               gameConfig={gameConfig}
               isOpen={isGameClockOpen}
               setIsOpen={setIsGameClockOpen}
+              isMobile={false}
             />
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Layout - Stack */}
+      <div className="xl:hidden flex flex-col h-screen">
+        <div className="flex-none h-[60vh]">
+          <SpaceScene isMobile={true} />
+        </div>
+        <div className="flex-1 overflow-auto bg-black">
+          <div className="divide-y divide-gray-700">
+            <div>
+              <Leaderboard
+                teams={leaderboard.teams}
+                currentUserTeam={leaderboard.currentUserTeam}
+                isOpen={isLeaderboardOpen}
+                setIsOpen={setIsLeaderboardOpen}
+                isMobile={true}
+              />
+            </div>
+            <div>
+              <Announcements
+                announcements={announcements}
+                isOpen={isAnnouncementsOpen}
+                setIsOpen={setIsAnnouncementsOpen}
+                isMobile={true}
+              />
+            </div>
+            <div>
+              <Activity
+                activities={activities}
+                isOpen={isActivityOpen}
+                setIsOpen={setIsActivityOpen}
+                isMobile={true}
+              />
+            </div>
+            <div>
+              <GameClock
+                timeLeft={timeLeft}
+                gameConfig={gameConfig}
+                isOpen={isGameClockOpen}
+                setIsOpen={setIsGameClockOpen}
+                isMobile={true}
+              />
+            </div>
           </div>
         </div>
       </div>

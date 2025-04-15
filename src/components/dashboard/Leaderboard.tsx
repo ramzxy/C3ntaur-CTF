@@ -1,4 +1,4 @@
-import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
+import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import * as GiIcons from 'react-icons/gi';
 
 interface Team {
@@ -14,9 +14,10 @@ interface LeaderboardProps {
   currentUserTeam: Team | null;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
+  isMobile: boolean;
 }
 
-export default function Leaderboard({ teams, currentUserTeam, isOpen, setIsOpen }: LeaderboardProps) {
+export default function Leaderboard({ teams, currentUserTeam, isOpen, setIsOpen, isMobile }: LeaderboardProps) {
   // Sort teams by score in descending order
   const sortedTeams = [...teams].sort((a, b) => b.score - a.score);
   
@@ -38,7 +39,7 @@ export default function Leaderboard({ teams, currentUserTeam, isOpen, setIsOpen 
   };
 
   return (
-    <div className="border bg-black">
+    <div className={`bg-black ${!isMobile && 'border'} ${isMobile && 'border-t-2'}`}>
       <div className="flex flex-col">
         {/* Fixed header at top */}
         <button
@@ -47,16 +48,16 @@ export default function Leaderboard({ teams, currentUserTeam, isOpen, setIsOpen 
         >
           <h3 className="text-lg font-semibold">LEADERBOARD</h3>
           {isOpen ? (
-            <ChevronUpIcon className="h-5 w-5" />
+            <FaChevronUp className="h-5 w-5" />
           ) : (
-            <ChevronDownIcon className="h-5 w-5" />
+            <FaChevronDown className="h-5 w-5" />
           )}
         </button>
 
         {/* Content area with scroll */}
         <div 
-          className={`overflow-hidden transition-[max-height] duration-300 ease-in-out ${
-            isOpen ? 'max-h-[calc(33vh-2.5rem)]' : 'max-h-0'
+          className={`overflow-y-auto transition-[max-height] duration-300 ease-in-out ${
+            isOpen ? (isMobile ? 'max-h-[50vh]' : 'max-h-[calc(33vh-2.5rem)]') : 'max-h-0'
           }`}
         >
           <div className="space-y-1 p-2">
