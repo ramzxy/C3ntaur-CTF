@@ -167,10 +167,11 @@ export default function ChallengesTab({ challenges, fetchData }: ChallengesTabPr
   return (
     <div>
       <div className="flex justify-between items-start mb-4">
+        <h2 className="text-2xl font-semibold mb-6">Challenges</h2>
         <div className="flex flex-col sm:flex-row gap-2">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="flex items-center px-4 py-2 bg-blue-600 text-white hover:bg-blue-700"
           >
             <FaPlus className="h-5 w-5 mr-2" />
             Add Challenge
@@ -178,13 +179,13 @@ export default function ChallengesTab({ challenges, fetchData }: ChallengesTabPr
           
           <button
             onClick={handleExportChallenges}
-            className="flex items-center px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+            className="flex items-center px-4 py-2 bg-green-600 text-white hover:bg-green-700"
           >
             <FaDownload className="h-5 w-5 mr-2" />
             Export All
           </button>
 
-          <label className="flex items-center px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 cursor-pointer">
+          <label className="flex items-center px-4 py-2 bg-yellow-600 text-white hover:bg-yellow-700 cursor-pointer">
             <FaUpload className="h-5 w-5 mr-2" />
             Import
             <input

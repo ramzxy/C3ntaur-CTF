@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { FaPlus } from "react-icons/fa";
 import { Announcement, NewAnnouncement } from './types';
+import AnnouncementModal from './AnnouncementModal';
 
 interface AnnouncementsTabProps {
   announcements: Announcement[];
@@ -7,6 +9,8 @@ interface AnnouncementsTabProps {
 }
 
 export default function AnnouncementsTab({ announcements, fetchData }: AnnouncementsTabProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [announcementToDelete, setAnnouncementToDelete] = useState<Announcement | null>(null);
   const [newAnnouncement, setNewAnnouncement] = useState<NewAnnouncement>({
     title: '',
     content: '',
@@ -23,6 +27,7 @@ export default function AnnouncementsTab({ announcements, fetchData }: Announcem
         body: JSON.stringify(newAnnouncement),
       });
       setNewAnnouncement({ title: '', content: '' });
+      setIsModalOpen(false);
       fetchData();
     } catch (error) {
       console.error('Error creating announcement:', error);
@@ -34,6 +39,7 @@ export default function AnnouncementsTab({ announcements, fetchData }: Announcem
       await fetch(`/api/announcements/${id}`, {
         method: 'DELETE',
       });
+      setAnnouncementToDelete(null);
       fetchData();
     } catch (error) {
       console.error('Error deleting announcement:', error);
@@ -42,50 +48,18 @@ export default function AnnouncementsTab({ announcements, fetchData }: Announcem
 
   return (
     <div className="space-y-8">
-      <div className="bg-gray-800/50 rounded-lg p-6">
-        <h2 className="text-xl font-medium mb-4">Create New Announcement</h2>
-        <form onSubmit={handleCreateAnnouncement} className="space-y-4">
-          <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-300">
-              Title
-            </label>
-            <input
-              type="text"
-              id="title"
-              value={newAnnouncement.title}
-              onChange={(e) =>
-                setNewAnnouncement({ ...newAnnouncement, title: e.target.value })
-              }
-              className="mt-1 block w-full bg-gray-700 border-gray-600 rounded text-white focus:border-blue-500 focus:ring-blue-500 p-2"
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor="content" className="block text-sm font-medium text-gray-300">
-              Content
-            </label>
-            <textarea
-              id="content"
-              value={newAnnouncement.content}
-              onChange={(e) =>
-                setNewAnnouncement({ ...newAnnouncement, content: e.target.value })
-              }
-              rows={4}
-              className="mt-1 block w-full bg-gray-700 border-gray-600 rounded text-white focus:border-blue-500 focus:ring-blue-500 p-2"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-          >
-            Create Announcement
-          </button>
-        </form>
+      <div className="flex justify-between items-start mb-4">
+        <h2 className="text-2xl font-semibold mb-6">Announcements</h2>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center px-4 py-2 bg-blue-600 text-white hover:bg-blue-700"
+        >
+          <FaPlus className="h-5 w-5 mr-2" />
+          Add Announcement
+        </button>
       </div>
 
-      <div className="bg-gray-800/50 rounded-lg p-6">
-        <h2 className="text-xl font-medium mb-4">Existing Announcements</h2>
+      <div className="">
         <div className="space-y-4">
           {announcements.length === 0 ? (
             <p className="text-gray-400 italic">No announcements yet</p>
@@ -104,10 +78,18 @@ export default function AnnouncementsTab({ announcements, fetchData }: Announcem
                     </p>
                   </div>
                   <button
-                    onClick={() => handleDeleteAnnouncement(announcement.id)}
-                    className="px-3 py-1 text-sm rounded-md bg-red-900 text-red-300 hover:bg-red-800 transition-colors shrink-0"
+                    onClick={() => announcementToDelete?.id === announcement.id 
+                      ? handleDeleteAnnouncement(announcement.id)
+                      : setAnnouncementToDelete(announcement)
+                    }
+                    onMouseLeave={() => setAnnouncementToDelete(null)}
+                    className={`px-3 py-1 text-sm rounded-md transition-colors shrink-0 ${
+                      announcementToDelete?.id === announcement.id
+                        ? 'bg-red-700 text-red-200 hover:bg-red-600'
+                        : 'bg-red-900 text-red-300 hover:bg-red-800'
+                    }`}
                   >
-                    Delete
+                    {announcementToDelete?.id === announcement.id ? 'Confirm?' : 'Delete'}
                   </button>
                 </div>
               </div>
@@ -115,6 +97,17 @@ export default function AnnouncementsTab({ announcements, fetchData }: Announcem
           )}
         </div>
       </div>
+
+      {isModalOpen && (
+        <AnnouncementModal
+          title="Create New Announcement"
+          announcement={newAnnouncement}
+          setAnnouncement={setNewAnnouncement}
+          onSubmit={handleCreateAnnouncement}
+          onClose={() => setIsModalOpen(false)}
+          submitText="Create Announcement"
+        />
+      )}
     </div>
   );
 }

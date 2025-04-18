@@ -76,17 +76,17 @@ export default function CategoryPage() {
       <div className="w-full lg:h-full max-w-[1800px] mx-auto flex flex-col lg:flex-row gap-2 lg:gap-8 items-center justify-center h-[100vh] overflow-y-auto mt-20">
         <div className="w-full lg:w-[1000px] lg:min-h-[800px] min-h-[400px] lg:h-[800px] border border-white overflow-hidden relative">
           {/* Corner boxes */}
-          <div className="absolute top-0 left-0 w-[20vw] min-w-[133px] h-[50px] bg-black border border-white z-10 p-3 text-blue-100">
+          <div className="absolute top-0 left-0 w-[20vw] max-w-[250px] min-w-[133px] h-[50px] bg-black border border-white z-10 p-3 text-blue-100">
             {currentTime.toLocaleTimeString()}
           </div>
-          <div className="absolute top-[45px] left-0 w-[20vw] min-w-[133px] h-[35px] z-10 p-3">
+          <div className="absolute top-[45px] left-0 w-[20vw] max-w-[250px] min-w-[133px] h-[35px] z-10 p-3">
             EARTH TIME
           </div>
-          <div className="absolute top-0 right-0 w-[20vw] min-w-[145px] h-[50px] bg-black border border-white z-10 p-3 text-right text-red-100">
+          <div className="absolute top-0 right-0 w-[20vw] max-w-[250px] min-w-[145px] h-[50px] bg-black border border-white z-10 p-3 text-right text-red-100">
             <span className="font-normal">RECORDING</span>
             <span className="inline-block w-[24px] text-left font-mono">{dots}</span>
           </div>
-          <div className="absolute top-[45px] right-0 w-[20vw] min-w-[145px] h-[35px] z-10 p-3 text-right">
+          <div className="absolute top-[45px] right-0 w-[20vw] max-w-[250px] min-w-[145px] h-[35px] z-10 p-3 text-right">
             VIDEO
           </div>
           <div className="absolute bottom-[50px] left-0 w-[200px] h-[45px] z-10 p-3">

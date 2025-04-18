@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import Providers from "@/components/Providers";
 import { Toaster } from 'react-hot-toast';
 import { prisma } from "@/lib/prisma";
+import { FaCheck, FaTimes } from 'react-icons/fa';
 
 const inter = Inter({ subsets: ["latin"] });
 const roboto = Roboto({ subsets: ["latin"] });
@@ -38,7 +39,41 @@ export default async function RootLayout({
         <Providers session={session}>
           <Navbar />
           <main>{children}</main>
-          <Toaster position="top-center" />
+          <Toaster 
+            position="top-center"
+            toastOptions={{
+              className: '',
+              style: {
+                background: '#000000',
+                color: '#00ff00',
+                border: '2px solid #00ff00',
+                fontSize: '1.25rem',
+                padding: '1rem 2rem',
+                boxShadow: '0 0 10px #00ff00',
+                fontFamily: 'Roboto Mono, monospace',
+                maxWidth: '600px',
+                width: '100%',
+                borderRadius: '0',
+              },
+              success: {
+                style: {
+                  border: '2px solid #00ff00',
+                  color: '#00ff00',
+                  borderRadius: '0',
+                },
+                icon: <FaCheck className="text-[#00ff00]" />,
+              },
+              error: {
+                style: {
+                  border: '2px solid #ff0000',
+                  color: '#ff0000',
+                  boxShadow: '0 0 10px #ff0000',
+                  borderRadius: '0',
+                },
+                icon: <FaTimes className="text-[#ff0000]" />,
+              },
+            }}
+          />
         </Providers>
       </body>
     </html>

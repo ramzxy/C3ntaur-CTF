@@ -75,7 +75,7 @@ export default function SiteConfigurationTab() {
 
   return (
     <div className="space-y-8">
-      <div className="bg-gray-800/50 rounded-lg p-6">
+      <div className="">
         <h2 className="text-2xl font-semibold mb-6">Site Configuration</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           {configKeys.map((key) => (

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 export default function SignIn() {
   const router = useRouter();
@@ -25,6 +26,7 @@ export default function SignIn() {
       if (result?.error) {
         setError('Invalid credentials');
       } else {
+        toast.success('Successfully logged in!');
         router.push('/dashboard');
       }
     } catch (error) {

@@ -7,6 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Righteous } from 'next/font/google';
 import { MarkdownComponents } from '@/components/MarkdownComponents';
+import toast from 'react-hot-toast';
 
 const righteous = Righteous({weight: '400', subsets: ['latin']});
 
@@ -118,11 +119,11 @@ export default function ChallengePage() {
         setHints(hintsData);
       } else {
         const data = await response.json();
-        alert(data.error || 'Error purchasing hint');
+        toast.error(data.error || 'Error purchasing hint');
       }
     } catch (error) {
       console.error('Error purchasing hint:', error);
-      alert('Error purchasing hint');
+      toast.error('Error purchasing hint');
     } finally {
       setIsPurchasing(false);
     }

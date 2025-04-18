@@ -76,7 +76,7 @@ export default function AdminDashboard() {
               <div className="flex overflow-x-auto pb-2 gap-2 hide-scrollbar">
                 <button
                   onClick={() => setActiveTab('challenges')}
-                  className={`px-4 py-2 whitespace-nowrap transition-colors rounded ${
+                  className={`px-4 py-2 whitespace-nowrap transition-colors ${
                     activeTab === 'challenges'
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
@@ -86,7 +86,7 @@ export default function AdminDashboard() {
                 </button>
                 <button
                   onClick={() => setActiveTab('users')}
-                  className={`px-4 py-2 whitespace-nowrap transition-colors rounded ${
+                  className={`px-4 py-2 whitespace-nowrap transition-colors ${
                     activeTab === 'users'
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
@@ -96,7 +96,7 @@ export default function AdminDashboard() {
                 </button>
                 <button
                   onClick={() => setActiveTab('teams')}
-                  className={`px-4 py-2 whitespace-nowrap transition-colors rounded ${
+                  className={`px-4 py-2 whitespace-nowrap transition-colors ${
                     activeTab === 'teams'
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
@@ -106,7 +106,7 @@ export default function AdminDashboard() {
                 </button>
                 <button
                   onClick={() => setActiveTab('announcements')}
-                  className={`px-4 py-2 whitespace-nowrap transition-colors rounded ${
+                  className={`px-4 py-2 whitespace-nowrap transition-colors ${
                     activeTab === 'announcements'
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
@@ -116,7 +116,7 @@ export default function AdminDashboard() {
                 </button>
                 <button
                   onClick={() => setActiveTab('siteconfig')}
-                  className={`px-4 py-2 whitespace-nowrap transition-colors rounded ${
+                  className={`px-4 py-2 whitespace-nowrap transition-colors ${
                     activeTab === 'siteconfig'
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
@@ -126,7 +126,7 @@ export default function AdminDashboard() {
                 </button>
                 <button
                   onClick={() => setActiveTab('configuration')}
-                  className={`px-4 py-2 whitespace-nowrap transition-colors rounded ${
+                  className={`px-4 py-2 whitespace-nowrap transition-colors ${
                     activeTab === 'configuration'
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
@@ -137,7 +137,7 @@ export default function AdminDashboard() {
               </div>
 
               {/* Content Area */}
-              <div className="mt-6 bg-black/50 rounded-lg p-4">
+              <div className="mt-6">
                 {activeTab === 'challenges' && (
                   <ChallengesTab 
                     challenges={challenges}

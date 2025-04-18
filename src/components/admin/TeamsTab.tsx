@@ -32,6 +32,7 @@ export default function TeamsTab({ teams, fetchData }: TeamsTabProps) {
     <div>
       {/* Table Container with horizontal scroll on mobile */}
       <div className="overflow-x-auto">
+        <h2 className="text-2xl font-semibold mb-6">Teams</h2>
         <table className="min-w-full divide-y divide-gray-700">
           <thead>
             <tr>

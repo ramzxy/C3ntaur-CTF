@@ -97,7 +97,7 @@ export default function GameConfigurationTab() {
 
   return (
     <div className="space-y-8">
-      <div className="p-6 bg-gray-800/50 rounded-lg">
+      <div className="">
         <h2 className="text-2xl font-semibold mb-6">Game Time Settings</h2>
         <form onSubmit={handleGameConfigUpdate} className="space-y-6">
           <div>

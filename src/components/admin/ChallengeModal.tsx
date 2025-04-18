@@ -21,8 +21,8 @@ export default function ChallengeModal({
   isEditing = false
 }: ChallengeModalProps) {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-800 p-6 w-full max-w-md rounded-lg shadow-xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+      <div className="bg-gray-800 p-6 w-full max-w-3xl shadow-xl max-h-[90vh] overflow-y-auto">
         <h2 className="text-2xl font-semibold mb-4">{title}</h2>
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
