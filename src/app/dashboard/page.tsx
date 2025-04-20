@@ -48,7 +48,7 @@ export default function Dashboard() {
   const [activities, setActivities] = useState<ActivityLog[]>([]);
   const [gameConfig, setGameConfig] = useState<GameConfig | null>(null);
   const [timeLeft, setTimeLeft] = useState<string>('');
-  
+
   // State for accordion sections
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(true);
   const [isAnnouncementsOpen, setIsAnnouncementsOpen] = useState(true);
@@ -59,7 +59,7 @@ export default function Dashboard() {
   useEffect(() => {
     const checkMobileView = () => {
       const isMobile = window.innerWidth < 1100;
-      
+
       // If switching to mobile view, collapse all panels
       if (isMobile) {
         setIsLeaderboardOpen(false);
@@ -183,40 +183,32 @@ export default function Dashboard() {
         </div>
         <div className="flex-1 overflow-auto bg-black">
           <div className="divide-y divide-gray-700">
-            <div>
-              <Leaderboard
-                teams={leaderboard.teams}
-                currentUserTeam={leaderboard.currentUserTeam}
-                isOpen={isLeaderboardOpen}
-                setIsOpen={setIsLeaderboardOpen}
-                isMobile={true}
-              />
-            </div>
-            <div>
-              <Announcements
-                announcements={announcements}
-                isOpen={isAnnouncementsOpen}
-                setIsOpen={setIsAnnouncementsOpen}
-                isMobile={true}
-              />
-            </div>
-            <div>
-              <Activity
-                activities={activities}
-                isOpen={isActivityOpen}
-                setIsOpen={setIsActivityOpen}
-                isMobile={true}
-              />
-            </div>
-            <div>
-              <GameClock
-                timeLeft={timeLeft}
-                gameConfig={gameConfig}
-                isOpen={isGameClockOpen}
-                setIsOpen={setIsGameClockOpen}
-                isMobile={true}
-              />
-            </div>
+            <Leaderboard
+              teams={leaderboard.teams}
+              currentUserTeam={leaderboard.currentUserTeam}
+              isOpen={isLeaderboardOpen}
+              setIsOpen={setIsLeaderboardOpen}
+              isMobile={true}
+            />
+            <Announcements
+              announcements={announcements}
+              isOpen={isAnnouncementsOpen}
+              setIsOpen={setIsAnnouncementsOpen}
+              isMobile={true}
+            />
+            <Activity
+              activities={activities}
+              isOpen={isActivityOpen}
+              setIsOpen={setIsActivityOpen}
+              isMobile={true}
+            />
+            <GameClock
+              timeLeft={timeLeft}
+              gameConfig={gameConfig}
+              isOpen={isGameClockOpen}
+              setIsOpen={setIsGameClockOpen}
+              isMobile={true}
+            />
           </div>
         </div>
       </div>

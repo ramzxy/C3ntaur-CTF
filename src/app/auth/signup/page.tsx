@@ -45,9 +45,7 @@ export default function SignUp() {
     try {
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           name,
           alias, 
@@ -68,18 +66,14 @@ export default function SignUp() {
       const data = await response.json();
       toast.success('Account created successfully! Signing you in...');
 
-      // Attempt to sign in with the new credentials
       const result = await signIn('credentials', {
         alias: data.user.alias,
         password: data.user.password,
         redirect: false,
       });
 
-      if (result?.error) {
-        throw new Error('Failed to sign in automatically');
-      }
+      if (result?.error) throw new Error('Failed to sign in automatically');
 
-      // Successful sign in, redirect to dashboard
       router.push('/dashboard');
     } catch (error) {
       if (error instanceof Error) {
@@ -96,15 +90,11 @@ export default function SignUp() {
     <div className="min-h-screen flex items-center justify-center">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-white">
-            Create your account or team
-          </h2>
+          <h2 className="text-3xl font-bold">Create your account or team</h2>
         </div>
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
-            <label htmlFor="name" className="sr-only">
-              Full Name
-            </label>
+            <label htmlFor="name" className="sr-only">Full Name</label>
             <input
               id="name"
               name="name"
@@ -115,9 +105,7 @@ export default function SignUp() {
             />
           </div>
           <div>
-            <label htmlFor="alias" className="sr-only">
-              Alias
-            </label>
+            <label htmlFor="alias" className="sr-only">Alias</label>
             <input
               id="alias"
               name="alias"
@@ -128,9 +116,7 @@ export default function SignUp() {
             />
           </div>
           <div>
-            <label htmlFor="password" className="sr-only">
-              Password
-            </label>
+            <label htmlFor="password" className="sr-only">Password</label>
             <input
               id="password"
               name="password"
@@ -142,7 +128,7 @@ export default function SignUp() {
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-4">
               <input
                 type="radio"
                 id="createTeam"
@@ -152,11 +138,9 @@ export default function SignUp() {
                 className="h-4 w-4 text-blue-600"
                 onChange={handleTeamOptionChange}
               />
-              <label htmlFor="createTeam" className="text-white">
-                Create a new team
-              </label>
+              <label htmlFor="createTeam">Create a new team</label>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-4">
               <input
                 type="radio"
                 id="joinTeam"
@@ -165,16 +149,12 @@ export default function SignUp() {
                 className="h-4 w-4 text-blue-600"
                 onChange={handleTeamOptionChange}
               />
-              <label htmlFor="joinTeam" className="text-white">
-                Join existing team
-              </label>
+              <label htmlFor="joinTeam">Join existing team</label>
             </div>
           </div>
 
           <div id="createTeamFields">
-            <label htmlFor="teamName" className="sr-only">
-              Team Name
-            </label>
+            <label htmlFor="teamName" className="sr-only">Team Name</label>
             <input
               id="teamName"
               name="teamName"
@@ -191,7 +171,7 @@ export default function SignUp() {
               />
 
               <div className="mt-4">
-                <label className="block text-white mb-2">Team Color</label>
+                <label className="block mb-2">Team Color</label>
                 <input
                   type="color"
                   value={selectedColor}
@@ -203,9 +183,7 @@ export default function SignUp() {
           </div>
 
           <div id="joinTeamFields" className="hidden">
-            <label htmlFor="teamCode" className="sr-only">
-              Team Code
-            </label>
+            <label htmlFor="teamCode" className="sr-only">Team Code</label>
             <input
               id="teamCode"
               name="teamCode"
@@ -215,18 +193,14 @@ export default function SignUp() {
             />
           </div>
 
-          {error && (
-            <div className="text-red-500 text-sm text-center">{error}</div>
-          )}
+          {error && <div className="text-red-500 text-sm text-center">{error}</div>}
 
-          <div>
-            <button
-              type="submit"
-              className="button w-full hover:bg-white hover:text-black transition duration-300"
-            >
-              Sign up
-            </button>
-          </div>
+          <button
+            type="submit"
+            className="button w-full hover:bg-white hover:text-black"
+          >
+            Sign up
+          </button>
           <div className="text-center">
             <Link href="/auth/signin" className="text-gray-500 hover:text-blue-500">
               Already have an account? Log in

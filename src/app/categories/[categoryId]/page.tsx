@@ -148,37 +148,37 @@ export default function CategoryPage() {
             </div>
           </div>
 
-          {/* Challenges box */}
-          <div className="w-full lg:w-[300px] border border-white p-4 h-auto lg:h-[600px]">
-            <h2 className="text-2xl font-semibold mb-4 text-blue-400">CHALLENGES</h2>
-            <div className="grid grid-cols-1 gap-4 overflow-y-auto max-h-[320px]">
-              {challenges.map((challenge) => (
-                <div
-                  key={challenge.id}
-                  className={`p-4 border transition-colors duration-200 cursor-pointer
-                    ${challenge.isLocked ? 'border-yellow-500 text-yellow-500' :
-                      challenge.isSolved ? 'border-green-500 text-green-500' :
-                        hoveredChallenge === challenge.id ? 'border-blue-400 text-blue-400' :
-                          'border-white text-white hover:border-blue-400 hover:text-blue-400'}`}
-                  onClick={() => !challenge.isLocked && router.push(`/challenges/${challenge.id}`)}
-                  onMouseEnter={() => setHoveredChallenge(challenge.id)}
-                  onMouseLeave={() => setHoveredChallenge(null)}
-                >
-                  <div className="flex items-center justify-between">
-                    <span>{challenge.title}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-400">{challenge.points} pts</span>
-                      {challenge.isLocked ? (
-                        <span>🔒</span>
-                      ) : challenge.isSolved ? (
-                        <span>✓</span>
-                      ) : null}
-                    </div>
+        {/* Challenges box */}
+        <div className="w-full lg:w-[300px] border border-white p-4 h-auto lg:h-[600px]">
+          <h2 className="text-2xl font-semibold mb-4 text-blue-400">CHALLENGES</h2>
+          <div className="grid grid-cols-1 gap-4 overflow-y-auto max-h-[320px]">
+            {challenges.map((challenge) => (
+              <div
+                key={challenge.id}
+                className={`p-4 border transition-colors duration-200 cursor-pointer
+                  ${challenge.isLocked ? 'border-yellow-500 text-yellow-500' :
+                    challenge.isSolved ? 'border-green-500 text-green-500' :
+                      hoveredChallenge === challenge.id ? 'border-blue-400 text-blue-400' :
+                        'border-white text-white hover:border-blue-400 hover:text-blue-400'}`}
+                onClick={() => !challenge.isLocked && router.push(`/challenges/${challenge.id}`)}
+                onMouseEnter={() => setHoveredChallenge(challenge.id)}
+                onMouseLeave={() => setHoveredChallenge(null)}
+              >
+                <div className="flex items-center justify-between">
+                  <span>{challenge.title}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-400">{challenge.points} pts</span>
+                    {challenge.isLocked ? (
+                      <span>🔒</span>
+                    ) : challenge.isSolved ? (
+                      <span>✓</span>
+                    ) : null}
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
+        </div>
 
           {/* Back button - now responsive */}
           <button

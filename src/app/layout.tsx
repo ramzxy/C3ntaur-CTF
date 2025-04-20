@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Roboto, Roboto_Mono } from "next/font/google";
 import "./globals.css";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../lib/auth"; // Fixed path
+import { authOptions } from "../lib/auth";
 import Navbar from "@/components/Navbar";
 import Providers from "@/components/Providers";
 import { Toaster } from 'react-hot-toast';
@@ -42,11 +42,10 @@ export default async function RootLayout({
           <Toaster 
             position="top-center"
             toastOptions={{
-              className: '',
+              className: 'font-mono',
               style: {
                 background: '#000000',
-                color: '#00ff00',
-                border: '2px solid #00ff00',
+                border: '2px solid',
                 fontSize: '1.25rem',
                 padding: '1rem 2rem',
                 boxShadow: '0 0 10px #00ff00',
