@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Righteous } from 'next/font/google';
+import PageLayout from '@/components/layouts/PageLayout';
 
-const righteous = Righteous({weight: '400', subsets: ['latin']});
+const righteous = Righteous({ weight: '400', subsets: ['latin'] });
 
 const ScoreboardChart = dynamic(() => import('@/components/ScoreboardChart'), {
   ssr: false,
@@ -76,28 +77,17 @@ export default function ScoreboardPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen text-white">
-      <div className="container mx-auto px-4 py-8 flex justify-center items-center">
-        <div className="w-full max-w-7xl overflow-hidden">
-          <div className="h-[80vh] overflow-y-auto">
-            <h1 className={`text-5xl font-bold mb-4 float-start uppercase ${righteous.className}`}>Scoreboard</h1>
-            <div className="border border-gray-400 w-full h-5 flex items-center justify-center relative clear-both">
-              <div className="absolute inset-x-0 border-t-2 border-gray-400 w-full"></div>
-            </div>
-
-            <div className="prose prose-invert max-w-none mb-6">
-              <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mt-8">
-                <div className="lg:col-span-3 lg:block hidden">
-                  <ScoreboardChart scores={scores} gameConfig={gameConfig} />
-                </div>
-                <div className="lg:col-span-1">
-                  <ScoreboardStandings scores={scores} />
-                </div>
-              </div>
-            </div>
+    <PageLayout title="Scoreboard" maxWidth="7xl">
+      <div className="prose prose-invert max-w-none mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mt-8">
+          <div className="lg:col-span-3 lg:block hidden">
+            <ScoreboardChart scores={scores} gameConfig={gameConfig} />
+          </div>
+          <div className="lg:col-span-1">
+            <ScoreboardStandings scores={scores} />
           </div>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 }

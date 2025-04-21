@@ -8,8 +8,9 @@ import remarkGfm from 'remark-gfm';
 import { Righteous } from 'next/font/google';
 import { MarkdownComponents } from '@/components/MarkdownComponents';
 import toast from 'react-hot-toast';
+import { IoArrowBack } from 'react-icons/io5';
 
-const righteous = Righteous({weight: '400', subsets: ['latin']});
+const righteous = Righteous({ weight: '400', subsets: ['latin'] });
 
 interface Challenge {
   id: string;
@@ -53,7 +54,7 @@ export default function ChallengePage() {
     try {
       const response = await fetch(`/api/files/download?filename=${encodeURIComponent(filename)}`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      
+
       const blob = await response.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -160,16 +161,23 @@ export default function ChallengePage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <div className="container mx-auto px-4 py-8">
-        <div className="w-full max-w-4xl shadow-lg">
+      <div className="container mx-auto px-4 py-8 flex justify-center items-center">
+        <div className="w-full max-w-5xl overflow-hidden">
           <div className="h-[80vh] overflow-y-auto">
-            <h1 className={`text-5xl font-bold mb-4 ${righteous.className}`}>{challenge.title}</h1>
-            <div className="flex items-baseline gap-2 float-end">
-              <span>{challenge.category}</span>
-              <span>{challenge.difficulty}</span>
-              <span className="font-bold">{challenge.points} points</span>
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
+              <h1 className={`text-5xl font-bold ${righteous.className}`}>{challenge.title}</h1>
+              <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mt-2 md:mt-0">
+                <span className="px-3 py-1 bg-green-500/10 border border-green-500 text-green-400 rounded-full font-mono text-sm">
+                  {challenge.points} POINTS
+                </span>
+                <span className="px-3 py-1 bg-blue-500/10 border border-blue-500 text-blue-400 rounded-full font-mono text-sm">
+                  {challenge.category.toUpperCase()}
+                </span>
+              </div>
             </div>
-            <div className="border-t-2 border-gray-400 my-4" />
+            <div className="border border-gray-400 w-full h-5 flex items-center justify-center relative clear-both">
+              <div className="absolute inset-x-0 border-t-2 border-gray-400 w-full"></div>
+            </div>
             <div className="prose prose-invert max-w-none mb-6 min-h-52">
               <ReactMarkdown
                 components={MarkdownComponents}
