@@ -51,24 +51,11 @@ model Challenge {
   isLocked    Boolean               @default(false)
   createdAt   DateTime              @default(now())
   updatedAt   DateTime              @updatedAt
-  lockedBy    ChallengeDependency[] @relation("Unlocks")
-  unlocks     ChallengeDependency[] @relation("UnlockedBy")
+  unlockConditions UnlockCondition[]
   files       ChallengeFile[]
   hints       Hint[]
   submissions Submission[]
   scores      Score[]
-}
-
-model ChallengeDependency {
-  id          String    @id @default(cuid())
-  challengeId String
-  unlocksId   String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  unlocks     Challenge @relation("Unlocks", fields: [unlocksId], references: [id])
-  challenge   Challenge @relation("UnlockedBy", fields: [challengeId], references: [id])
-
-  @@unique([challengeId, unlocksId])
 }
 
 model Submission {
@@ -83,6 +70,8 @@ model Submission {
   team        Team      @relation(fields: [teamId], references: [id])
   challenge   Challenge @relation(fields: [challengeId], references: [id])
   user        User      @relation(fields: [userId], references: [id])
+
+  @@index([challengeId])
 }
 
 model Announcement {
@@ -167,4 +156,24 @@ model Score {
   @@index([teamId])
   @@index([userId])
   @@index([challengeId])
+}
+
+enum UnlockConditionType {
+  CHALLENGE_SOLVED
+  TIME_REMAINDER // Unlocks when time remaining is LESS than the threshold
+}
+
+model UnlockCondition {
+  id            String              @id @default(cuid())
+  challengeId   String
+  challenge     Challenge           @relation(fields: [challengeId], references: [id], onDelete: Cascade) // Add onDelete Cascade
+  type          UnlockConditionType
+  // Fields specific to condition type
+  requiredChallengeId String?           // For CHALLENGE_SOLVED (ID of challenge that must be solved)
+  timeThresholdSeconds Int?             // For TIME_REMAINDER (e.g., 3600 for 1 hour remaining)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  @@index([challengeId])
+  @@index([requiredChallengeId]) // Index potential foreign key
 }

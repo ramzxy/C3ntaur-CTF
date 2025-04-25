@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 interface SiteConfig {
   key: string;
@@ -70,7 +71,7 @@ export default function SiteConfigurationTab() {
   };
 
   if (isLoading) {
-    return <div className="p-6">Loading configuration...</div>;
+    return <LoadingSpinner />;
   }
 
   return (

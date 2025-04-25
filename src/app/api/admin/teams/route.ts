@@ -68,4 +68,63 @@ export async function DELETE(req: Request) {
       { status: 500 }
     );
   }
+}
+
+export async function PATCH(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.isAdmin) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    const { id, name, icon, color } = await req.json();
+
+    if (!id) {
+      return NextResponse.json({ error: 'Team ID is required' }, { status: 400 });
+    }
+
+    if (name !== undefined && !name.trim()) {
+      return NextResponse.json({ error: 'Team name cannot be empty' }, { status: 400 });
+    }
+
+    const updateData: { name?: string; icon?: string; color?: string } = {};
+    if (name !== undefined) updateData.name = name;
+    if (icon !== undefined) updateData.icon = icon;
+    if (color !== undefined) updateData.color = color;
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json({ error: 'No update data provided' }, { status: 400 });
+    }
+
+    const updatedTeam = await prisma.team.update({
+      where: { id },
+      data: updateData,
+      include: {
+        members: {
+          select: {
+            id: true,
+            alias: true,
+            name: true,
+            isAdmin: true,
+            isTeamLeader: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(updatedTeam);
+  } catch (error: any) {
+    console.error('Error updating team:', error);
+    if (error.code === 'P2002' && error.meta?.target?.includes('name')) {
+      return NextResponse.json(
+        { error: 'Team name already exists' },
+        { status: 409 }
+      );
+    }
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
 } 

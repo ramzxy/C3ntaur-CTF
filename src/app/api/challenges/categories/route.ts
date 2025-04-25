@@ -79,7 +79,14 @@ export async function GET() {
         acc[challenge.category] = [];
       }
       acc[challenge.category].push({
-        ...challenge,
+        id: challenge.id,
+        title: challenge.title,
+        description: challenge.description,
+        points: challenge.points,
+        category: challenge.category,
+        difficulty: challenge.difficulty,
+        isActive: challenge.isActive,
+        files: challenge.files,
         isSolved: solvedChallengeIds.has(challenge.id),
         solvedBy: challenge.submissions.map(sub => ({
           teamId: sub.teamId,

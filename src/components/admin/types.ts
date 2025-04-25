@@ -10,6 +10,9 @@ export interface Challenge {
   isLocked: boolean;
   files: ChallengeFile[];
   hints: Hint[];
+  unlockConditions: UnlockCondition[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ChallengeFile {
@@ -35,6 +38,8 @@ export interface Team {
   name: string;
   code: string;
   score: number;
+  icon?: string;
+  color?: string;
   members: User[];
 }
 
@@ -68,6 +73,13 @@ export interface GameConfig {
   isActive: boolean;
 }
 
+export interface UnlockCondition {
+  id?: string;
+  type: 'CHALLENGE_SOLVED' | 'TIME_REMAINDER';
+  requiredChallengeId?: string | null;
+  timeThresholdSeconds?: number | null;
+}
+
 export interface NewChallenge {
   title: string;
   description: string;
@@ -75,9 +87,11 @@ export interface NewChallenge {
   points: number;
   flag: string;
   difficulty: string;
-  isLocked: boolean;
+  isActive?: boolean;
+  isLocked?: boolean;
   files: ChallengeFile[];
   hints: Hint[];
+  unlockConditions?: UnlockCondition[];
 }
 
 export interface NewAnnouncement {

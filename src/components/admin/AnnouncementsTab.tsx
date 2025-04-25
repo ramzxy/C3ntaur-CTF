@@ -1,20 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { FaPlus } from "react-icons/fa";
 import { Announcement, NewAnnouncement } from './types';
 import AnnouncementModal from './AnnouncementModal';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { toast } from 'react-hot-toast';
 
-interface AnnouncementsTabProps {
-  announcements: Announcement[];
-  fetchData: () => Promise<void>;
-}
-
-export default function AnnouncementsTab({ announcements, fetchData }: AnnouncementsTabProps) {
+export default function AnnouncementsTab() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [announcementToDelete, setAnnouncementToDelete] = useState<Announcement | null>(null);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [newAnnouncement, setNewAnnouncement] = useState<NewAnnouncement>({
     title: '',
     content: '',
   });
+
+  const fetchAnnouncements = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/announcements');
+      if (!response.ok) {
+        throw new Error('Failed to fetch announcements');
+      }
+      const data = await response.json();
+      setAnnouncements(data);
+    } catch (err: any) {
+      setError(err.message);
+      toast.error(`Error fetching announcements: ${err.message}`);
+      console.error('Error fetching announcements:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAnnouncements();
+  }, [fetchAnnouncements]);
 
   const handleCreateAnnouncement = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,9 +51,10 @@ export default function AnnouncementsTab({ announcements, fetchData }: Announcem
       });
       setNewAnnouncement({ title: '', content: '' });
       setIsModalOpen(false);
-      fetchData();
+      await fetchAnnouncements();
     } catch (error) {
       console.error('Error creating announcement:', error);
+      toast.error('Error creating announcement. See console for details.');
     }
   };
 
@@ -40,11 +64,20 @@ export default function AnnouncementsTab({ announcements, fetchData }: Announcem
         method: 'DELETE',
       });
       setAnnouncementToDelete(null);
-      fetchData();
+      await fetchAnnouncements();
     } catch (error) {
       console.error('Error deleting announcement:', error);
+      toast.error('Error deleting announcement. See console for details.');
     }
   };
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return <div className="text-red-400">Error loading announcements: {error}</div>;
+  }
 
   return (
     <div className="space-y-8">

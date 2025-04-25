@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { evaluateUnlockConditions } from '@/lib/challenges';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -35,20 +36,79 @@ export async function GET() {
 
     const challenges = await prisma.challenge.findMany({
       include: {
-        files: true
+        files: true,
+        unlockConditions: true,
+        submissions: session.user.isAdmin ? undefined : {
+          where: {
+            isCorrect: true,
+            teamId: session?.user?.teamId || undefined
+          }
+        }
       }
     });
 
-    // For non-admin users, hide description and flag for locked challenges
+    // Fetch all correct submissions for the team if not admin
+    const teamSolves = (!session.user.isAdmin && session?.user?.teamId) ? await prisma.submission.findMany({
+        where: {
+            teamId: session.user.teamId,
+            isCorrect: true,
+        },
+        select: {
+            challengeId: true,
+        }
+    }) : [];
+    const solvedChallengeIds = new Set(teamSolves.map(solve => solve.challengeId));
+
+    // Process challenges: evaluate unlocks for non-admins, return appropriate data
     const processedChallenges = challenges.map(challenge => {
-      if (challenge.isLocked && !session.user.isAdmin) {
+      // Admins see everything
+      if (session.user.isAdmin) {
+        // Optionally calculate isSolved for admin view
+        // For simplicity, just returning raw data + conditions here
         return {
-          ...challenge,
-          description: 'This challenge is locked. Complete previous challenges to unlock it.',
-          flag: null
+            ...challenge,
+            flag: undefined, // Generally avoid sending flags even to admins in list view
+            submissions: undefined, // Don't need submissions list here
+            isUnlocked: true // Admins bypass locks
         };
       }
-      return challenge;
+
+      // Non-admins: Evaluate unlock conditions
+      const { isUnlocked, reason } = evaluateUnlockConditions(
+        challenge.unlockConditions,
+        solvedChallengeIds,
+        gameConfig
+      );
+
+      if (!isUnlocked) {
+        // Return minimal data for locked challenges
+        return {
+          id: challenge.id,
+          title: challenge.title,
+          points: challenge.points,
+          category: challenge.category,
+          difficulty: challenge.difficulty,
+          isLocked: true,
+          unlockReason: reason
+        };
+      }
+
+      // Return unlocked challenge data (without flag, conditions)
+      return {
+        id: challenge.id,
+        title: challenge.title,
+        description: challenge.description,
+        points: challenge.points,
+        difficulty: challenge.difficulty,
+        category: challenge.category,
+        files: challenge.files,
+        createdAt: challenge.createdAt,
+        updatedAt: challenge.updatedAt,
+        isUnlocked: true,
+        isSolved: challenge.submissions && challenge.submissions.length > 0, // Check if team solved this one
+        // submissions: undefined, // Already excluded by structure above
+        unlockConditions: undefined // Don't send conditions
+      };
     });
 
     return NextResponse.json(processedChallenges);

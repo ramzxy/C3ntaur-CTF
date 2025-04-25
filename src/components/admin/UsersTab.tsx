@@ -1,14 +1,49 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { User, Team } from './types';
+import UserEditModal from './UserEditModal';
+import toast from 'react-hot-toast';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
-interface UsersTabProps {
-  users: User[];
-  teams: Team[];
-  fetchData: () => Promise<void>;
-}
-
-export default function UsersTab({ users, teams, fetchData }: UsersTabProps) {
+export default function UsersTab() {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchUsersAndTeams = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const [usersRes, teamsRes] = await Promise.all([
+        fetch('/api/admin/users'),
+        fetch('/api/admin/teams')
+      ]);
+
+      if (!usersRes.ok) throw new Error('Failed to fetch users');
+      if (!teamsRes.ok) throw new Error('Failed to fetch teams');
+
+      const [usersData, teamsData] = await Promise.all([
+        usersRes.json(),
+        teamsRes.json()
+      ]);
+
+      setUsers(usersData);
+      setTeams(teamsData);
+    } catch (err: any) {
+      setError(err.message);
+      toast.error(`Error fetching data: ${err.message}`);
+      console.error('Error fetching users or teams:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUsersAndTeams();
+  }, [fetchUsersAndTeams]);
 
   const handleDeleteUser = async (id: string) => {
     try {
@@ -22,17 +57,56 @@ export default function UsersTab({ users, teams, fetchData }: UsersTabProps) {
 
       if (response.ok) {
         setUserToDelete(null);
-        fetchData();
+        await fetchUsersAndTeams();
       }
     } catch (error) {
       console.error('Error deleting user:', error);
+      toast.error('Error deleting user. See console for details.');
     }
   };
+
+  const handleEditUser = (user: User) => {
+    setEditingUser(user);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateUser = async (updatedData: Partial<User>) => {
+    if (!editingUser) return;
+
+    try {
+      const response = await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update user alias');
+      }
+
+      toast.success('User alias updated successfully!');
+      setIsEditModalOpen(false);
+      setEditingUser(null);
+      await fetchUsersAndTeams();
+    } catch (error: any) {
+      console.error('Error updating user alias:', error);
+      toast.error(`Error: ${error.message}`);
+      throw error;
+    }
+  };
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return <div className="text-red-400">Error loading data: {error}</div>;
+  }
 
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-4">Users</h2>
-      {/* Table Container with horizontal scroll on mobile */}
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-700">
           <thead>
@@ -66,7 +140,14 @@ export default function UsersTab({ users, teams, fetchData }: UsersTabProps) {
                   </span>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="flex flex-row gap-2 justify-end">
+                  <div className="flex flex-row gap-2 items-center justify-end">
+                    <button
+                      onClick={() => handleEditUser(user)}
+                      className="bg-blue-900 text-blue-300 px-3 py-1 rounded hover:bg-blue-800 transition-colors"
+                      disabled={!!userToDelete}
+                    >
+                      Edit
+                    </button>
                     {userToDelete?.id === user.id ? (
                       <>
                         <button
@@ -104,6 +185,18 @@ export default function UsersTab({ users, teams, fetchData }: UsersTabProps) {
           </tbody>
         </table>
       </div>
+
+      <UserEditModal
+        user={editingUser}
+        isOpen={isEditModalOpen}
+        teams={teams}
+        onDataRefresh={fetchUsersAndTeams}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingUser(null);
+        }}
+        onSave={handleUpdateUser}
+      />
     </div>
   );
 }

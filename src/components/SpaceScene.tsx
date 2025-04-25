@@ -7,12 +7,17 @@ import { useRouter } from 'next/navigation';
 interface Challenge {
   id: string;
   title: string;
-  category: string;
+  description?: string;
   points: number;
+  category: string;
   difficulty: string;
+  isActive?: boolean;
   isLocked: boolean;
   isSolved: boolean;
-  solvedBy: { teamColor: string }[];
+  solvedBy: Array<{ teamId: string; teamColor: string; }>;
+  files?: any[];
+  isUnlocked: boolean;
+  unlockReason?: string;
 }
 
 interface CategorySatellite {
@@ -105,6 +110,9 @@ function CategorySatellite({ satellite, onSelect }: { satellite: CategorySatelli
     return mostCommonColor;
   };
 
+  // Determine the color based on solved status
+  const satelliteColor = getSatelliteColor();
+
   useFrame((state, delta) => {
     if (satelliteRef.current) {
       timeRef.current += delta * satellite.orbitSpeed;
@@ -125,13 +133,17 @@ function CategorySatellite({ satellite, onSelect }: { satellite: CategorySatelli
   });
 
   return (
-    <group ref={satelliteRef} onClick={onSelect}
+    <group
+      ref={satelliteRef}
+      onClick={onSelect} // Always allow clicking the category
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}>
       <mesh>
         <sphereGeometry args={[satelliteSize, 8, 8]} />
         <meshBasicMaterial
-          color={hovered ? "#4a90e2" : getSatelliteColor()}
+          color={hovered ? "#4a90e2" : satelliteColor} // Color based on hover/solve status
+          opacity={1} // Always fully opaque
+          transparent={false}
         />
       </mesh>
       <Billboard>
@@ -142,12 +154,13 @@ function CategorySatellite({ satellite, onSelect }: { satellite: CategorySatelli
         <mesh
           position={[0.8, 0.8, -0.11]}>
           <planeGeometry args={[textWidth + padding + 0.15, 1]} />
-          <meshBasicMaterial color={hovered ? "#4a90e2" : "white"} />
+          {/* Border color based on hover */}
+          <meshBasicMaterial color={hovered ? "#4a90e2" : 'white'} />
         </mesh>
         <Text
           position={[0.8, 0.8, 0]}
           fontSize={0.8}
-          color={hovered ? "#4a90e2" : "white"}
+          color={hovered ? "#4a90e2" : 'white'} // Text color based on hover
           anchorX="center"
           anchorY="middle"
           font="/SquadaOne-Regular.ttf"
@@ -252,6 +265,7 @@ export default function SpaceScene({ isMobile }: { isMobile?: boolean }) {
 
     fetchCategories();
   }, []);
+
 
   return (
     <div className={`${isMobile ? 'h-full' : 'fixed inset-0'}`}>

@@ -1,13 +1,39 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Team } from './types';
+import TeamEditModal from './TeamEditModal';
+import toast from 'react-hot-toast';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
-interface TeamsTabProps {
-  teams: Team[];
-  fetchData: () => Promise<void>;
-}
-
-export default function TeamsTab({ teams, fetchData }: TeamsTabProps) {
+export default function TeamsTab() {
   const [teamToDelete, setTeamToDelete] = useState<Team | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingTeam, setEditingTeam] = useState<Team | null>(null);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchTeams = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/admin/teams');
+      if (!response.ok) {
+        throw new Error('Failed to fetch teams');
+      }
+      const data = await response.json();
+      setTeams(data);
+    } catch (err: any) {
+      setError(err.message);
+      toast.error(`Error fetching teams: ${err.message}`);
+      console.error('Error fetching teams:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchTeams();
+  }, [fetchTeams]);
 
   const handleDeleteTeam = async (id: string) => {
     try {
@@ -21,12 +47,52 @@ export default function TeamsTab({ teams, fetchData }: TeamsTabProps) {
 
       if (response.ok) {
         setTeamToDelete(null);
-        fetchData();
+        await fetchTeams();
       }
     } catch (error) {
       console.error('Error deleting team:', error);
+      toast.error('Error deleting team. See console for details.');
     }
   };
+
+  const handleEditTeam = (team: Team) => {
+    setEditingTeam(team);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateTeam = async (updatedData: Partial<Team>) => {
+    if (!editingTeam) return;
+
+    try {
+      const response = await fetch('/api/admin/teams', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update team');
+      }
+
+      toast.success('Team updated successfully!');
+      setIsEditModalOpen(false);
+      setEditingTeam(null);
+      await fetchTeams();
+    } catch (error: any) {
+      console.error('Error updating team:', error);
+      toast.error(`Error: ${error.message}`);
+      throw error;
+    }
+  };
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return <div className="text-red-400">Error loading teams: {error}</div>;
+  }
 
   return (
     <div>
@@ -55,7 +121,14 @@ export default function TeamsTab({ teams, fetchData }: TeamsTabProps) {
                   </span>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="flex flex-row gap-2 justify-end">
+                  <div className="flex flex-row gap-2 items-center justify-end">
+                    <button
+                      onClick={() => handleEditTeam(team)}
+                      className="bg-blue-900 text-blue-300 px-3 py-1 rounded hover:bg-blue-800 transition-colors"
+                      disabled={!!teamToDelete}
+                    >
+                      Edit
+                    </button>
                     {teamToDelete?.id === team.id ? (
                       <>
                         <button
@@ -86,6 +159,17 @@ export default function TeamsTab({ teams, fetchData }: TeamsTabProps) {
           </tbody>
         </table>
       </div>
+
+      <TeamEditModal
+        team={editingTeam}
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingTeam(null);
+        }}
+        onDataRefresh={fetchTeams}
+        onSave={handleUpdateTeam}
+      />
     </div>
   );
 }

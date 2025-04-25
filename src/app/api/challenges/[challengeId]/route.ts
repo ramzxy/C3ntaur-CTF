@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { evaluateUnlockConditions } from '@/lib/challenges';
 
 export async function GET(
   request: Request,
@@ -15,24 +16,16 @@ export async function GET(
       where: {
         id: challengeId
       },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        points: true,
-        difficulty: true,
-        category: true,
-        flag: true,
+      include: {
         files: true,
-        createdAt: true,
-        updatedAt: true,
+        hints: true,
+        unlockConditions: true,
         submissions: {
           where: {
             isCorrect: true,
-            teamId: session?.user?.teamId || ''
+            teamId: session?.user?.teamId || undefined
           },
           select: {
-            id: true,
             teamId: true
           }
         }
@@ -46,12 +39,56 @@ export async function GET(
       );
     }
 
+    // Fetch all correct submissions for the team to check CHALLENGE_SOLVED conditions
+    const teamSolves = session?.user?.teamId ? await prisma.submission.findMany({
+      where: {
+        teamId: session.user.teamId,
+        isCorrect: true,
+      },
+      select: {
+        challengeId: true,
+      }
+    }) : [];
+
+    const solvedChallengeIds = new Set(teamSolves.map(solve => solve.challengeId));
+
+    // Fetch Game Config (assuming only one active config)
+    const gameConfig = await prisma.gameConfig.findFirst({
+        where: { isActive: true },
+    });
+
+    // Evaluate unlock conditions
+    const { isUnlocked, reason } = evaluateUnlockConditions(
+        challenge.unlockConditions,
+        solvedChallengeIds,
+        gameConfig
+    );
+
+    // Decide what to return based on unlock status
+    if (!isUnlocked) {
+        // Option 1: Return minimal data for locked challenges
+        return NextResponse.json({
+            id: challenge.id,
+            title: challenge.title,
+            points: challenge.points,
+            category: challenge.category,
+            difficulty: challenge.difficulty,
+            isLocked: true,
+            unlockReason: reason
+        });
+        // Option 2: Return 403 Forbidden (or 404 Not Found)
+        // return NextResponse.json({ error: 'Challenge locked', reason }, { status: 403 });
+    }
+
     // Transform the challenge to include isSolved and solvedByTeamId
     const transformedChallenge = {
       ...challenge,
+      flag: undefined,
       isSolved: challenge.submissions.length > 0,
       solvedByTeamId: challenge.submissions[0]?.teamId,
-      submissions: undefined // Remove the submissions field from the response
+      submissions: undefined,
+      unlockConditions: undefined,
+      isUnlocked: true
     };
 
     return NextResponse.json(transformedChallenge);

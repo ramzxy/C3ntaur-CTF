@@ -15,17 +15,19 @@ const righteous = Righteous({ weight: '400', subsets: ['latin'] });
 interface Challenge {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   points: number;
   difficulty: string;
-  isSolved: boolean;
+  isSolved?: boolean;
   category: string;
   solvedByTeamId?: string;
   files?: {
     name: string;
-    url: string;
-    size: string;
+    path: string;
+    size: number;
   }[];
+  isLocked?: boolean;
+  unlockReason?: string;
 }
 
 interface Hint {
@@ -155,6 +157,26 @@ export default function ChallengePage() {
     }
   };
 
+  if (challenge?.isLocked) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center p-8 border bg-black/90 max-w-md">
+          <h1 className="text-3xl font-bold mb-4">Challenge Locked</h1>
+          <p className="text-gray-300 mb-2">Title: {challenge.title}</p>
+          <p className="text-gray-300 mb-2">Category: {challenge.category}</p>
+          <p className="text-gray-300 mb-4">Points: {challenge.points}</p>
+          <p className="text-yellow-400 mb-6">Reason: {challenge.unlockReason || 'Unlock conditions not met.'}</p>
+          <button 
+            onClick={() => router.back()} 
+            className="px-4 py-2 border border-white hover:bg-white hover:text-black flex items-center mx-auto"
+          >
+            <IoArrowBack className="mr-2" /> Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!challenge) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
@@ -184,7 +206,7 @@ export default function ChallengePage() {
                 remarkPlugins={[remarkGfm]}
                 skipHtml={false}
               >
-                {challenge.description}
+                {challenge.description || ''}
               </ReactMarkdown>
             </div>
 
@@ -198,10 +220,10 @@ export default function ChallengePage() {
                       <div className="flex items-center gap-2">
                         <span className="text-gray-400">📎</span>
                         <span>{file.name}</span>
-                        <span className="text-gray-400 text-sm">({file.size})</span>
+                        <span className="text-gray-400 text-sm">({file.size} bytes)</span>
                       </div>
                       <button
-                        onClick={() => handleDownload(file.url, file.name)}
+                        onClick={() => handleDownload(file.path, file.name)}
                         className="px-3 py-1 border border-white hover:bg-white hover:text-black"
                       >
                         Download

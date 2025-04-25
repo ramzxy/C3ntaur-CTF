@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { GameConfig } from './types';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { toast } from 'react-hot-toast';
 
 export default function GameConfigurationTab() {
   const [gameConfig, setGameConfig] = useState<GameConfig>({
@@ -63,14 +65,14 @@ export default function GameConfigurationTab() {
           endTime: data.endTime ? new Date(data.endTime).toISOString() : null,
         });
         setHasEndTime(data.hasEndTime !== false);
-        alert('Game time settings updated successfully!');
+        toast.success('Game time settings updated successfully!');
       } else {
         const data = await response.json();
-        alert(`Error: ${data.error || 'Failed to update game time settings'}`);
+        toast.error(`Error: ${data.error || 'Failed to update game time settings'}`);
       }
     } catch (error) {
       console.error('Error updating game config:', error);
-      alert('Error updating game time settings');
+      toast.error('Error updating game time settings');
     }
   };
 
@@ -92,7 +94,7 @@ export default function GameConfigurationTab() {
   };
 
   if (loading) {
-    return <div className="p-6">Loading configuration...</div>;
+    return <LoadingSpinner />;
   }
 
   return (

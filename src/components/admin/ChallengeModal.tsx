@@ -1,14 +1,18 @@
 import React from 'react';
-import { Challenge, NewChallenge } from './types';
+import { Challenge, NewChallenge, UnlockCondition, ChallengeFile } from './types';
+import { FaTrash } from 'react-icons/fa';
+import { toast } from 'react-hot-toast';
 
 interface ChallengeModalProps {
   title: string;
   challenge: Challenge | NewChallenge;
-  setChallenge: React.Dispatch<React.SetStateAction<Challenge | NewChallenge>>;
+  setChallenge: React.Dispatch<React.SetStateAction<any>>;
   onSubmit: (e: React.FormEvent) => Promise<void>;
   onClose: () => void;
   submitText: string;
   isEditing?: boolean;
+  onDataRefresh?: () => Promise<void>;
+  allChallenges: Pick<Challenge, 'id' | 'title'>[];
 }
 
 export default function ChallengeModal({
@@ -18,13 +22,49 @@ export default function ChallengeModal({
   onSubmit,
   onClose,
   submitText,
-  isEditing = false
+  isEditing = false,
+  allChallenges,
+  onDataRefresh
 }: ChallengeModalProps) {
+  const unlockConditions = challenge.unlockConditions || [];
+
+  const handleFileDelete = async (file: ChallengeFile) => {
+    try {
+      const filename = file.path.split('/').pop();
+      const response = await fetch(`/api/files/${filename}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        const updatedFiles = challenge.files.filter((f) => f.id !== file.id);
+        setChallenge({ ...challenge, files: updatedFiles });
+        if (onDataRefresh) await onDataRefresh();
+      } else {
+        throw new Error('Failed to delete file');
+      }
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      toast.error('Failed to delete file');
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
       <div className="bg-gray-800 p-6 w-full max-w-3xl shadow-xl max-h-[90vh] overflow-y-auto">
         <h2 className="text-2xl font-semibold mb-4">{title}</h2>
-        <form onSubmit={onSubmit} className="space-y-4">
+        <form 
+          onSubmit={(e) => 
+            handleChallengeSubmit(
+              e, 
+              challenge, 
+              isEditing ? 'PATCH' : 'POST', 
+              onDataRefresh, 
+              onClose // Close modal on success
+              // Pass an onError handler if needed
+            )
+          } 
+          className="space-y-4"
+        >
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">Title</label>
             <input
@@ -169,22 +209,7 @@ export default function ChallengeModal({
                     <button
                       type="button"
                       onClick={async () => {
-                        try {
-                          const filename = file.path.split('/').pop();
-                          const response = await fetch(`/api/files/${filename}`, {
-                            method: 'DELETE'
-                          });
-                          
-                          if (response.ok) {
-                            const updatedFiles = challenge.files.filter((_, i) => i !== index);
-                            setChallenge({ ...challenge, files: updatedFiles });
-                          } else {
-                            throw new Error('Failed to delete file');
-                          }
-                        } catch (error) {
-                          console.error('Error deleting file:', error);
-                          alert('Failed to delete file');
-                        }
+                        await handleFileDelete(file);
                       }}
                       className="text-red-400 hover:text-red-300"
                     >
@@ -259,6 +284,105 @@ export default function ChallengeModal({
             </div>
           </div>
           
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Unlock Conditions (Optional)</label>
+            <p className="text-xs text-gray-400 mb-2">The challenge will unlock if ANY of these conditions are met.</p>
+            <div className="space-y-3">
+              {unlockConditions.map((condition, index) => (
+                <div key={index} className="p-3 bg-gray-700 rounded border border-gray-600 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-sm font-medium text-gray-300">Condition #{index + 1}</label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newConditions = [...unlockConditions];
+                        newConditions.splice(index, 1);
+                        setChallenge({ ...challenge, unlockConditions: newConditions });
+                      }}
+                      className="text-red-400 hover:text-red-300"
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1">Type</label>
+                    <select
+                      value={condition.type}
+                      onChange={(e) => {
+                        const newConditions = [...unlockConditions];
+                        newConditions[index] = { 
+                          ...newConditions[index], 
+                          type: e.target.value as UnlockCondition['type'],
+                          requiredChallengeId: null, 
+                          timeThresholdSeconds: null
+                        };
+                        setChallenge({ ...challenge, unlockConditions: newConditions });
+                      }}
+                      className="w-full bg-gray-600 text-white px-3 py-2 rounded text-sm"
+                    >
+                      <option value="CHALLENGE_SOLVED">Challenge Solved</option>
+                      <option value="TIME_REMAINDER">Time Remaining</option>
+                    </select>
+                  </div>
+                  {condition.type === 'CHALLENGE_SOLVED' && (
+                    <div>
+                      <label className="block text-xs font-medium text-gray-400 mb-1">Required Challenge</label>
+                      <select
+                        value={condition.requiredChallengeId || ''}
+                        onChange={(e) => {
+                          const newConditions = [...unlockConditions];
+                          newConditions[index] = { ...newConditions[index], requiredChallengeId: e.target.value || null };
+                          setChallenge({ ...challenge, unlockConditions: newConditions });
+                        }}
+                        className="w-full bg-gray-600 text-white px-3 py-2 rounded text-sm"
+                        required
+                      >
+                        <option value="">-- Select Challenge --</option>
+                        {allChallenges
+                          .filter(c => !isEditing || c.id !== (challenge as Challenge).id)
+                          .map(c => (
+                            <option key={c.id} value={c.id}>{c.title}</option>
+                          ))}
+                      </select>
+                    </div>
+                  )}
+                  {condition.type === 'TIME_REMAINDER' && (
+                    <div>
+                      <label className="block text-xs font-medium text-gray-400 mb-1">Time Threshold (Seconds Remaining)</label>
+                      <input
+                        type="number"
+                        value={condition.timeThresholdSeconds || ''}
+                        onChange={(e) => {
+                          const newConditions = [...unlockConditions];
+                          newConditions[index] = { ...newConditions[index], timeThresholdSeconds: e.target.value ? parseInt(e.target.value) : null };
+                          setChallenge({ ...challenge, unlockConditions: newConditions });
+                        }}
+                        className="w-full bg-gray-600 text-white px-3 py-2 rounded text-sm"
+                        placeholder="e.g., 3600 (for 1 hour)"
+                        required
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  setChallenge({
+                    ...challenge,
+                    unlockConditions: [
+                      ...unlockConditions,
+                      { type: 'CHALLENGE_SOLVED', requiredChallengeId: null, timeThresholdSeconds: null }
+                    ]
+                  });
+                }}
+                className="w-full px-4 py-2 border border-dashed border-gray-500 text-gray-400 hover:bg-gray-700 hover:text-gray-300 rounded"
+              >
+                + Add Unlock Condition
+              </button>
+            </div>
+          </div>
+          
           <div className="flex justify-end space-x-2 pt-2">
             <button
               type="button"
@@ -279,3 +403,45 @@ export default function ChallengeModal({
     </div>
   );
 }
+
+const handleChallengeSubmit = async (
+  e: React.FormEvent,
+  challenge: Challenge | NewChallenge,
+  apiMethod: 'POST' | 'PATCH',
+  onDataRefresh?: () => Promise<void>,
+  onSuccess?: () => void,
+  onError?: (error: Error) => void
+) => {
+  e.preventDefault();
+
+  try {
+    const apiUrl = '/api/admin/challenges';
+    const response = await fetch(apiUrl, {
+      method: apiMethod,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(challenge),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `Failed to ${apiMethod === 'POST' ? 'create' : 'update'} challenge`);
+    }
+
+    toast.success(`Challenge ${apiMethod === 'POST' ? 'created' : 'updated'} successfully!`);
+    
+    if (onDataRefresh) {
+      await onDataRefresh();
+    }
+
+    if (onSuccess) {
+      onSuccess();
+    }
+
+  } catch (err: any) {
+    console.error(`Error ${apiMethod === 'POST' ? 'creating' : 'updating'} challenge:`, err);
+    toast.error(`Error: ${err.message}`);
+    if (onError) {
+      onError(err);
+    }
+  }
+};

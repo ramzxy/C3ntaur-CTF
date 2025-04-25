@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { title, description, category, points, flag, difficulty, isLocked, files, hints } = await req.json();
+    const { title, description, category, points, flag, difficulty, isLocked, files, hints, unlockConditions } = await req.json();
 
     const challenge = await prisma.challenge.create({
       data: {
@@ -37,11 +37,19 @@ export async function POST(req: Request) {
             content: hint.content,
             cost: hint.cost
           }))
+        } : undefined,
+        unlockConditions: unlockConditions ? {
+          create: unlockConditions.map((cond: { type: string; requiredChallengeId?: string; timeThresholdSeconds?: number }) => ({
+            type: cond.type,
+            requiredChallengeId: cond.requiredChallengeId,
+            timeThresholdSeconds: cond.timeThresholdSeconds
+          }))
         } : undefined
       },
       include: {
         files: true,
-        hints: true
+        hints: true,
+        unlockConditions: true
       }
     });
 
@@ -105,7 +113,7 @@ export async function PATCH(req: Request) {
   }
 
   try {
-    const { id, title, description, category, points, flag, difficulty, isActive, isLocked, files, hints } = await req.json();
+    const { id, title, description, category, points, flag, difficulty, isActive, isLocked, files, hints, unlockConditions } = await req.json();
 
     // Get the current challenge state to check if it was previously locked
     const currentChallenge = await prisma.challenge.findUnique({
@@ -124,8 +132,18 @@ export async function PATCH(req: Request) {
         difficulty,
         isActive,
         isLocked,
+        unlockConditions: unlockConditions ? {
+          deleteMany: {},
+          create: unlockConditions.map((cond: { type: string; requiredChallengeId?: string; timeThresholdSeconds?: number }) => ({
+            type: cond.type,
+            requiredChallengeId: cond.requiredChallengeId,
+            timeThresholdSeconds: cond.timeThresholdSeconds
+          }))
+        } : {
+          deleteMany: {}
+        },
         files: files ? {
-          deleteMany: {}, // Remove existing files
+          deleteMany: {},
           create: files.map((file: { name: string; path: string; size: number }) => ({
             name: file.name,
             path: file.path,
@@ -133,7 +151,7 @@ export async function PATCH(req: Request) {
           }))
         } : undefined,
         hints: hints ? {
-          deleteMany: {}, // Remove existing hints
+          deleteMany: {},
           create: hints.map((hint: { content: string; cost: number }) => ({
             content: hint.content,
             cost: hint.cost
@@ -142,7 +160,8 @@ export async function PATCH(req: Request) {
       },
       include: {
         files: true,
-        hints: true
+        hints: true,
+        unlockConditions: true
       }
     });
 

@@ -1,18 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { FaPlus, FaDownload, FaUpload } from "react-icons/fa";
-import { Challenge, NewChallenge } from './types';
+import { Challenge, NewChallenge, UnlockCondition } from './types';
 import ChallengeModal from './ChallengeModal';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { toast } from 'react-hot-toast';
 
-interface ChallengesTabProps {
-  challenges: Challenge[];
-  fetchData: () => Promise<void>;
-}
-
-export default function ChallengesTab({ challenges, fetchData }: ChallengesTabProps) {
+export default function ChallengesTab() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingChallenge, setEditingChallenge] = useState<Challenge | NewChallenge | null>(null);
   const [challengeToDelete, setChallengeToDelete] = useState<Challenge | null>(null);
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [newChallenge, setNewChallenge] = useState<NewChallenge>({
     title: '',
     description: '',
@@ -22,8 +22,32 @@ export default function ChallengesTab({ challenges, fetchData }: ChallengesTabPr
     difficulty: 'easy',
     isLocked: false,
     files: [],
-    hints: []
+    hints: [],
+    unlockConditions: []
   });
+
+  const fetchChallenges = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/admin/challenges');
+      if (!response.ok) {
+        throw new Error('Failed to fetch challenges');
+      }
+      const data = await response.json();
+      setChallenges(data);
+    } catch (err: any) {
+      setError(err.message);
+      toast.error(`Error fetching challenges: ${err.message}`);
+      console.error('Error fetching challenges:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchChallenges();
+  }, [fetchChallenges]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +57,10 @@ export default function ChallengesTab({ challenges, fetchData }: ChallengesTabPr
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(newChallenge),
+        body: JSON.stringify({
+          ...newChallenge,
+          unlockConditions: newChallenge.unlockConditions?.map(cond => ({ ...cond })) || []
+        }),
       });
 
       if (response.ok) {
@@ -46,10 +73,11 @@ export default function ChallengesTab({ challenges, fetchData }: ChallengesTabPr
           difficulty: 'easy',
           isLocked: false,
           files: [],
-          hints: []
+          hints: [],
+          unlockConditions: []
         });
         setIsModalOpen(false);
-        fetchData();
+        await fetchChallenges();
       }
     } catch (error) {
       console.error('Error creating challenge:', error);
@@ -68,7 +96,7 @@ export default function ChallengesTab({ challenges, fetchData }: ChallengesTabPr
 
       if (response.ok) {
         setChallengeToDelete(null);
-        fetchData();
+        await fetchChallenges();
       }
     } catch (error) {
       console.error('Error deleting challenge:', error);
@@ -90,28 +118,13 @@ export default function ChallengesTab({ challenges, fetchData }: ChallengesTabPr
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...editingChallenge,
-          files: editingChallenge.files.map(file => ({
-            name: file.name,
-            path: file.path,
-            size: file.size
-          })),
-          hints: editingChallenge.hints.map(hint => ({
-            content: hint.content,
-            cost: hint.cost,
-            challengeId: hint.challengeId,
-            id: hint.id,
-            createdAt: hint.createdAt,
-            updatedAt: hint.updatedAt
-          }))
-        }),
+        body: JSON.stringify(editingChallenge),
       });
 
       if (response.ok) {
         setIsEditModalOpen(false);
         setEditingChallenge(null);
-        fetchData();
+        await fetchChallenges();
       }
     } catch (error) {
       console.error('Error updating challenge:', error);
@@ -135,6 +148,7 @@ export default function ChallengesTab({ challenges, fetchData }: ChallengesTabPr
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error exporting challenges:', error);
+      toast.error('Error exporting challenges. Check console.');
     }
   };
 
@@ -155,14 +169,24 @@ export default function ChallengesTab({ challenges, fetchData }: ChallengesTabPr
       });
 
       if (response.ok) {
-        fetchData(); // Refresh the challenges list
+        await fetchChallenges();
       } else {
         console.error('Error importing challenges:', await response.text());
+        toast.error('Error importing challenges. Check console.');
       }
     } catch (error) {
       console.error('Error importing challenges:', error);
+      toast.error('Error processing import file. Check console.');
     }
   };
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return <div className="text-red-400">Error loading challenges: {error}</div>;
+  }
 
   return (
     <div>
@@ -262,7 +286,9 @@ export default function ChallengesTab({ challenges, fetchData }: ChallengesTabPr
         <ChallengeModal
           title="Add New Challenge"
           challenge={newChallenge}
-          setChallenge={setNewChallenge}
+          allChallenges={challenges}
+          setChallenge={setNewChallenge as any}
+          onDataRefresh={fetchChallenges}
           onSubmit={handleSubmit}
           onClose={() => setIsModalOpen(false)}
           submitText="Create"
@@ -272,24 +298,13 @@ export default function ChallengesTab({ challenges, fetchData }: ChallengesTabPr
       {/* Edit Challenge Modal */}
       {isEditModalOpen && editingChallenge && (
         <ChallengeModal
-          title="Edit Challenge"
+          title={`Edit Challenge: ${editingChallenge.title}`}
           challenge={editingChallenge}
-          setChallenge={(value) => {
-            // Handle both direct value and function updates
-            if (typeof value === 'function') {
-              setEditingChallenge((prev) => {
-                if (!prev) return null;
-                return value(prev);
-              });
-            } else {
-              setEditingChallenge(value);
-            }
-          }}
+          allChallenges={challenges}
+          setChallenge={setEditingChallenge as any}
+          onDataRefresh={fetchChallenges}
           onSubmit={handleUpdate}
-          onClose={() => {
-            setIsEditModalOpen(false);
-            setEditingChallenge(null);
-          }}
+          onClose={() => setIsEditModalOpen(false)}
           submitText="Save Changes"
           isEditing={true}
         />
