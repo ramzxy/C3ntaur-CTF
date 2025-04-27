@@ -118,21 +118,23 @@ async function main() {
     createdChallenges.push(createdChallenge);
   }
 
-  // Create challenge dependencies
-  const dependencies = [
+  // Create challenge unlock conditions
+  const unlockConditions = [
     {
-      challengeId: createdChallenges[0].id,
-      unlocksId: createdChallenges[2].id
+      challengeId: createdChallenges[2].id, // Neural Decrypt requires Breach The Mainframe
+      type: 'CHALLENGE_SOLVED' as const,
+      requiredChallengeId: createdChallenges[0].id
     },
     {
-      challengeId: createdChallenges[1].id,
-      unlocksId: createdChallenges[3].id
+      challengeId: createdChallenges[3].id, // Ghost in the Machine requires Incident Response 101
+      type: 'CHALLENGE_SOLVED' as const,
+      requiredChallengeId: createdChallenges[1].id
     }
   ];
 
-  for (const dep of dependencies) {
-    await prisma.challengeDependency.create({
-      data: dep
+  for (const condition of unlockConditions) {
+    await prisma.unlockCondition.create({
+      data: condition
     });
   }
 
