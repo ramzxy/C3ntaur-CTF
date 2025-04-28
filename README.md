@@ -7,13 +7,13 @@
 [![Powered by Prisma](https://img.shields.io/badge/Powered%20by-Prisma-2D3748?logo=prisma&logoWidth=20)](https://www.prisma.io)
 [![Styled with Tailwind](https://img.shields.io/badge/Styled%20with-Tailwind-38B2AC?logo=tailwind-css&logoWidth=20)](https://tailwindcss.com)
 
-<img src="https://raw.githubusercontent.com/asynchronous-x/orbital-ctf/main/public/logo.png" alt="Orbital CTF Logo" width="200"/>
+<img src="https://raw.githubusercontent.com/asynchronous-x/orbital-ctf/refs/heads/main/src/app/favicon.ico" alt="Orbital CTF Logo" width="200"/>
 
 A retro space-themed Capture The Flag platform built with modern tech stack that actually Just Works™️ 
 
 Experience a CTF in a sleek, dark-themed environment with real-time scoring and team collaboration.
 
-[Demo](https://orbital-ctf.vercel.app) · [Report Bug](https://github.com/asynchronous-x/orbital-ctf/issues) · [Request Feature](https://github.com/asynchronous-x/orbital-ctf/issues)
+[Demo](https://asynchronous-x.github.io/orbital-ctf/) · [Report Bug](https://github.com/asynchronous-x/orbital-ctf/issues) · [Request Feature](https://github.com/asynchronous-x/orbital-ctf/issues)
 
 </div>
 
