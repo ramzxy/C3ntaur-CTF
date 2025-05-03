@@ -19,12 +19,31 @@ export default function ChallengesTab() {
     category: '',
     points: 0,
     flag: '',
+    flags: [],
+    multipleFlags: false,
     difficulty: 'easy',
     isLocked: false,
     files: [],
     hints: [],
     unlockConditions: []
   });
+
+  const resetNewChallenge = () => {
+    setNewChallenge({
+      title: '',
+      description: '',
+      category: '',
+      points: 0,
+      flag: '',
+      flags: [],
+      multipleFlags: false,
+      difficulty: 'easy',
+      isLocked: false,
+      files: [],
+      hints: [],
+      unlockConditions: []
+    });
+  };
 
   const fetchChallenges = useCallback(async () => {
     setIsLoading(true);
@@ -64,18 +83,7 @@ export default function ChallengesTab() {
       });
 
       if (response.ok) {
-        setNewChallenge({
-          title: '',
-          description: '',
-          category: '',
-          points: 0,
-          flag: '',
-          difficulty: 'easy',
-          isLocked: false,
-          files: [],
-          hints: [],
-          unlockConditions: []
-        });
+        resetNewChallenge();
         setIsModalOpen(false);
         await fetchChallenges();
       }
@@ -223,33 +231,57 @@ export default function ChallengesTab() {
       </div>
       {/* Table Container with horizontal scroll on mobile */}
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-700">
+        <table className="min-w-full text-gray-300">
           <thead>
-            <tr>
-              <th className="px-6 py-3 text-left">Title</th>
-              <th className="px-6 py-3 text-left">Points</th>
-              <th className="px-6 py-3 text-left">Category</th>
-              <th className="px-6 py-3 text-left">Status</th>
-              <th className="px-6 py-3 text-left">Actions</th>
+            <tr className="border-b border-gray-700">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Title</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Category</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Points</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Difficulty</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Status</th>
+              <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-gray-700">
             {challenges.map((challenge) => (
               <tr key={challenge.id} className="border-t border-gray-700 hover:bg-gray-800/50 transition-colors">
-                <td className="px-6 py-4">{challenge.title}</td>
-                <td className="px-6 py-4">{challenge.points}</td>
-                <td className="px-6 py-4">{challenge.category}</td>
-                <td className="px-6 py-4">
-                  <span className={`px-2 py-1 rounded ${
-                    challenge.isActive ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'
-                  }`}>
-                    {challenge.isActive ? 'Active' : 'Inactive'}
-                  </span>
-                  {challenge.isLocked && (
-                    <span className="ml-2 px-2 py-1 rounded bg-yellow-900 text-yellow-300">
-                      Locked
-                    </span>
+                <td className="px-6 py-4 whitespace-nowrap">{challenge.title}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{challenge.category}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {challenge.multipleFlags ? (
+                    <div className="flex flex-col gap-1">
+                      {challenge.flags.map((flag, index) => (
+                        <span key={flag.id || index} className="text-sm">
+                          {flag.points} pts
+                        </span>
+                      ))}
+                      <span className="text-xs text-gray-500">
+                        Total: {challenge.flags.reduce((sum, flag) => sum + flag.points, 0)} pts
+                      </span>
+                    </div>
+                  ) : (
+                    challenge.points
                   )}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">{challenge.difficulty}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex flex-col gap-1">
+                    <span className={`max-w-fit inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      challenge.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {challenge.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                    {challenge.isLocked && (
+                      <span className="max-w-fit inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        Locked
+                      </span>
+                    )}
+                    {challenge.multipleFlags && (
+                      <span className="max-w-fit inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        Multiple Flags
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex flex-row gap-2 justify-end">

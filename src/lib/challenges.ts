@@ -1,4 +1,4 @@
-import type { UnlockCondition, GameConfig } from '@prisma/client';
+import type { UnlockCondition, GameConfig } from '../../prisma/generated/client';
 
 interface EvaluationResult {
   isUnlocked: boolean;

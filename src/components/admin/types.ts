@@ -1,10 +1,21 @@
+export interface ChallengeFlag {
+  id?: string;
+  flag: string;
+  points: number;
+  challengeId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface Challenge {
   id: string;
   title: string;
   description: string;
   category: string;
   points: number;
-  flag: string;
+  flag?: string;
+  flags: ChallengeFlag[];
+  multipleFlags: boolean;
   difficulty: string;
   isActive: boolean;
   isLocked: boolean;
@@ -85,7 +96,9 @@ export interface NewChallenge {
   description: string;
   category: string;
   points: number;
-  flag: string;
+  flag?: string;
+  flags: ChallengeFlag[];
+  multipleFlags: boolean;
   difficulty: string;
   isActive?: boolean;
   isLocked?: boolean;

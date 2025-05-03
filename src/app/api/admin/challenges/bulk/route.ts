@@ -18,7 +18,9 @@ export async function GET() {
     const challenges = await prisma.challenge.findMany({
       include: {
         files: true,
-        hints: true
+        hints: true,
+        flags: true,
+        unlockConditions: true
       }
     });
 
@@ -46,7 +48,7 @@ export async function POST(req: Request) {
     // Begin transaction to ensure all-or-nothing import
     const result = await prisma.$transaction(async (tx) => {
       const imported = await Promise.all(challenges.map(async (challenge) => {
-        const { files, hints, ...challengeData } = challenge;
+        const { files, hints, flags, unlockConditions, ...challengeData } = challenge;
         
         return await tx.challenge.create({
           data: {
@@ -63,11 +65,26 @@ export async function POST(req: Request) {
                 content: hint.content,
                 cost: hint.cost
               }))
+            } : undefined,
+            flags: flags && challengeData.multipleFlags ? {
+              create: flags.map((flag: { flag: string; points: number }) => ({
+                flag: flag.flag,
+                points: flag.points
+              }))
+            } : undefined,
+            unlockConditions: unlockConditions ? {
+              create: unlockConditions.map((cond: { type: string; requiredChallengeId?: string; timeThresholdSeconds?: number }) => ({
+                type: cond.type,
+                requiredChallengeId: cond.requiredChallengeId,
+                timeThresholdSeconds: cond.timeThresholdSeconds
+              }))
             } : undefined
           },
           include: {
             files: true,
-            hints: true
+            hints: true,
+            flags: true,
+            unlockConditions: true
           }
         });
       }));

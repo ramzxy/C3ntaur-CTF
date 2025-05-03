@@ -20,13 +20,15 @@ export async function GET(
         files: true,
         hints: true,
         unlockConditions: true,
+        flags: true,
         submissions: {
           where: {
             isCorrect: true,
             teamId: session?.user?.teamId || undefined
           },
           select: {
-            teamId: true
+            teamId: true,
+            flagId: true
           }
         }
       }
@@ -80,11 +82,21 @@ export async function GET(
         // return NextResponse.json({ error: 'Challenge locked', reason }, { status: 403 });
     }
 
+    // Get set of solved flag IDs for this challenge
+    const solvedFlagIds = new Set(challenge.submissions.map(sub => sub.flagId));
+
     // Transform the challenge to include isSolved and solvedByTeamId
     const transformedChallenge = {
       ...challenge,
       flag: undefined,
-      isSolved: challenge.submissions.length > 0,
+      flags: challenge.multipleFlags ? challenge.flags.map(flag => ({
+        id: flag.id,
+        points: flag.points,
+        isSolved: solvedFlagIds.has(flag.id)
+      })) : undefined,
+      isSolved: challenge.multipleFlags 
+        ? solvedFlagIds.size === challenge.flags.length 
+        : challenge.submissions.length > 0,
       solvedByTeamId: challenge.submissions[0]?.teamId,
       submissions: undefined,
       unlockConditions: undefined,

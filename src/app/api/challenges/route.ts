@@ -38,10 +38,15 @@ export async function GET() {
       include: {
         files: true,
         unlockConditions: true,
+        flags: true,
         submissions: session.user.isAdmin ? undefined : {
           where: {
             isCorrect: true,
             teamId: session?.user?.teamId || undefined
+          },
+          select: {
+            teamId: true,
+            flagId: true
           }
         }
       }
@@ -55,9 +60,17 @@ export async function GET() {
         },
         select: {
             challengeId: true,
+            flagId: true
         }
     }) : [];
-    const solvedChallengeIds = new Set(teamSolves.map(solve => solve.challengeId));
+
+    // Create a map of challenge ID to set of solved flag IDs
+    const solvedFlagsByChallenge = new Map<string, Set<string>>();
+    teamSolves.forEach(solve => {
+      const solvedFlags = solvedFlagsByChallenge.get(solve.challengeId) || new Set<string>();
+      if (solve.flagId) solvedFlags.add(solve.flagId);
+      solvedFlagsByChallenge.set(solve.challengeId, solvedFlags);
+    });
 
     // Process challenges: evaluate unlocks for non-admins, return appropriate data
     const processedChallenges = challenges.map(challenge => {
@@ -68,6 +81,7 @@ export async function GET() {
         return {
             ...challenge,
             flag: undefined, // Generally avoid sending flags even to admins in list view
+            flags: challenge.flags.map(f => ({ id: f.id, points: f.points })), // Send only id and points
             submissions: undefined, // Don't need submissions list here
             isUnlocked: true // Admins bypass locks
         };
@@ -76,7 +90,7 @@ export async function GET() {
       // Non-admins: Evaluate unlock conditions
       const { isUnlocked, reason } = evaluateUnlockConditions(
         challenge.unlockConditions,
-        solvedChallengeIds,
+        new Set(teamSolves.map(solve => solve.challengeId)),
         gameConfig
       );
 
@@ -93,6 +107,8 @@ export async function GET() {
         };
       }
 
+      const solvedFlags = solvedFlagsByChallenge.get(challenge.id) || new Set<string>();
+
       // Return unlocked challenge data (without flag, conditions)
       return {
         id: challenge.id,
@@ -105,8 +121,15 @@ export async function GET() {
         createdAt: challenge.createdAt,
         updatedAt: challenge.updatedAt,
         isUnlocked: true,
-        isSolved: challenge.submissions && challenge.submissions.length > 0, // Check if team solved this one
-        // submissions: undefined, // Already excluded by structure above
+        multipleFlags: challenge.multipleFlags,
+        flags: challenge.multipleFlags ? challenge.flags.map(flag => ({
+          id: flag.id,
+          points: flag.points,
+          isSolved: solvedFlags.has(flag.id)
+        })) : undefined,
+        isSolved: challenge.multipleFlags 
+          ? solvedFlags.size === challenge.flags.length 
+          : challenge.submissions && challenge.submissions.length > 0,
         unlockConditions: undefined // Don't send conditions
       };
     });

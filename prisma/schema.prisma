@@ -44,7 +44,9 @@ model Challenge {
   title       String
   description String
   points      Int
-  flag        String
+  flag        String?
+  flags       ChallengeFlag[]
+  multipleFlags Boolean             @default(false)
   category    String
   difficulty  String
   isActive    Boolean               @default(true)
@@ -66,12 +68,15 @@ model Submission {
   updatedAt   DateTime  @updatedAt
   userId      String
   challengeId String
+  flagId      String?
   teamId      String
   team        Team      @relation(fields: [teamId], references: [id])
   challenge   Challenge @relation(fields: [challengeId], references: [id])
   user        User      @relation(fields: [userId], references: [id])
+  challengeFlag ChallengeFlag? @relation(fields: [flagId], references: [id])
 
   @@index([challengeId])
+  @@index([flagId])
 }
 
 model Announcement {
@@ -176,4 +181,18 @@ model UnlockCondition {
 
   @@index([challengeId])
   @@index([requiredChallengeId]) // Index potential foreign key
+}
+
+// Add new model for challenge flags
+model ChallengeFlag {
+  id          String    @id @default(cuid())
+  flag        String
+  points      Int
+  challengeId String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  submissions Submission[]
+
+  @@index([challengeId])
 }

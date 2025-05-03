@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { title, description, category, points, flag, difficulty, isLocked, files, hints, unlockConditions } = await req.json();
+    const { title, description, category, points, flag, flags, multipleFlags, difficulty, isLocked, files, hints, unlockConditions } = await req.json();
 
     const challenge = await prisma.challenge.create({
       data: {
@@ -22,7 +22,14 @@ export async function POST(req: Request) {
         description,
         category,
         points,
-        flag,
+        flag: multipleFlags ? undefined : flag,
+        multipleFlags: multipleFlags || false,
+        flags: multipleFlags && flags ? {
+          create: flags.map((flag: { flag: string; points: number }) => ({
+            flag: flag.flag,
+            points: flag.points
+          }))
+        } : undefined,
         difficulty,
         isLocked: isLocked || false,
         files: files ? {
@@ -49,6 +56,7 @@ export async function POST(req: Request) {
       include: {
         files: true,
         hints: true,
+        flags: true,
         unlockConditions: true
       }
     });
@@ -72,7 +80,9 @@ export async function GET() {
     const challenges = await prisma.challenge.findMany({
       include: {
         files: true,
-        hints: true
+        hints: true,
+        flags: true,
+        unlockConditions: true
       }
     });
     return NextResponse.json(challenges);
@@ -113,7 +123,7 @@ export async function PATCH(req: Request) {
   }
 
   try {
-    const { id, title, description, category, points, flag, difficulty, isActive, isLocked, files, hints, unlockConditions } = await req.json();
+    const { id, title, description, category, points, flag, flags, multipleFlags, difficulty, isActive, isLocked, files, hints, unlockConditions } = await req.json();
 
     // Get the current challenge state to check if it was previously locked
     const currentChallenge = await prisma.challenge.findUnique({
@@ -128,7 +138,15 @@ export async function PATCH(req: Request) {
         description,
         category,
         points,
-        flag,
+        flag: multipleFlags ? undefined : flag,
+        multipleFlags,
+        flags: flags ? {
+          deleteMany: {},
+          create: flags.map((flag: { flag: string; points: number }) => ({
+            flag: flag.flag,
+            points: flag.points
+          }))
+        } : undefined,
         difficulty,
         isActive,
         isLocked,
@@ -161,6 +179,7 @@ export async function PATCH(req: Request) {
       include: {
         files: true,
         hints: true,
+        flags: true,
         unlockConditions: true
       }
     });

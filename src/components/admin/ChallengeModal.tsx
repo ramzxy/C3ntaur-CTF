@@ -113,18 +113,92 @@ export default function ChallengeModal({
               required
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Flag</label>
+          <div className="flex items-center">
             <input
-              type="text"
-              value={challenge.flag}
+              type="checkbox"
+              id="multipleFlags"
+              checked={challenge.multipleFlags}
               onChange={(e) =>
-                setChallenge({ ...challenge, flag: e.target.value })
+                setChallenge({ ...challenge, multipleFlags: e.target.checked, flags: challenge.flags || [] })
               }
-              className="w-full bg-gray-700 text-white px-3 py-2 rounded"
-              required
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-600"
             />
+            <label htmlFor="multipleFlags" className="ml-2 block text-sm text-gray-300">
+              Multiple Flags
+            </label>
           </div>
+          
+          {!challenge.multipleFlags ? (
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Flag</label>
+              <input
+                type="text"
+                value={challenge.flag || ''}
+                onChange={(e) =>
+                  setChallenge({ ...challenge, flag: e.target.value })
+                }
+                className="w-full bg-gray-700 text-white px-3 py-2 rounded"
+                required={!challenge.multipleFlags}
+              />
+            </div>
+          ) : (
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Flags</label>
+              <div className="space-y-2">
+                {(challenge.flags || []).map((flag, index) => (
+                  <div key={index} className="flex space-x-2">
+                    <input
+                      type="text"
+                      value={flag.flag}
+                      onChange={(e) => {
+                        const newFlags = [...(challenge.flags || [])];
+                        newFlags[index] = { ...newFlags[index], flag: e.target.value };
+                        setChallenge({ ...challenge, flags: newFlags });
+                      }}
+                      className="flex-1 bg-gray-700 text-white px-3 py-2 rounded"
+                      placeholder="Flag"
+                      required
+                    />
+                    <input
+                      type="number"
+                      value={flag.points}
+                      onChange={(e) => {
+                        const newFlags = [...(challenge.flags || [])];
+                        newFlags[index] = { ...newFlags[index], points: parseInt(e.target.value) };
+                        setChallenge({ ...challenge, flags: newFlags });
+                      }}
+                      className="w-24 bg-gray-700 text-white px-3 py-2 rounded"
+                      placeholder="Points"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newFlags = [...(challenge.flags || [])];
+                        newFlags.splice(index, 1);
+                        setChallenge({ ...challenge, flags: newFlags });
+                      }}
+                      className="px-2 py-1 bg-red-600 text-white hover:bg-red-700 rounded"
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setChallenge({
+                      ...challenge,
+                      flags: [...(challenge.flags || []), { flag: '', points: 0 }]
+                    });
+                  }}
+                  className="w-full px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded"
+                >
+                  Add Flag
+                </button>
+              </div>
+            </div>
+          )}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">Difficulty</label>
             <select

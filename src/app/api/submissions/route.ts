@@ -62,6 +62,8 @@ export async function POST(request: Request) {
         title: true,
         points: true,
         flag: true,
+        flags: true,
+        multipleFlags: true,
         isLocked: true,
       },
     });
@@ -81,16 +83,29 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check if the team/user has already solved this challenge
-    const existingSubmission = await prisma.submission.findFirst({
+    // Check if the team/user has already solved all flags for this challenge
+    const existingSubmissions = await prisma.submission.findMany({
       where: {
         challengeId,
         teamId: session.user.teamId ? session.user.teamId : "",
         isCorrect: true,
       },
+      select: {
+        flagId: true
+      }
     });
 
-    if (existingSubmission) {
+    // For multiple flags challenges, check if all flags have been solved
+    if (challenge.multipleFlags) {
+      const solvedFlagIds = new Set(existingSubmissions.map(sub => sub.flagId));
+      if (solvedFlagIds.size === challenge.flags.length) {
+        return NextResponse.json(
+          { message: 'All flags for this challenge have been solved' },
+          { status: 400 }
+        );
+      }
+    } else if (existingSubmissions.length > 0) {
+      // For single flag challenges, check if it's already solved
       return NextResponse.json(
         { message: 'Challenge already solved' },
         { status: 400 }
@@ -98,7 +113,25 @@ export async function POST(request: Request) {
     }
 
     // Check if the flag is correct
-    const isCorrect = flag === challenge.flag;
+    let isCorrect = false;
+    let flagPoints = 0;
+    let solvedFlagId = null;
+
+    if (challenge.multipleFlags) {
+      // Check against all flags that haven't been solved yet
+      const solvedFlagIds = new Set(existingSubmissions.map(sub => sub.flagId));
+      for (const challengeFlag of challenge.flags) {
+        if (!solvedFlagIds.has(challengeFlag.id) && flag === challengeFlag.flag) {
+          isCorrect = true;
+          flagPoints = challengeFlag.points;
+          solvedFlagId = challengeFlag.id;
+          break;
+        }
+      }
+    } else {
+      isCorrect = flag === challenge.flag;
+      flagPoints = challenge.points;
+    }
 
     // Create submission record
     await prisma.submission.create({
@@ -106,6 +139,7 @@ export async function POST(request: Request) {
         userId: session.user.id,
         teamId: session.user.teamId ?? "",
         challengeId,
+        flagId: solvedFlagId,
         flag,
         isCorrect,
       },
@@ -124,7 +158,7 @@ export async function POST(request: Request) {
           userId: session.user.id,
           teamId: session.user.teamId ?? "",
           challengeId,
-          points: challenge.points,
+          points: flagPoints,
         },
       });
 
@@ -133,7 +167,7 @@ export async function POST(request: Request) {
         where: { id: session.user.teamId },
         data: {
           score: {
-            increment: challenge.points,
+            increment: flagPoints,
           },
         },
       });
@@ -142,36 +176,40 @@ export async function POST(request: Request) {
       await prisma.activityLog.create({
         data: {
           type: 'SUBMISSION',
-          description: `Team ${team?.name} solved challenge "${challenge.title}" for ${challenge.points} points`,
+          description: challenge.multipleFlags 
+            ? `Team ${team?.name} found a flag in challenge "${challenge.title}" worth ${flagPoints} points`
+            : `Team ${team?.name} solved challenge "${challenge.title}" for ${flagPoints} points`,
           teamId: session.user.teamId ?? "",
         },
       });
 
-      // Check for and unlock dependent challenges
-      const dependentChallenges = await prisma.challengeDependency.findMany({
-        where: {
-          challengeId: challenge.id,
-        },
-        include: {
-          unlocks: true,
-        },
-      });
+      // For single flag challenges or when all flags are found, check for and unlock dependent challenges
+      if (!challenge.multipleFlags || existingSubmissions.length + 1 === challenge.flags.length) {
+        const dependentChallenges = await prisma.challengeDependency.findMany({
+          where: {
+            challengeId: challenge.id,
+          },
+          include: {
+            unlocks: true,
+          },
+        });
 
-      for (const dependency of dependentChallenges) {
-        if (dependency.unlocks.isLocked) {
-          // Unlock the dependent challenge
-          await prisma.challenge.update({
-            where: { id: dependency.unlocksId },
-            data: { isLocked: false },
-          });
+        for (const dependency of dependentChallenges) {
+          if (dependency.unlocks.isLocked) {
+            // Unlock the dependent challenge
+            await prisma.challenge.update({
+              where: { id: dependency.unlocksId },
+              data: { isLocked: false },
+            });
 
-          // Log the unlock in the activity feed
-          await prisma.activityLog.create({
-            data: {
-              type: 'CHALLENGE_UNLOCKED',
-              description: `Challenge "${dependency.unlocks.title}" has been unlocked by solving "${challenge.title}"`,
-            },
-          });
+            // Log the unlock in the activity feed
+            await prisma.activityLog.create({
+              data: {
+                type: 'CHALLENGE_UNLOCKED',
+                description: `Challenge "${dependency.unlocks.title}" has been unlocked by solving "${challenge.title}"`,
+              },
+            });
+          }
         }
       }
     }
@@ -179,7 +217,8 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { 
         message: isCorrect ? 'Correct flag!' : 'Incorrect flag',
-        isCorrect 
+        isCorrect,
+        points: isCorrect ? flagPoints : 0
       },
       { status: isCorrect ? 200 : 400 }
     );

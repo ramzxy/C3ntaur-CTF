@@ -28,6 +28,12 @@ interface Challenge {
   }[];
   isLocked?: boolean;
   unlockReason?: string;
+  multipleFlags?: boolean;
+  flags?: {
+    id: string;
+    points: number;
+    isSolved?: boolean;
+  }[];
 }
 
 interface Hint {
@@ -145,6 +151,8 @@ export default function ChallengePage() {
         const challengeResponse = await fetch(`/api/challenges/${challengeId}`);
         const challengeData = await challengeResponse.json();
         setChallenge(challengeData);
+        
+        toast.success(`Correct! You earned ${data.points} points!`);
       }
     } catch (error) {
       console.error('Error submitting flag:', error);
@@ -154,6 +162,7 @@ export default function ChallengePage() {
       });
     } finally {
       setIsSubmitting(false);
+      setFlag('');
     }
   };
 
@@ -188,11 +197,14 @@ export default function ChallengePage() {
           <div className="h-[80vh] overflow-y-auto">
             <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
               <h1 className={`text-5xl font-bold ${righteous.className}`}>{challenge.title}</h1>
-              <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mt-2 md:mt-0">
-                <span className="px-3 py-1 bg-green-500/10 border border-green-500 text-green-400 rounded-full font-mono text-sm">
-                  {challenge.points} POINTS
+              <div className="flex md:flex-row md:items-center gap-2 md:gap-4 mt-2 md:mt-0">
+                <span className="max-w-fit px-3 py-1 bg-green-500/10 border border-green-500 text-green-400 rounded-full font-mono text-sm">
+                  {challenge.multipleFlags 
+                    ? `${challenge.flags?.reduce((sum, flag) => sum + flag.points, 0)} TOTAL POINTS`
+                    : `${challenge.points} POINTS`
+                  }
                 </span>
-                <span className="px-3 py-1 bg-blue-500/10 border border-blue-500 text-blue-400 rounded-full font-mono text-sm">
+                <span className="max-w-fit px-3 py-1 bg-blue-500/10 border border-blue-500 text-blue-400 rounded-full font-mono text-sm">
                   {challenge.category.toUpperCase()}
                 </span>
               </div>
@@ -293,6 +305,45 @@ export default function ChallengePage() {
                     </div>
                   )}
                 </form>
+              </div>
+            )}
+
+            {challenge.multipleFlags && (
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-4">Challenge Progress</h2>
+                <div className="border-t-2 border-b-2 border-gray-700 mb-6" />
+                <div className="space-y-2">
+                  {challenge.flags?.map((flag) => (
+                    <div 
+                      key={flag.id}
+                      className={`flex justify-between items-center p-3 border ${
+                        flag.isSolved 
+                          ? 'border-green-500 bg-green-500/10'
+                          : 'border-blue-500 bg-blue-500/10'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">
+                          {flag.isSolved ? '✓' : '○'}
+                        </span>
+                        <span className="font-mono">
+                          {flag.points} points
+                        </span>
+                      </div>
+                      <span className="text-sm opacity-75">
+                        {flag.isSolved ? 'Solved' : 'Unsolved'}
+                      </span>
+                    </div>
+                  ))}
+                  <div className="mt-4 p-3">
+                    <div className="flex justify-between items-center">
+                      <span className="font-mono">Total Progress</span>
+                      <span className="font-mono">
+                        {challenge.flags?.filter(f => f.isSolved).reduce((sum, flag) => sum + flag.points, 0)} / {challenge.flags?.reduce((sum, flag) => sum + flag.points, 0)} points
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>
