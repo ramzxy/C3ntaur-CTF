@@ -37,6 +37,7 @@ model Team {
   scores      Score[]
   teamHints   TeamHint[]
   members     User[]
+  pointHistory TeamPointHistory[]
 }
 
 model Challenge {
@@ -195,4 +196,18 @@ model ChallengeFlag {
   submissions Submission[]
 
   @@index([challengeId])
+}
+
+model TeamPointHistory {
+  id          String    @id @default(cuid())
+  teamId      String
+  points      Int       // The point change (positive or negative)
+  totalPoints Int       // The team's total points after this change
+  reason      String    // e.g., "HINT_PURCHASE", "CHALLENGE_SOLVE"
+  metadata    String?   // Additional JSON data about the change
+  createdAt   DateTime  @default(now())
+  team        Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([teamId])
+  @@index([createdAt])
 }

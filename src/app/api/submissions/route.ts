@@ -133,92 +133,117 @@ export async function POST(request: Request) {
       flagPoints = challenge.points;
     }
 
-    // Create submission record
-    await prisma.submission.create({
-      data: {
-        userId: session.user.id,
-        teamId: session.user.teamId ?? "",
-        challengeId,
-        flagId: solvedFlagId,
-        flag,
-        isCorrect,
-      },
-    });
-
-    if (isCorrect) {
-      // Get team name for activity log
-      const team = await prisma.team.findUnique({
-        where: { id: session.user.teamId },
-        select: { name: true },
-      });
-
-      // Create score record
-      await prisma.score.create({
+    // Start a transaction to ensure atomicity
+    const result = await prisma.$transaction(async (tx) => {
+      // Create submission record
+      const submission = await tx.submission.create({
         data: {
           userId: session.user.id,
           teamId: session.user.teamId ?? "",
           challengeId,
-          points: flagPoints,
+          flagId: solvedFlagId,
+          flag,
+          isCorrect,
         },
       });
 
-      // Update team score
-      await prisma.team.update({
-        where: { id: session.user.teamId },
-        data: {
-          score: {
-            increment: flagPoints,
-          },
-        },
-      });
+      if (isCorrect) {
+        // Get team for activity log and point history
+        const team = await tx.team.findUnique({
+          where: { id: session.user.teamId },
+          select: { name: true, score: true },
+        });
 
-      // Create activity log for successful challenge completion
-      await prisma.activityLog.create({
-        data: {
-          type: 'SUBMISSION',
-          description: challenge.multipleFlags 
-            ? `Team ${team?.name} found a flag in challenge "${challenge.title}" worth ${flagPoints} points`
-            : `Team ${team?.name} solved challenge "${challenge.title}" for ${flagPoints} points`,
-          teamId: session.user.teamId ?? "",
-        },
-      });
-
-      // For single flag challenges or when all flags are found, check for and unlock dependent challenges
-      if (!challenge.multipleFlags || existingSubmissions.length + 1 === challenge.flags.length) {
-        const dependentChallenges = await prisma.challengeDependency.findMany({
-          where: {
-            challengeId: challenge.id,
-          },
-          include: {
-            unlocks: true,
+        // Create score record
+        await tx.score.create({
+          data: {
+            userId: session.user.id,
+            teamId: session.user.teamId ?? "",
+            challengeId,
+            points: flagPoints,
           },
         });
 
-        for (const dependency of dependentChallenges) {
-          if (dependency.unlocks.isLocked) {
-            // Unlock the dependent challenge
-            await prisma.challenge.update({
-              where: { id: dependency.unlocksId },
-              data: { isLocked: false },
-            });
+        // Update team score
+        const updatedTeam = await tx.team.update({
+          where: { id: session.user.teamId },
+          data: {
+            score: {
+              increment: flagPoints,
+            },
+          },
+        });
 
-            // Log the unlock in the activity feed
-            await prisma.activityLog.create({
-              data: {
-                type: 'CHALLENGE_UNLOCKED',
-                description: `Challenge "${dependency.unlocks.title}" has been unlocked by solving "${challenge.title}"`,
-              },
-            });
+        // Record point history
+        await tx.teamPointHistory.create({
+          data: {
+            teamId: session.user.teamId ?? "",
+            points: flagPoints,
+            totalPoints: updatedTeam.score,
+            reason: 'CHALLENGE_SOLVE',
+            metadata: JSON.stringify({
+              challengeId,
+              challengeTitle: challenge.title,
+              flagId: solvedFlagId,
+              points: flagPoints,
+              isPartialSolve: challenge.multipleFlags
+            })
+          }
+        });
+
+        // Create activity log for successful challenge completion
+        await tx.activityLog.create({
+          data: {
+            type: 'SUBMISSION',
+            description: challenge.multipleFlags 
+              ? `Team ${team?.name} found a flag in challenge "${challenge.title}" worth ${flagPoints} points`
+              : `Team ${team?.name} solved challenge "${challenge.title}" for ${flagPoints} points`,
+            teamId: session.user.teamId ?? "",
+          },
+        });
+
+        // For single flag challenges or when all flags are found, check for and unlock dependent challenges
+        if (!challenge.multipleFlags || existingSubmissions.length + 1 === challenge.flags.length) {
+          const dependentChallenges = await tx.unlockCondition.findMany({
+            where: {
+              type: 'CHALLENGE_SOLVED',
+              requiredChallengeId: challenge.id,
+            },
+            include: {
+              challenge: true,
+            },
+          });
+
+          for (const condition of dependentChallenges) {
+            if (condition.challenge.isLocked) {
+              // Unlock the dependent challenge
+              await tx.challenge.update({
+                where: { id: condition.challengeId },
+                data: { isLocked: false },
+              });
+
+              // Log the unlock in the activity feed
+              await tx.activityLog.create({
+                data: {
+                  type: 'CHALLENGE_UNLOCKED',
+                  description: `Challenge "${condition.challenge.title}" has been unlocked by solving "${challenge.title}"`,
+                },
+              });
+            }
           }
         }
+
+        return { submission, points: flagPoints };
       }
-    }
+
+      return { submission, points: 0 };
+    });
 
     return NextResponse.json(
       { 
         message: isCorrect ? 'Correct flag!' : 'Incorrect flag',
         isCorrect,
-        points: isCorrect ? flagPoints : 0
+        points: result.points
       },
       { status: isCorrect ? 200 : 400 }
     );

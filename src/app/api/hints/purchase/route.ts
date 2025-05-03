@@ -17,6 +17,11 @@ export async function POST(req: Request) {
     const [hint, team] = await Promise.all([
       prisma.hint.findUnique({
         where: { id: hintId },
+        include: {
+          challenge: {
+            select: { title: true }
+          }
+        }
       }),
       prisma.team.findUnique({
         where: { id: session.user.teamId ?? "" },
@@ -67,12 +72,36 @@ export async function POST(req: Request) {
 
       // Deduct points from team if hint has a cost
       if (hint.cost > 0) {
-        await tx.team.update({
+        const updatedTeam = await tx.team.update({
           where: { id: team.id },
           data: {
             score: {
               decrement: hint.cost,
             },
+          },
+        });
+
+        // Record point history
+        await tx.teamPointHistory.create({
+          data: {
+            teamId: team.id,
+            points: -hint.cost, // Negative points for hint purchase
+            totalPoints: updatedTeam.score,
+            reason: 'HINT_PURCHASE',
+            metadata: JSON.stringify({
+              hintId: hint.id,
+              challengeTitle: hint.challenge.title,
+              cost: hint.cost
+            })
+          }
+        });
+
+        // Record activity
+        await tx.activityLog.create({
+          data: {
+            type: 'HINT_PURCHASE',
+            description: `Team purchased a hint for challenge "${hint.challenge.title}" (-${hint.cost} points)`,
+            teamId: team.id,
           },
         });
       }

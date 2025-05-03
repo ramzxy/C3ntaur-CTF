@@ -1,10 +1,20 @@
-import { PrismaClient } from './generated/client';
+import { PrismaClient, Challenge } from './generated/client';
 import dotenv from 'dotenv';
 import { hash } from 'bcryptjs';
 
 dotenv.config();
 
 const prisma = new PrismaClient();
+
+interface SubmissionData {
+  flag: string;
+  isCorrect: boolean;
+  userId: string;
+  challengeId: string;
+  teamId: string;
+  createdAt: Date;
+  flagId?: string;
+}
 
 async function main() {
   // Create sample teams
@@ -54,9 +64,10 @@ async function main() {
       points: 100,
       category: 'Web',
       difficulty: 'Easy',
-      flag: 'CTF{M41nfr4m3_Br34ch3d_2024}',
       isActive: true,
-      isLocked: false
+      isLocked: false,
+      multipleFlags: false,
+      flag: 'CTF{M41nfr4m3_Br34ch3d_2024}'
     },
     {
       title: 'Incident Response 101',
@@ -64,9 +75,10 @@ async function main() {
       points: 100,
       category: 'Forensics',
       difficulty: 'Easy',
-      flag: 'CTF{M41nfr4m3_Br34ch3d_2024}',
       isActive: true,
-      isLocked: false
+      isLocked: false,
+      multipleFlags: false,
+      flag: 'CTF{M41nfr4m3_Br34ch3d_2024}'
     },
     {
       title: 'Neural Decrypt',
@@ -74,9 +86,10 @@ async function main() {
       points: 200,
       category: 'Cryptography',
       difficulty: 'Medium',
-      flag: 'CTF{N3ur4l_D3crypt_1337}',
       isActive: true,
-      isLocked: false
+      isLocked: false,
+      multipleFlags: false,
+      flag: 'CTF{N3ur4l_D3crypt_1337}'
     },
     {
       title: 'Ghost in the Machine',
@@ -84,9 +97,10 @@ async function main() {
       points: 300,
       category: 'Reverse Engineering',
       difficulty: 'Hard',
-      flag: 'CTF{R0gu3_AI_C4ptur3d}',
       isActive: true,
-      isLocked: false
+      isLocked: false,
+      multipleFlags: false,
+      flag: 'CTF{R0gu3_AI_C4ptur3d}'
     },
     {
       title: 'Cyberdeck Override',
@@ -94,9 +108,10 @@ async function main() {
       points: 400,
       category: 'Binary',
       difficulty: 'Expert',
-      flag: 'CTF{Cyb3rd3ck_0v3rr1d3}',
       isActive: true,
-      isLocked: false
+      isLocked: false,
+      multipleFlags: false,
+      flag: 'CTF{Cyb3rd3ck_0v3rr1d3}'
     },
     {
       title: 'Corporate Espionage',
@@ -104,18 +119,57 @@ async function main() {
       points: 500,
       category: 'Web',
       difficulty: 'Hard',
-      flag: 'CTF{C0rp_D4t4_L34k}',
       isActive: true,
-      isLocked: false
+      isLocked: false,
+      multipleFlags: false,
+      flag: 'CTF{C0rp_D4t4_L34k}'
+    },
+    {
+      title: 'Multi-Layer Security',
+      description: 'A new security system with multiple layers of encryption. Each layer requires a different approach.',
+      points: 600,
+      category: 'Cryptography',
+      difficulty: 'Expert',
+      isActive: true,
+      isLocked: false,
+      multipleFlags: true
     }
   ];
 
-  const createdChallenges = [];
+  const createdChallenges: Challenge[] = [];
   for (const challenge of challenges) {
     const createdChallenge = await prisma.challenge.create({
       data: challenge
     });
     createdChallenges.push(createdChallenge);
+  }
+
+  // Create multiple flags for the Multi-Layer Security challenge
+  const multiLayerChallenge = createdChallenges.find(c => c.title === 'Multi-Layer Security');
+  if (multiLayerChallenge) {
+    const challengeFlags = [
+      {
+        flag: 'CTF{L4Y3R_1_BR34CH3D}',
+        points: 200,
+        challengeId: multiLayerChallenge.id
+      },
+      {
+        flag: 'CTF{L4Y3R_2_D3CRYPT3D}',
+        points: 200,
+        challengeId: multiLayerChallenge.id
+      },
+      {
+        flag: 'CTF{F1N4L_L4Y3R_PWN3D}',
+        points: 200,
+        challengeId: multiLayerChallenge.id
+      }
+    ];
+
+    for (const flag of challengeFlags) {
+      await prisma.challengeFlag.create({
+        data: flag
+      });
+    }
   }
 
   // Create challenge unlock conditions
@@ -162,14 +216,80 @@ async function main() {
     }
   ];
 
+  const createdHints = [];
   for (const hint of hints) {
-    await prisma.hint.create({
+    const createdHint = await prisma.hint.create({
       data: hint
     });
+    createdHints.push(createdHint);
   }
 
-  // Create sample submissions with varied success rates
-  const submissions = [
+  // Create sample hint purchases and record point history
+  const hintPurchases = [
+    {
+      teamId: createdTeams[0].id,
+      hintId: createdHints[0].id,
+      createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000) // 3 hours ago
+    },
+    {
+      teamId: createdTeams[2].id,
+      hintId: createdHints[1].id,
+      createdAt: new Date(Date.now() - 2.5 * 60 * 60 * 1000) // 2.5 hours ago
+    },
+    {
+      teamId: createdTeams[1].id,
+      hintId: createdHints[2].id,
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
+    }
+  ];
+
+  for (const purchase of hintPurchases) {
+    const hint = createdHints.find(h => h.id === purchase.hintId);
+    const team = createdTeams.find(t => t.id === purchase.teamId);
+    
+    if (hint && team) {
+      await prisma.$transaction(async (tx) => {
+        // Create team hint record
+        await tx.teamHint.create({
+          data: {
+            teamId: purchase.teamId,
+            hintId: purchase.hintId,
+            createdAt: purchase.createdAt,
+            updatedAt: purchase.createdAt
+          }
+        });
+
+        // Update team score
+        const updatedTeam = await tx.team.update({
+          where: { id: purchase.teamId },
+          data: {
+            score: {
+              decrement: hint.cost
+            }
+          }
+        });
+
+        // Record point history for hint purchase
+        await tx.teamPointHistory.create({
+          data: {
+            teamId: purchase.teamId,
+            points: -hint.cost,
+            totalPoints: updatedTeam.score,
+            reason: 'HINT_PURCHASE',
+            metadata: JSON.stringify({
+              hintId: hint.id,
+              challengeTitle: (await tx.challenge.findUnique({ where: { id: hint.challengeId } }))?.title,
+              cost: hint.cost
+            }),
+            createdAt: purchase.createdAt
+          }
+        });
+      });
+    }
+  }
+
+  // Create sample submissions with varied success rates and record point history
+  const submissions: SubmissionData[] = [
     {
       flag: 'CTF{M41nfr4m3_Br34ch3d_2024}',
       isCorrect: true,
@@ -200,23 +320,99 @@ async function main() {
       userId: createdUsers[2].id,
       challengeId: createdChallenges[2].id,
       teamId: createdTeams[1].id,
-      createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000) // 1 hours ago
+      createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000) // 1 hour ago
     }
   ];
 
-  for (const submission of submissions) {
-    await prisma.submission.create({
-      data: submission
-    });
+  // Get the flags for the multi-layer challenge
+  const multiLayerFlags = await prisma.challengeFlag.findMany({
+    where: {
+      challengeId: multiLayerChallenge?.id
+    }
+  });
 
+  // Add submissions for the first two flags of the multi-layer challenge
+  if (multiLayerFlags.length > 0) {
+    submissions.push(
+      {
+        flag: 'CTF{L4Y3R_1_BR34CH3D}',
+        isCorrect: true,
+        userId: createdUsers[0].id,
+        challengeId: multiLayerChallenge!.id,
+        teamId: createdTeams[0].id,
+        flagId: multiLayerFlags[0].id,
+        createdAt: new Date(Date.now() - 0.5 * 60 * 60 * 1000) // 30 minutes ago
+      },
+      {
+        flag: 'CTF{L4Y3R_2_D3CRYPT3D}',
+        isCorrect: true,
+        userId: createdUsers[0].id,
+        challengeId: multiLayerChallenge!.id,
+        teamId: createdTeams[0].id,
+        flagId: multiLayerFlags[1].id,
+        createdAt: new Date(Date.now() - 0.25 * 60 * 60 * 1000) // 15 minutes ago
+      }
+    );
+  }
+
+  for (const submission of submissions) {
     if (submission.isCorrect) {
-      await prisma.score.create({
-        data: {
-          points: createdChallenges.find(c => c.id === submission.challengeId)?.points || 0,
-          userId: submission.userId,
-          teamId: submission.teamId,
-          challengeId: submission.challengeId
-        }
+      await prisma.$transaction(async (tx) => {
+        // Create submission record
+        await tx.submission.create({
+          data: submission
+        });
+
+        // For multi-flag challenges, use the points from the specific flag
+        const points = submission.flagId
+          ? multiLayerFlags.find(f => f.id === submission.flagId)?.points
+          : createdChallenges.find(c => c.id === submission.challengeId)?.points;
+
+        // Create score record
+        await tx.score.create({
+          data: {
+            points: points || 0,
+            userId: submission.userId,
+            teamId: submission.teamId,
+            challengeId: submission.challengeId,
+            createdAt: submission.createdAt,
+            updatedAt: submission.createdAt
+          }
+        });
+
+        // Update team score
+        const updatedTeam = await tx.team.update({
+          where: { id: submission.teamId },
+          data: {
+            score: {
+              increment: points || 0
+            }
+          }
+        });
+
+        // Get challenge title for metadata
+        const challenge = await tx.challenge.findUnique({
+          where: { id: submission.challengeId },
+          select: { title: true, multipleFlags: true }
+        });
+
+        // Record point history for challenge solve
+        await tx.teamPointHistory.create({
+          data: {
+            teamId: submission.teamId,
+            points: points || 0,
+            totalPoints: updatedTeam.score,
+            reason: 'CHALLENGE_SOLVE',
+            metadata: JSON.stringify({
+              challengeId: submission.challengeId,
+              challengeTitle: challenge?.title,
+              flagId: submission.flagId,
+              points: points,
+              isPartialSolve: challenge?.multipleFlags
+            }),
+            createdAt: submission.createdAt
+          }
+        });
       });
     }
   }
@@ -224,7 +420,7 @@ async function main() {
   // Create sample announcements
   const announcements = [
     {
-      title: 'Welcome to CyberCTF 2024!',
+      title: 'Welcome to CyberCTF 2025!',
       content: 'Jack in, hackers! The virtual playground is now open. May the best team win!'
     },
     {
@@ -260,7 +456,7 @@ async function main() {
   const activityLogs = [
     {
       type: 'GAME_START',
-      description: 'CyberCTF 2024 has begun!',
+      description: 'CyberCTF 2025 has begun!',
     },
     {
       type: 'CHALLENGE_SOLVED',

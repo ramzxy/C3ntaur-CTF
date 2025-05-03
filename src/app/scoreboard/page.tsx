@@ -2,10 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { Righteous } from 'next/font/google';
 import PageLayout from '@/components/layouts/PageLayout';
 
-const righteous = Righteous({ weight: '400', subsets: ['latin'] });
 
 const ScoreboardChart = dynamic(() => import('@/components/ScoreboardChart'), {
   ssr: false,
