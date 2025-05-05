@@ -1,5 +1,5 @@
 import React from 'react';
-import { Team } from './types'; // Assuming Team type exists here
+import { Team, ApiError } from './types'; // Assuming Team type exists here
 
 interface TeamEditModalProps {
   team: Team | null;
@@ -43,8 +43,9 @@ export default function TeamEditModal({ team, isOpen, onClose, onSave, onDataRef
       if (onDataRefresh) {
         await onDataRefresh();
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to update team.');
+    } catch (err) {
+      const error = err as ApiError;
+      setError(error.message || 'Failed to update team.');
     } finally {
       setIsSaving(false);
     }
@@ -78,7 +79,7 @@ export default function TeamEditModal({ team, isOpen, onClose, onSave, onDataRef
               className="w-full bg-gray-700 text-white px-3 py-2 rounded border border-gray-600 focus:border-blue-500 focus:ring-blue-500"
               placeholder="e.g., GiRocket, FaFlag, etc."
             />
-            <p className="text-xs text-gray-400 mt-1">Enter a valid React Icons name (e.g., from 'react-icons/gi', 'react-icons/fa').</p>
+            <p className="text-xs text-gray-400 mt-1">Enter a valid React Icons name (e.g., from &apos;react-icons/gi&apos;, &apos;react-icons/fa&apos;).</p>
           </div>
           <div>
             <label htmlFor="teamColor" className="block text-sm font-medium text-gray-300 mb-1">Team Color</label>

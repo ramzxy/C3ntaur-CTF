@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FaPlus } from "react-icons/fa";
-import { Announcement, NewAnnouncement } from './types';
+import { Announcement, NewAnnouncement, ApiError } from './types';
 import AnnouncementModal from './AnnouncementModal';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { toast } from 'react-hot-toast';
@@ -26,10 +26,17 @@ export default function AnnouncementsTab() {
       }
       const data = await response.json();
       setAnnouncements(data);
-    } catch (err: any) {
-      setError(err.message);
-      toast.error(`Error fetching announcements: ${err.message}`);
-      console.error('Error fetching announcements:', err);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+        toast.error(`Error fetching announcements: ${err.message}`);
+        console.error('Error fetching announcements:', err);
+      } else {
+        const errorMessage = 'An unknown error occurred';
+        setError(errorMessage);
+        toast.error(`Error fetching announcements: ${errorMessage}`);
+        console.error('Error fetching announcements:', err);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -53,8 +60,9 @@ export default function AnnouncementsTab() {
       setIsModalOpen(false);
       await fetchAnnouncements();
     } catch (error) {
-      console.error('Error creating announcement:', error);
-      toast.error('Error creating announcement. See console for details.');
+      const err = error as ApiError;
+      console.error('Error creating announcement:', err);
+      toast.error(err.message || 'Failed to create announcement');
     }
   };
 

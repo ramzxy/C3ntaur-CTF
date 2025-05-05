@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Team } from './types'; // Import Team type
+import { User, Team, ApiError } from './types'; // Import Team type and ApiError type
 
 interface UserEditModalProps {
   user: User | null;
@@ -62,8 +62,9 @@ export default function UserEditModal({ user, isOpen, onClose, onSave, teams, on
       if (onDataRefresh) {
         await onDataRefresh();
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to update user alias.');
+    } catch (err) {
+      const error = err as ApiError;
+      setError(error.message || 'Failed to update user alias.');
     } finally {
       setIsSaving(false);
     }

@@ -113,3 +113,11 @@ export interface NewAnnouncement {
 }
 
 export type Tab = 'challenges' | 'users' | 'teams' | 'announcements' | 'configuration' | 'siteconfig';
+
+export interface ApiError extends Error {
+  message: string;
+  code?: string;
+  meta?: {
+    target?: string[];
+  };
+}

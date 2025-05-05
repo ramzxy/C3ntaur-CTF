@@ -1,13 +1,12 @@
 import React from 'react';
-import { Challenge, NewChallenge, UnlockCondition, ChallengeFile } from './types';
+import { Challenge, NewChallenge, UnlockCondition, ChallengeFile, ApiError } from './types';
 import { FaTrash } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 
 interface ChallengeModalProps {
   title: string;
   challenge: Challenge | NewChallenge;
-  setChallenge: React.Dispatch<React.SetStateAction<any>>;
-  onSubmit: (e: React.FormEvent) => Promise<void>;
+  setChallenge: React.Dispatch<React.SetStateAction<Challenge | NewChallenge>>;
   onClose: () => void;
   submitText: string;
   isEditing?: boolean;
@@ -19,7 +18,6 @@ export default function ChallengeModal({
   title,
   challenge,
   setChallenge,
-  onSubmit,
   onClose,
   submitText,
   isEditing = false,
@@ -511,11 +509,12 @@ const handleChallengeSubmit = async (
       onSuccess();
     }
 
-  } catch (err: any) {
-    console.error(`Error ${apiMethod === 'POST' ? 'creating' : 'updating'} challenge:`, err);
-    toast.error(`Error: ${err.message}`);
+  } catch (err) {
+    const error = err as ApiError;
+    console.error(`Error ${apiMethod === 'POST' ? 'creating' : 'updating'} challenge:`, error);
+    toast.error(`Error: ${error.message}`);
     if (onError) {
-      onError(err);
+      onError(error);
     }
   }
 };

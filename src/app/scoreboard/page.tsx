@@ -134,13 +134,13 @@ export default function ScoreboardPage() {
       <div className="prose prose-invert max-w-none mb-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mt-8">
           <div className="lg:col-span-3 lg:block hidden">
-            <ScoreboardChart chartData={chartData} gameConfig={gameConfig} />
+            <ScoreboardChart chartData={chartData} />
           </div>
           <div className="lg:col-span-1">
             <ScoreboardStandings scores={standingsScores} />
           </div>
         </div>
-      </div>
+        </div>
     </PageLayout>
   );
 }

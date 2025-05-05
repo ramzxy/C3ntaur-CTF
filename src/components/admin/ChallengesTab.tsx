@@ -1,14 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FaPlus, FaDownload, FaUpload } from "react-icons/fa";
-import { Challenge, NewChallenge, UnlockCondition } from './types';
+import { Challenge, NewChallenge, ApiError } from './types';
 import ChallengeModal from './ChallengeModal';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { toast } from 'react-hot-toast';
 
 export default function ChallengesTab() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingChallenge, setEditingChallenge] = useState<Challenge | NewChallenge | null>(null);
+  const [, setIsEditModalOpen] = useState(false);
+  const [editingChallenge, setEditingChallenge] = useState<Challenge | null>(null);
   const [challengeToDelete, setChallengeToDelete] = useState<Challenge | null>(null);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -19,31 +19,15 @@ export default function ChallengesTab() {
     category: '',
     points: 0,
     flag: '',
-    flags: [],
     multipleFlags: false,
-    difficulty: 'easy',
-    isLocked: false,
+    flags: [],
     files: [],
     hints: [],
+    difficulty: 'easy',
+    isActive: true,
+    isLocked: false,
     unlockConditions: []
   });
-
-  const resetNewChallenge = () => {
-    setNewChallenge({
-      title: '',
-      description: '',
-      category: '',
-      points: 0,
-      flag: '',
-      flags: [],
-      multipleFlags: false,
-      difficulty: 'easy',
-      isLocked: false,
-      files: [],
-      hints: [],
-      unlockConditions: []
-    });
-  };
 
   const fetchChallenges = useCallback(async () => {
     setIsLoading(true);
@@ -55,10 +39,11 @@ export default function ChallengesTab() {
       }
       const data = await response.json();
       setChallenges(data);
-    } catch (err: any) {
-      setError(err.message);
-      toast.error(`Error fetching challenges: ${err.message}`);
-      console.error('Error fetching challenges:', err);
+    } catch (err) {
+      const error = err as ApiError;
+      setError(error.message);
+      toast.error(`Error fetching challenges: ${error.message}`);
+      console.error('Error fetching challenges:', error);
     } finally {
       setIsLoading(false);
     }
@@ -68,29 +53,6 @@ export default function ChallengesTab() {
     fetchChallenges();
   }, [fetchChallenges]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const response = await fetch('/api/admin/challenges', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...newChallenge,
-          unlockConditions: newChallenge.unlockConditions?.map(cond => ({ ...cond })) || []
-        }),
-      });
-
-      if (response.ok) {
-        resetNewChallenge();
-        setIsModalOpen(false);
-        await fetchChallenges();
-      }
-    } catch (error) {
-      console.error('Error creating challenge:', error);
-    }
-  };
 
   const handleDelete = async (id: string) => {
     try {
@@ -107,7 +69,9 @@ export default function ChallengesTab() {
         await fetchChallenges();
       }
     } catch (error) {
-      console.error('Error deleting challenge:', error);
+      const err = error as ApiError;
+      console.error('Error deleting challenge:', err);
+      toast.error(err.message || 'Failed to delete challenge');
     }
   };
 
@@ -116,28 +80,6 @@ export default function ChallengesTab() {
     setIsEditModalOpen(true);
   };
 
-  const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingChallenge) return;
-
-    try {
-      const response = await fetch('/api/admin/challenges', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(editingChallenge),
-      });
-
-      if (response.ok) {
-        setIsEditModalOpen(false);
-        setEditingChallenge(null);
-        await fetchChallenges();
-      }
-    } catch (error) {
-      console.error('Error updating challenge:', error);
-    }
-  };
 
   const handleExportChallenges = async () => {
     try {
@@ -197,7 +139,7 @@ export default function ChallengesTab() {
   }
 
   return (
-    <div>
+    <div className="p-4">
       <div className="flex justify-between items-start mb-4">
         <h2 className="text-2xl font-semibold mb-6">Challenges</h2>
         <div className="flex flex-col sm:flex-row gap-2">
@@ -316,27 +258,25 @@ export default function ChallengesTab() {
       {/* Add Challenge Modal */}
       {isModalOpen && (
         <ChallengeModal
-          title="Add New Challenge"
+          title="Create New Challenge"
           challenge={newChallenge}
           allChallenges={challenges}
-          setChallenge={setNewChallenge as any}
+          setChallenge={setNewChallenge}
           onDataRefresh={fetchChallenges}
-          onSubmit={handleSubmit}
           onClose={() => setIsModalOpen(false)}
-          submitText="Create"
+          submitText="Create Challenge"
         />
       )}
 
       {/* Edit Challenge Modal */}
-      {isEditModalOpen && editingChallenge && (
+      {editingChallenge && (
         <ChallengeModal
-          title={`Edit Challenge: ${editingChallenge.title}`}
+          title="Edit Challenge"
           challenge={editingChallenge}
           allChallenges={challenges}
-          setChallenge={setEditingChallenge as any}
+          setChallenge={setEditingChallenge as React.Dispatch<React.SetStateAction<Challenge | NewChallenge>>}
           onDataRefresh={fetchChallenges}
-          onSubmit={handleUpdate}
-          onClose={() => setIsEditModalOpen(false)}
+          onClose={() => setEditingChallenge(null)}
           submitText="Save Changes"
           isEditing={true}
         />

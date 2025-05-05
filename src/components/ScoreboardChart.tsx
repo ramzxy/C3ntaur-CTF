@@ -27,12 +27,6 @@ interface PointHistory {
   createdAt: string;
 }
 
-interface GameConfig {
-  startTime: string;
-  endTime: string | null;
-  isActive: boolean;
-}
-
 interface ChartData {
   teams: Team[];
   pointHistories: Record<string, PointHistory[]>;
@@ -42,10 +36,9 @@ interface ChartData {
 
 interface ScoreboardChartProps {
   chartData: ChartData;
-  gameConfig: GameConfig;
 }
 
-export default function ScoreboardChart({ chartData, gameConfig }: ScoreboardChartProps) {
+export default function ScoreboardChart({ chartData }: ScoreboardChartProps) {
   const [hoveredTeam] = useState<string | null>(null);
   const { teams, pointHistories, chartStart, chartEnd } = chartData;
 
@@ -67,7 +60,7 @@ export default function ScoreboardChart({ chartData, gameConfig }: ScoreboardCha
   const chartRows = useMemo(() => {
     if (!timePoints.length) return [];
     return timePoints.map((time) => {
-      const row: Record<string, any> = {
+      const row: Record<string, number | string> = {
         timestamp: time.toLocaleTimeString([], {
           hour: '2-digit',
           minute: '2-digit',

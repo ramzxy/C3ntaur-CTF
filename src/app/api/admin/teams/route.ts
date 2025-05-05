@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { ApiError } from '@/components/admin/types';
 
 export async function GET() {
   try {
@@ -114,9 +115,10 @@ export async function PATCH(req: Request) {
     });
 
     return NextResponse.json(updatedTeam);
-  } catch (error: any) {
-    console.error('Error updating team:', error);
-    if (error.code === 'P2002' && error.meta?.target?.includes('name')) {
+  } catch (error) {
+    const err = error as ApiError;
+    console.error('Error updating team:', err);
+    if (err.code === 'P2002' && err.meta?.target?.includes('name')) {
       return NextResponse.json(
         { error: 'Team name already exists' },
         { status: 409 }

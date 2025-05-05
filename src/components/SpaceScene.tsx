@@ -3,6 +3,8 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { Billboard, OrbitControls, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { useRouter } from 'next/navigation';
+import { ApiError } from '@/components/admin/types';
+import { toast } from 'react-hot-toast';
 
 interface Challenge {
   id: string;
@@ -15,9 +17,18 @@ interface Challenge {
   isLocked: boolean;
   isSolved: boolean;
   solvedBy: Array<{ teamId: string; teamColor: string; }>;
-  files?: any[];
+  files?: ChallengeFile[];
   isUnlocked: boolean;
   unlockReason?: string;
+}
+
+interface ChallengeFile {
+  id: string;
+  name: string;
+  path: string;
+  size: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface CategorySatellite {
@@ -259,7 +270,9 @@ export default function SpaceScene({ isMobile }: { isMobile?: boolean }) {
 
         setCategories(newCategories);
       } catch (error) {
-        console.error('Error fetching categories:', error);
+        const err = error as ApiError;
+        console.error('Error loading space scene:', err);
+        toast.error(err.message || 'Failed to load space scene');
       }
     };
 

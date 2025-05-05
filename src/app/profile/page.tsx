@@ -5,10 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import * as GiIcons from 'react-icons/gi';
-import { Righteous } from 'next/font/google';
 import PageLayout from '@/components/layouts/PageLayout';
-
-const righteous = Righteous({ weight: '400', subsets: ['latin'] });
 
 interface Team {
   id: string;

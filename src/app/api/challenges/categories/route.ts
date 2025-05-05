@@ -20,15 +20,9 @@ interface Challenge {
   difficulty: string;
   isLocked: boolean;
   isActive: boolean;
-  submissions: Array<{
-    teamId: string;
-    team: {
-      color: string;
-    };
-  }>;
   files: ChallengeFile[];
-  isSolved?: boolean;
-  solvedBy?: Array<{
+  isSolved: boolean;
+  solvedBy: Array<{
     teamId: string;
     teamColor: string;
   }>;
@@ -86,6 +80,7 @@ export async function GET() {
         category: challenge.category,
         difficulty: challenge.difficulty,
         isActive: challenge.isActive,
+        isLocked: challenge.isLocked,
         files: challenge.files,
         isSolved: solvedChallengeIds.has(challenge.id),
         solvedBy: challenge.submissions.map(sub => ({

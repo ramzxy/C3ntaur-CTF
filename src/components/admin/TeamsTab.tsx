@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Team } from './types';
+import { Team, ApiError } from './types';
 import TeamEditModal from './TeamEditModal';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
@@ -22,10 +22,11 @@ export default function TeamsTab() {
       }
       const data = await response.json();
       setTeams(data);
-    } catch (err: any) {
-      setError(err.message);
-      toast.error(`Error fetching teams: ${err.message}`);
-      console.error('Error fetching teams:', err);
+    } catch (err) {
+      const error = err as ApiError;
+      setError(error.message);
+      toast.error(`Error fetching teams: ${error.message}`);
+      console.error('Error fetching teams:', error);
     } finally {
       setIsLoading(false);
     }
@@ -79,7 +80,8 @@ export default function TeamsTab() {
       setIsEditModalOpen(false);
       setEditingTeam(null);
       await fetchTeams();
-    } catch (error: any) {
+    } catch (err) {
+      const error = err as ApiError;
       console.error('Error updating team:', error);
       toast.error(`Error: ${error.message}`);
       throw error;

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { User, Team } from './types';
+import { User, Team, ApiError } from './types';
 import UserEditModal from './UserEditModal';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
@@ -32,10 +32,11 @@ export default function UsersTab() {
 
       setUsers(usersData);
       setTeams(teamsData);
-    } catch (err: any) {
-      setError(err.message);
-      toast.error(`Error fetching data: ${err.message}`);
-      console.error('Error fetching users or teams:', err);
+    } catch (err) {
+      const error = err as ApiError;
+      setError(error.message);
+      toast.error(`Error fetching data: ${error.message}`);
+      console.error('Error fetching users or teams:', error);
     } finally {
       setIsLoading(false);
     }
@@ -89,7 +90,8 @@ export default function UsersTab() {
       setIsEditModalOpen(false);
       setEditingUser(null);
       await fetchUsersAndTeams();
-    } catch (error: any) {
+    } catch (err) {
+      const error = err as ApiError;
       console.error('Error updating user alias:', error);
       toast.error(`Error: ${error.message}`);
       throw error;

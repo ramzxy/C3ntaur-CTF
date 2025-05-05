@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { ApiError } from '@/components/admin/types';
 
 export async function GET() {
   try {
@@ -84,52 +85,32 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    // Accept id, alias, name, teamId, isTeamLeader for update
     const { id, alias, name, teamId, isTeamLeader } = await req.json();
 
     if (!id) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
-    // Allow updating individual fields
-    const updateData: { alias?: string; name?: string; teamId?: string | null, isTeamLeader?: boolean } = {};
-
-    // Validate and add alias if present
-    if (alias !== undefined) {
-      const trimmedAlias = alias.trim();
-      if (!trimmedAlias) {
-        return NextResponse.json({ error: 'Alias cannot be empty' }, { status: 400 });
-      }
-      updateData.alias = trimmedAlias;
+    if (alias !== undefined && !alias.trim()) {
+      return NextResponse.json({ error: 'Alias cannot be empty' }, { status: 400 });
     }
 
-    // Validate and add name if present
-    if (name !== undefined) {
-      const trimmedName = name.trim();
-      if (!trimmedName) {
-        return NextResponse.json({ error: 'Name cannot be empty' }, { status: 400 });
-      }
-      updateData.name = trimmedName;
+    if (name !== undefined && !name.trim()) {
+      return NextResponse.json({ error: 'Name cannot be empty' }, { status: 400 });
     }
 
-    // Add teamId if present (null means remove from team)
-    if (teamId !== undefined) {
-      updateData.teamId = teamId; // teamId can be null
-      // If removing from team or not explicitly setting leader, set leader to false
-      if (teamId === null || isTeamLeader === undefined) {
-        updateData.isTeamLeader = false;
-      }
-    }
+    const updateData: {
+      alias?: string;
+      name?: string;
+      teamId?: string | null;
+      isTeamLeader?: boolean;
+    } = {};
 
-    // Add isTeamLeader if present AND a team is selected
-    if (isTeamLeader !== undefined && updateData.teamId !== null && teamId !== null) {
-      // Only allow setting isTeamLeader if teamId is also being set to a non-null value or already exists
-      // Note: This logic doesn't automatically handle leader conflicts within a team. 
-      // A more robust solution might require a transaction to unset the previous leader.
-      updateData.isTeamLeader = isTeamLeader;
-    }
+    if (alias !== undefined) updateData.alias = alias.trim();
+    if (name !== undefined) updateData.name = name.trim();
+    if (teamId !== undefined) updateData.teamId = teamId;
+    if (isTeamLeader !== undefined) updateData.isTeamLeader = isTeamLeader;
 
-    // Check if any data was actually provided for update
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json({ error: 'No update data provided' }, { status: 400 });
     }
@@ -137,32 +118,16 @@ export async function PATCH(req: Request) {
     const updatedUser = await prisma.user.update({
       where: { id },
       data: updateData,
-      // Select the same fields as GET to return the updated user
-      select: {
-        id: true,
-        alias: true,
-        name: true,
-        isAdmin: true,
-        teamId: true,
-        isTeamLeader: true,
-      },
     });
 
     return NextResponse.json(updatedUser);
-  } catch (error: any) {
-    console.error('Error updating user alias:', error);
-    // Handle potential unique constraint violation for alias
-    if (error.code === 'P2002' && error.meta?.target?.includes('alias')) {
+  } catch (error) {
+    const err = error as ApiError;
+    console.error('Error updating user:', err);
+    if (err.code === 'P2002' && err.meta?.target?.includes('alias')) {
       return NextResponse.json(
         { error: 'Alias already exists' },
-        { status: 409 } // Conflict
-      );
-    }
-    // Handle user not found during update
-    if (error.code === 'P2025') {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
+        { status: 409 }
       );
     }
     return NextResponse.json(

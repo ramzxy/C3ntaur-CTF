@@ -11,6 +11,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
+    // Check if user has a team
+    if (!session.user.teamId) {
+      return NextResponse.json(
+        { message: 'You must be part of a team to submit flags' },
+        { status: 403 }
+      );
+    }
+
+    const teamId = session.user.teamId; // Store teamId in a variable to ensure it's not undefined
+
     // Get current game config
     const gameConfig = await prisma.gameConfig.findFirst({
       where: { isActive: true }
@@ -139,7 +149,7 @@ export async function POST(request: Request) {
       const submission = await tx.submission.create({
         data: {
           userId: session.user.id,
-          teamId: session.user.teamId ?? "",
+          teamId,
           challengeId,
           flagId: solvedFlagId,
           flag,
@@ -150,15 +160,19 @@ export async function POST(request: Request) {
       if (isCorrect) {
         // Get team for activity log and point history
         const team = await tx.team.findUnique({
-          where: { id: session.user.teamId },
+          where: { id: teamId },
           select: { name: true, score: true },
         });
+
+        if (!team) {
+          throw new Error('Team not found');
+        }
 
         // Create score record
         await tx.score.create({
           data: {
             userId: session.user.id,
-            teamId: session.user.teamId ?? "",
+            teamId,
             challengeId,
             points: flagPoints,
           },
@@ -166,7 +180,7 @@ export async function POST(request: Request) {
 
         // Update team score
         const updatedTeam = await tx.team.update({
-          where: { id: session.user.teamId },
+          where: { id: teamId },
           data: {
             score: {
               increment: flagPoints,
@@ -177,7 +191,7 @@ export async function POST(request: Request) {
         // Record point history
         await tx.teamPointHistory.create({
           data: {
-            teamId: session.user.teamId ?? "",
+            teamId,
             points: flagPoints,
             totalPoints: updatedTeam.score,
             reason: 'CHALLENGE_SOLVE',
@@ -196,10 +210,10 @@ export async function POST(request: Request) {
           data: {
             type: 'SUBMISSION',
             description: challenge.multipleFlags 
-              ? `Team ${team?.name} found a flag in challenge "${challenge.title}" worth ${flagPoints} points`
-              : `Team ${team?.name} solved challenge "${challenge.title}" for ${flagPoints} points`,
-            teamId: session.user.teamId ?? "",
-          },
+              ? `Team ${team.name} found a flag in challenge "${challenge.title}" worth ${flagPoints} points`
+              : `Team ${team.name} solved challenge "${challenge.title}" for ${flagPoints} points`,
+            teamId
+          }
         });
 
         // For single flag challenges or when all flags are found, check for and unlock dependent challenges
@@ -239,18 +253,15 @@ export async function POST(request: Request) {
       return { submission, points: 0 };
     });
 
-    return NextResponse.json(
-      { 
-        message: isCorrect ? 'Correct flag!' : 'Incorrect flag',
-        isCorrect,
-        points: result.points
-      },
-      { status: isCorrect ? 200 : 400 }
-    );
+    return NextResponse.json({
+      message: isCorrect ? 'Correct flag!' : 'Incorrect flag',
+      isCorrect,
+      points: result.points
+    });
   } catch (error) {
     console.error('Error submitting flag:', error);
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { message: 'An error occurred while submitting the flag' },
       { status: 500 }
     );
   }
