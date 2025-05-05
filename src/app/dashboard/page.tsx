@@ -55,6 +55,10 @@ export default function Dashboard() {
   const [isActivityOpen, setIsActivityOpen] = useState(true);
   const [isGameClockOpen, setIsGameClockOpen] = useState(true);
 
+  // State for mobile modal
+  const [isMobileModalOpen, setIsMobileModalOpen] = useState(false);
+  const [activeMobileSection, setActiveMobileSection] = useState<'leaderboard' | 'announcements' | 'activity' | 'gameclock'>('leaderboard');
+
   // Add window resize listener for mobile view
   useEffect(() => {
     const checkMobileView = () => {
@@ -176,41 +180,120 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Mobile Layout - Stack */}
+      {/* Mobile Layout - Full Screen Space Scene with Modal */}
       <div className="xl:hidden flex flex-col h-screen">
-        <div className="flex-none h-[60vh]">
+        <div className="flex-1 relative">
           <SpaceScene isMobile={true} />
         </div>
-        <div className="flex-1 overflow-auto bg-black">
-          <div className="divide-y divide-gray-700">
-            <Leaderboard
-              teams={leaderboard.teams}
-              currentUserTeam={leaderboard.currentUserTeam}
-              isOpen={isLeaderboardOpen}
-              setIsOpen={setIsLeaderboardOpen}
-              isMobile={true}
-            />
-            <Announcements
-              announcements={announcements}
-              isOpen={isAnnouncementsOpen}
-              setIsOpen={setIsAnnouncementsOpen}
-              isMobile={true}
-            />
-            <Activity
-              activities={activities}
-              isOpen={isActivityOpen}
-              setIsOpen={setIsActivityOpen}
-              isMobile={true}
-            />
-            <GameClock
-              timeLeft={timeLeft}
-              gameConfig={gameConfig}
-              isOpen={isGameClockOpen}
-              setIsOpen={setIsGameClockOpen}
-              isMobile={true}
-            />
-          </div>
+        
+        {/* Mobile Navigation Button */}
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
+          <button
+            onClick={() => setIsMobileModalOpen(true)}
+            className="bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+          >
+            View Dashboard
+          </button>
         </div>
+
+        {/* Mobile Modal */}
+        {isMobileModalOpen && (
+          <div className="fixed inset-0 bg-black flex flex-col z-50">
+            {/* Close Button - Overlayed in top right */}
+            <div className="absolute top-4 right-4 z-50">
+              <button
+                onClick={() => setIsMobileModalOpen(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Navigation Stack - Vertical and condensed */}
+            <div className="flex flex-col border-b border-gray-700 pt-14">
+              <button
+                onClick={() => setActiveMobileSection('leaderboard')}
+                className={`p-2.5 text-left border-b border-gray-700 ${
+                  activeMobileSection === 'leaderboard'
+                    ? 'bg-gray-700 text-white'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                }`}
+              >
+                Leaderboard
+              </button>
+              <button
+                onClick={() => setActiveMobileSection('announcements')}
+                className={`p-2.5 text-left border-b border-gray-700 ${
+                  activeMobileSection === 'announcements'
+                    ? 'bg-gray-700 text-white'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                }`}
+              >
+                Announcements
+              </button>
+              <button
+                onClick={() => setActiveMobileSection('activity')}
+                className={`p-2.5 text-left border-b border-gray-700 ${
+                  activeMobileSection === 'activity'
+                    ? 'bg-gray-700 text-white'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                }`}
+              >
+                Activity
+              </button>
+              <button
+                onClick={() => setActiveMobileSection('gameclock')}
+                className={`p-2.5 text-left ${
+                  activeMobileSection === 'gameclock'
+                    ? 'bg-gray-700 text-white'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                }`}
+              >
+                Game Clock
+              </button>
+            </div>
+
+            {/* Content Area */}
+            <div className="flex-1 overflow-y-auto">
+              {activeMobileSection === 'leaderboard' && (
+                <Leaderboard
+                  teams={leaderboard.teams}
+                  currentUserTeam={leaderboard.currentUserTeam}
+                  isOpen={true}
+                  setIsOpen={() => {}}
+                  isMobile={true}
+                />
+              )}
+              {activeMobileSection === 'announcements' && (
+                <Announcements
+                  announcements={announcements}
+                  isOpen={true}
+                  setIsOpen={() => {}}
+                  isMobile={true}
+                />
+              )}
+              {activeMobileSection === 'activity' && (
+                <Activity
+                  activities={activities}
+                  isOpen={true}
+                  setIsOpen={() => {}}
+                  isMobile={true}
+                />
+              )}
+              {activeMobileSection === 'gameclock' && (
+                <GameClock
+                  timeLeft={timeLeft}
+                  gameConfig={gameConfig}
+                  isOpen={true}
+                  setIsOpen={() => {}}
+                  isMobile={true}
+                />
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

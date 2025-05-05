@@ -106,18 +106,21 @@ export default function GameClock({ gameConfig, isOpen, setIsOpen, isMobile }: G
 
   return (
     <div className={`relative bg-black ${!isMobile && 'border'}`}>
-      <button
-        className="flex items-center justify-between w-full z-20 text-white p-2 relative border-b-2 lg:border-t-2 lg:border-b-0"
-        onClick={() => setIsOpen(!isOpen)}
-        aria-expanded={isOpen}
-      >
-        <h3 className="text-lg font-semibold">GAMECLOCK</h3>
-        {isOpen ? (
-          <FaChevronUp className="h-5 w-5 transition-transform" />
-        ) : (
-          <FaChevronDown className="h-5 w-5 transition-transform" />
-        )}
-      </button>
+      {/* Header - only show if not mobile */}
+      {!isMobile && (
+        <button
+          className="flex items-center justify-between w-full z-20 text-white p-2 relative border-b-2 lg:border-t-2 lg:border-b-0"
+          onClick={() => setIsOpen(!isOpen)}
+          aria-expanded={isOpen}
+        >
+          <h3 className="text-lg font-semibold">GAMECLOCK</h3>
+          {isOpen ? (
+            <FaChevronUp className="h-5 w-5 transition-transform" />
+          ) : (
+            <FaChevronDown className="h-5 w-5 transition-transform" />
+          )}
+        </button>
+      )}
 
       <div 
         className={`overflow-y-hidden transition-[max-height] duration-300 ease-in-out bg-black ${

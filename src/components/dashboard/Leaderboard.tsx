@@ -42,18 +42,20 @@ export default function Leaderboard({ teams, currentUserTeam, isOpen, setIsOpen,
   return (
     <div className={`bg-black ${!isMobile && 'border'} ${isMobile && 'border-t-2'}`}>
       <div className="flex flex-col">
-        {/* Fixed header at top */}
-        <button
-          className="flex items-center justify-between w-full text-white p-2 relative border-b-2 "
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <h3 className="text-lg font-semibold">LEADERBOARD</h3>
-          {isOpen ? (
-            <FaChevronUp className="h-5 w-5" />
-          ) : (
-            <FaChevronDown className="h-5 w-5" />
-          )}
-        </button>
+        {/* Fixed header at top - only show if not mobile */}
+        {!isMobile && (
+          <button
+            className="flex items-center justify-between w-full text-white p-2 relative border-b-2"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            <h3 className="text-lg font-semibold">LEADERBOARD</h3>
+            {isOpen ? (
+              <FaChevronUp className="h-5 w-5" />
+            ) : (
+              <FaChevronDown className="h-5 w-5" />
+            )}
+          </button>
+        )}
 
         {/* Content area with scroll */}
         <div 

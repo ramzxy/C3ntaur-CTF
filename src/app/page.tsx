@@ -39,22 +39,22 @@ export default function Home() {
             <p className="mt-5 max-w-xl mx-auto text-xl text-gray-300">
               {subtitle}
             </p>
-            <div className="mt-10 flex justify-center gap-2">
+            <div className="mt-10 flex flex-wrap justify-center gap-2">
               <Link
                 href="/auth/signup"
-                className="px-6 py-3 border border-white hover:text-blue-500 hover:border-blue-500"
+                className="px-6 py-3 border border-white hover:text-blue-500 hover:border-blue-500 whitespace-nowrap"
               >
                 Register
               </Link>
               <Link
                 href="/auth/signin"
-                className="px-6 py-3 border border-gray-400 text-gray-400 hover:text-blue-500 hover:border-blue-500"
+                className="px-6 py-3 border border-gray-400 text-gray-400 hover:text-blue-500 hover:border-blue-500 whitespace-nowrap"
               >
                 Log In
               </Link>
               <Link
                 href="/rules"
-                className="px-6 py-3 border border-gray-400 text-gray-400 hover:text-blue-500 hover:border-blue-500"
+                className="px-6 py-3 border border-gray-400 text-gray-400 hover:text-blue-500 hover:border-blue-500 whitespace-nowrap"
               >
                 Rules
               </Link>

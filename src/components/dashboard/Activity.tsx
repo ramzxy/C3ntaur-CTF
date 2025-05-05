@@ -24,18 +24,21 @@ interface ActivityProps {
 export default function Activity({ activities, isOpen, setIsOpen, isMobile = false }: ActivityProps) {
   return (
     <div className={`bg-black ${!isMobile && 'border'}`}>
-      <button
-        className="flex items-center justify-between w-full text-white p-2 relative border-b-2"
-        onClick={() => setIsOpen(!isOpen)}
-        aria-expanded={isOpen}
-      >
-        <h3 className="text-lg font-semibold">ACTIVITY</h3>
-        {isOpen ? (
-          <FaChevronUp className="h-5 w-5 transition-transform" />
-        ) : (
-          <FaChevronDown className="h-5 w-5 transition-transform" />
-        )}
-      </button>
+      {/* Header - only show if not mobile */}
+      {!isMobile && (
+        <button
+          className="flex items-center justify-between w-full text-white p-2 relative border-b-2"
+          onClick={() => setIsOpen(!isOpen)}
+          aria-expanded={isOpen}
+        >
+          <h3 className="text-lg font-semibold">ACTIVITY</h3>
+          {isOpen ? (
+            <FaChevronUp className="h-5 w-5 transition-transform" />
+          ) : (
+            <FaChevronDown className="h-5 w-5 transition-transform" />
+          )}
+        </button>
+      )}
 
       <div
         className={`overflow-y-auto transition-[max-height] duration-300 ease-in-out ${isOpen ? (isMobile ? 'max-h-[50vh]' : 'max-h-[33vh]') : 'max-h-0'

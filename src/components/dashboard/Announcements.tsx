@@ -18,17 +18,20 @@ export default function Announcements({ announcements, isOpen, setIsOpen, isMobi
   return (
     <div className={`bg-black ${!isMobile && 'border'}`}>
       <div className="flex flex-col">
-        <button
-          className="flex items-center justify-between w-full text-white p-2 relative border-b-2"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <h3 className="text-lg font-semibold">ANNOUNCEMENTS</h3>
-          {isOpen ? (
-            <FaChevronUp className="h-5 w-5" />
-          ) : (
-            <FaChevronDown className="h-5 w-5" />
-          )}
-        </button>
+        {/* Header - only show if not mobile */}
+        {!isMobile && (
+          <button
+            className="flex items-center justify-between w-full text-white p-2 relative border-b-2"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            <h3 className="text-lg font-semibold">ANNOUNCEMENTS</h3>
+            {isOpen ? (
+              <FaChevronUp className="h-5 w-5" />
+            ) : (
+              <FaChevronDown className="h-5 w-5" />
+            )}
+          </button>
+        )}
 
         <div 
           className={`overflow-auto transition-[max-height] duration-300 ease-in-out ${
