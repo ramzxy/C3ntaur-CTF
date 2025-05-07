@@ -9,39 +9,9 @@ import { Righteous } from 'next/font/google';
 import { MarkdownComponents } from '@/components/MarkdownComponents';
 import toast from 'react-hot-toast';
 import { IoArrowBack } from 'react-icons/io5';
+import { Challenge, Hint, fetchChallenge, fetchHints, purchaseHint, submitFlag, downloadFile } from '@/utils/api';
 
 const righteous = Righteous({ weight: '400', subsets: ['latin'] });
-
-interface Challenge {
-  id: string;
-  title: string;
-  description?: string;
-  points: number;
-  difficulty: string;
-  isSolved?: boolean;
-  category: string;
-  solvedByTeamId?: string;
-  files?: {
-    name: string;
-    path: string;
-    size: number;
-  }[];
-  isLocked?: boolean;
-  unlockReason?: string;
-  multipleFlags?: boolean;
-  flags?: {
-    id: string;
-    points: number;
-    isSolved?: boolean;
-  }[];
-}
-
-interface Hint {
-  id: string;
-  content: string;
-  cost: number;
-  isPurchased: boolean;
-}
 
 export default function ChallengePage() {
   const params = useParams();
@@ -60,10 +30,7 @@ export default function ChallengePage() {
 
   const handleDownload = async (url: string, filename: string) => {
     try {
-      const response = await fetch(`/api/files/download?filename=${encodeURIComponent(filename)}`);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-      const blob = await response.blob();
+      const blob = await downloadFile(filename);
       const downloadUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = downloadUrl;
@@ -79,21 +46,11 @@ export default function ChallengePage() {
   };
 
   useEffect(() => {
-    const fetchChallenge = async () => {
+    const loadChallenge = async () => {
       try {
-        const [challengeRes, hintsRes] = await Promise.all([
-          fetch(`/api/challenges/${challengeId}`),
-          session ? fetch(`/api/hints?challengeId=${challengeId}`) : Promise.resolve({ json: () => [] })
-        ]);
-
-        if (!challengeRes.ok) {
-          router.push('/dashboard');
-          return;
-        }
-
         const [challengeData, hintsData] = await Promise.all([
-          challengeRes.json(),
-          hintsRes.json ? hintsRes.json() : []
+          fetchChallenge(challengeId),
+          session ? fetchHints(challengeId) : []
         ]);
 
         setChallenge(challengeData);
@@ -104,29 +61,18 @@ export default function ChallengePage() {
       }
     };
 
-    fetchChallenge();
+    loadChallenge();
   }, [challengeId, router, session]);
 
   const handlePurchaseHint = async (hintId: string) => {
     setIsPurchasing(true);
     try {
-      const response = await fetch('/api/hints/purchase', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ hintId }),
-      });
-
-      if (response.ok) {
-        const hintsRes = await fetch(`/api/hints?challengeId=${challengeId}`);
-        const hintsData = await hintsRes.json();
-        setHints(hintsData);
-      } else {
-        const data = await response.json();
-        toast.error(data.error || 'Error purchasing hint');
-      }
+      await purchaseHint(hintId);
+      const hintsData = await fetchHints(challengeId);
+      setHints(hintsData);
     } catch (error) {
       console.error('Error purchasing hint:', error);
-      toast.error('Error purchasing hint');
+      toast.error(error instanceof Error ? error.message : 'Error purchasing hint');
     } finally {
       setIsPurchasing(false);
     }
@@ -138,20 +84,12 @@ export default function ChallengePage() {
     setSubmissionStatus(null);
 
     try {
-      const response = await fetch('/api/submissions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ challengeId, flag }),
-      });
-
-      const data = await response.json();
+      const data = await submitFlag(challengeId, flag);
       setSubmissionStatus(data);
 
       if (data.isCorrect) {
-        const challengeResponse = await fetch(`/api/challenges/${challengeId}`);
-        const challengeData = await challengeResponse.json();
+        const challengeData = await fetchChallenge(challengeId);
         setChallenge(challengeData);
-        
         toast.success(`Correct! You earned ${data.points} points!`);
       }
     } catch (error) {

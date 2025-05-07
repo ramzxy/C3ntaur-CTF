@@ -7,21 +7,12 @@ import { OrbitControls } from '@react-three/drei';
 import DetailedCategoryView from '@/components/DetailedCategoryView';
 import { useRouter } from 'next/navigation';
 import { IoArrowBack } from 'react-icons/io5';
-
-interface Challenge {
-  id: string;
-  title: string;
-  isSolved: boolean;
-  isLocked: boolean;
-  points: number;
-  category: string;
-  solvedBy: { teamId: string; teamColor: string }[];
-}
+import { CategoryChallenge, fetchChallengesByCategory } from '@/utils/api';
 
 export default function CategoryPage() {
   const params = useParams();
   const router = useRouter();
-  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [challenges, setChallenges] = useState<CategoryChallenge[]>([]);
   const [hoveredChallenge, setHoveredChallenge] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [dots, setDots] = useState('   '); // Initialize with 3 spaces
@@ -53,14 +44,9 @@ export default function CategoryPage() {
   const categoryName = challenges[0]?.category || decodeURIComponent(categoryId);
 
   useEffect(() => {
-    const fetchChallenges = async () => {
+    const loadChallenges = async () => {
       try {
-        const response = await fetch(`/api/challenges/categories/${categoryId}`);
-        if (!response.ok) {
-          router.push('/dashboard');
-          return;
-        }
-        const data = await response.json();
+        const data = await fetchChallengesByCategory(categoryId);
         setChallenges(data.challenges);
       } catch (error) {
         console.error('Error fetching challenges:', error);
@@ -68,7 +54,7 @@ export default function CategoryPage() {
       }
     };
 
-    fetchChallenges();
+    loadChallenges();
   }, [categoryId, router]);
 
   return (

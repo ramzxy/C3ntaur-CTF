@@ -3,25 +3,23 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import SpaceScene from '@/components/SpaceScene';
-
-interface SiteConfig {
-  key: string;
-  value: string;
-}
+import { fetchSiteConfig } from '@/utils/api';
 
 export default function Home() {
   const [title, setTitle] = useState('Welcome to Orbital CTF');
   const [subtitle, setSubtitle] = useState('80s retro ui, space-themed, batteries included.');
 
   useEffect(() => {
-    fetch('/api/config')
-      .then(res => res.json())
-      .then((configs: SiteConfig[]) => {
+    fetchSiteConfig()
+      .then((configs) => {
         const titleConfig = configs.find(c => c.key === 'homepage_title');
         const subtitleConfig = configs.find(c => c.key === 'homepage_subtitle');
         
         if (titleConfig) setTitle(titleConfig.value);
         if (subtitleConfig) setSubtitle(subtitleConfig.value);
+      })
+      .catch(error => {
+        console.error('Failed to load site configuration:', error);
       });
   }, []);
 

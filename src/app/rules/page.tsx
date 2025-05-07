@@ -5,19 +5,15 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { MarkdownComponents } from '@/components/MarkdownComponents';
 import PageLayout from '@/components/layouts/PageLayout';
-
+import { fetchRules } from '@/utils/api';
 
 export default function RulesPage() {
   const [rules, setRules] = useState<string>('Loading...');
 
   useEffect(() => {
-    const fetchRules = async () => {
+    const loadRules = async () => {
       try {
-        const response = await fetch('/api/rules');
-        if (!response.ok) {
-          throw new Error('Failed to fetch rules');
-        }
-        const data = await response.json();
+        const data = await fetchRules();
         setRules(data.siteRules);
       } catch (error) {
         console.error('Error fetching rules:', error);
@@ -25,7 +21,7 @@ export default function RulesPage() {
       }
     };
 
-    fetchRules();
+    loadRules();
   }, []);
 
   return (

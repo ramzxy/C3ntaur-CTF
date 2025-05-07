@@ -41,39 +41,39 @@ model Team {
 }
 
 model Challenge {
-  id          String                @id @default(cuid())
-  title       String
-  description String
-  points      Int
-  flag        String?
-  flags       ChallengeFlag[]
-  multipleFlags Boolean             @default(false)
-  category    String
-  difficulty  String
-  isActive    Boolean               @default(true)
-  isLocked    Boolean               @default(false)
-  createdAt   DateTime              @default(now())
-  updatedAt   DateTime              @updatedAt
+  id               String            @id @default(cuid())
+  title            String
+  description      String
+  points           Int
+  flag             String?
+  flags            ChallengeFlag[]
+  multipleFlags    Boolean           @default(false)
+  category         String
+  difficulty       String
+  isActive         Boolean           @default(true)
+  isLocked         Boolean           @default(false)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
   unlockConditions UnlockCondition[]
-  files       ChallengeFile[]
-  hints       Hint[]
-  submissions Submission[]
-  scores      Score[]
+  files            ChallengeFile[]
+  hints            Hint[]
+  submissions      Submission[]
+  scores           Score[]
 }
 
 model Submission {
-  id          String    @id @default(cuid())
-  flag        String
-  isCorrect   Boolean
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  userId      String
-  challengeId String
-  flagId      String?
-  teamId      String
-  team        Team      @relation(fields: [teamId], references: [id])
-  challenge   Challenge @relation(fields: [challengeId], references: [id])
-  user        User      @relation(fields: [userId], references: [id])
+  id            String         @id @default(cuid())
+  flag          String
+  isCorrect     Boolean
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  userId        String
+  challengeId   String
+  flagId        String?
+  teamId        String
+  team          Team           @relation(fields: [teamId], references: [id])
+  challenge     Challenge      @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id])
   challengeFlag ChallengeFlag? @relation(fields: [flagId], references: [id])
 
   @@index([challengeId])
@@ -114,7 +114,7 @@ model ChallengeFile {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   challengeId String
-  challenge   Challenge @relation(fields: [challengeId], references: [id])
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
 }
 
 model Hint {
@@ -124,7 +124,7 @@ model Hint {
   challengeId String
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-  challenge   Challenge  @relation(fields: [challengeId], references: [id])
+  challenge   Challenge  @relation(fields: [challengeId], references: [id], onDelete: Cascade)
   teamHints   TeamHint[]
 }
 
@@ -134,7 +134,7 @@ model TeamHint {
   hintId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  hint      Hint     @relation(fields: [hintId], references: [id])
+  hint      Hint     @relation(fields: [hintId], references: [id], onDelete: Cascade)
   team      Team     @relation(fields: [teamId], references: [id])
 
   @@unique([teamId, hintId])
@@ -156,7 +156,7 @@ model Score {
   teamId      String
   challengeId String
   team        Team      @relation(fields: [teamId], references: [id])
-  challenge   Challenge @relation(fields: [challengeId], references: [id])
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
   user        User      @relation(fields: [userId], references: [id])
 
   @@index([teamId])

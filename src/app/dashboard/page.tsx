@@ -6,44 +6,20 @@ import Leaderboard from '@/components/dashboard/Leaderboard';
 import Announcements from '@/components/dashboard/Announcements';
 import Activity from '@/components/dashboard/Activity';
 import GameClock from '@/components/dashboard/GameClock';
-
-interface Team {
-  id: string;
-  name: string;
-  score: number;
-}
-
-interface Announcement {
-  id: string;
-  title: string;
-  content: string;
-  createdAt: string;
-}
-
-interface ActivityLog {
-  id: string;
-  type: string;
-  description: string;
-  createdAt: string;
-  team?: Team;
-}
-
-interface GameConfig {
-  id: string;
-  startTime: string;
-  endTime: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  hasEndTime: boolean;
-}
+import { 
+  LeaderboardResponse, 
+  Announcement, 
+  ActivityLog, 
+  GameConfig,
+  fetchLeaderboard,
+  fetchAnnouncements,
+  fetchActivity,
+  fetchGameConfig
+} from '@/utils/api';
 
 export default function Dashboard() {
   // State for each section
-  const [leaderboard, setLeaderboard] = useState<{
-    teams: Team[];
-    currentUserTeam: Team | null;
-  }>({ teams: [], currentUserTeam: null });
+  const [leaderboard, setLeaderboard] = useState<LeaderboardResponse>({ teams: [], currentUserTeam: null });
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [activities, setActivities] = useState<ActivityLog[]>([]);
   const [gameConfig, setGameConfig] = useState<GameConfig | null>(null);
@@ -82,20 +58,13 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    const fetchAndUpdate = async () => {
+    const loadDashboardData = async () => {
       try {
-        const [leaderboardRes, announcementsRes, activitiesRes, gameConfigRes] = await Promise.all([
-          fetch('/api/leaderboard'),
-          fetch('/api/announcements'),
-          fetch('/api/activity'),
-          fetch('/api/game-config'),
-        ]);
-
         const [leaderboardData, announcementsData, activitiesData, gameConfigData] = await Promise.all([
-          leaderboardRes.json(),
-          announcementsRes.json(),
-          activitiesRes.json(),
-          gameConfigRes.json(),
+          fetchLeaderboard(),
+          fetchAnnouncements(),
+          fetchActivity(),
+          fetchGameConfig()
         ]);
 
         setLeaderboard(leaderboardData);
@@ -123,8 +92,8 @@ export default function Dashboard() {
       }
     };
 
-    fetchAndUpdate(); // Initial call
-    const interval = setInterval(fetchAndUpdate, 30000);
+    loadDashboardData(); // Initial call
+    const interval = setInterval(loadDashboardData, 30000);
     return () => clearInterval(interval);
   }, []);
 

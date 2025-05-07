@@ -6,21 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import * as GiIcons from 'react-icons/gi';
 import PageLayout from '@/components/layouts/PageLayout';
-
-interface Team {
-  id: string;
-  name: string;
-  code: string;
-  score: number;
-  icon?: string;
-  color?: string;
-  members: {
-    id: string;
-    alias: string;
-    name: string;
-    isTeamLeader: boolean;
-  }[];
-}
+import { Team, fetchTeam } from '@/utils/api';
 
 export default function Profile() {
   const { data: session, status } = useSession();
@@ -28,11 +14,10 @@ export default function Profile() {
   const [team, setTeam] = useState<Team | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchTeamData = useCallback(async () => {
+  const loadTeamData = useCallback(async () => {
     try {
-      const response = await fetch(`/api/teams/${session?.user?.teamId}`);
-      if (response.ok) {
-        const data = await response.json();
+      if (session?.user?.teamId) {
+        const data = await fetchTeam(session.user.teamId);
         setTeam(data);
       }
     } catch (error) {
@@ -46,9 +31,9 @@ export default function Profile() {
     if (status === 'unauthenticated') {
       router.push('/auth/signin');
     } else if (status === 'authenticated' && session?.user?.teamId) {
-      fetchTeamData();
+      loadTeamData();
     }
-  }, [status, session, router, fetchTeamData]);
+  }, [status, session, router, loadTeamData]);
 
   if (status === 'loading' || loading) {
     return (

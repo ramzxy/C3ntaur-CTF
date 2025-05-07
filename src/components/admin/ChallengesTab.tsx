@@ -139,7 +139,7 @@ export default function ChallengesTab() {
   }
 
   return (
-    <div className="p-4">
+    <div className="">
       <div className="flex justify-between items-start mb-4">
         <h2 className="text-2xl font-semibold mb-6">Challenges</h2>
         <div className="flex flex-col sm:flex-row gap-2">

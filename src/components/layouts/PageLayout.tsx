@@ -6,7 +6,7 @@ const righteous = Righteous({ weight: '400', subsets: ['latin'] });
 interface PageLayoutProps {
   children: ReactNode;
   title?: string;
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '5xl' | '6xl' | '7xl';
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '5xl' | '6xl' | '7xl' | '8xl';
   showHeaderLine?: boolean;
 }
 
@@ -24,7 +24,8 @@ export default function PageLayout({
     '2xl': 'max-w-2xl',
     '5xl': 'max-w-5xl',
     '6xl': 'max-w-6xl',
-    '7xl': 'max-w-7xl'
+    '7xl': 'max-w-7xl',
+    '8xl': 'max-w-8xl'
   };
 
   return (

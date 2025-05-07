@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FaPlus } from "react-icons/fa";
-import { Announcement, NewAnnouncement, ApiError } from './types';
+import { Announcement, NewAnnouncement } from '@/utils/api';
+import { fetchAnnouncements, createAnnouncement, deleteAnnouncement } from '@/utils/api';
 import AnnouncementModal from './AnnouncementModal';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { toast } from 'react-hot-toast';
@@ -16,51 +17,36 @@ export default function AnnouncementsTab() {
     content: '',
   });
 
-  const fetchAnnouncements = useCallback(async () => {
+  const fetchAnnouncementsData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/announcements');
-      if (!response.ok) {
-        throw new Error('Failed to fetch announcements');
-      }
-      const data = await response.json();
+      const data = await fetchAnnouncements();
       setAnnouncements(data);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-        toast.error(`Error fetching announcements: ${err.message}`);
-        console.error('Error fetching announcements:', err);
-      } else {
-        const errorMessage = 'An unknown error occurred';
-        setError(errorMessage);
-        toast.error(`Error fetching announcements: ${errorMessage}`);
-        console.error('Error fetching announcements:', err);
-      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      setError(errorMessage);
+      toast.error(`Error fetching announcements: ${errorMessage}`);
+      console.error('Error fetching announcements:', err);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchAnnouncements();
-  }, [fetchAnnouncements]);
+    fetchAnnouncementsData();
+  }, [fetchAnnouncementsData]);
 
   const handleCreateAnnouncement = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await fetch('/api/announcements', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newAnnouncement),
-      });
+      await createAnnouncement(newAnnouncement);
       setNewAnnouncement({ title: '', content: '' });
       setIsModalOpen(false);
-      await fetchAnnouncements();
+      await fetchAnnouncementsData();
+      toast.success('Announcement created successfully');
     } catch (error) {
-      const err = error as ApiError;
+      const err = error as Error;
       console.error('Error creating announcement:', err);
       toast.error(err.message || 'Failed to create announcement');
     }
@@ -68,11 +54,10 @@ export default function AnnouncementsTab() {
 
   const handleDeleteAnnouncement = async (id: string) => {
     try {
-      await fetch(`/api/announcements/${id}`, {
-        method: 'DELETE',
-      });
+      await deleteAnnouncement(id);
       setAnnouncementToDelete(null);
-      await fetchAnnouncements();
+      await fetchAnnouncementsData();
+      toast.success('Announcement deleted successfully');
     } catch (error) {
       console.error('Error deleting announcement:', error);
       toast.error('Error deleting announcement. See console for details.');
@@ -100,16 +85,13 @@ export default function AnnouncementsTab() {
         </button>
       </div>
 
-      <div className="">
-        <div className="space-y-4">
-          {announcements.length === 0 ? (
-            <p className="text-gray-400 italic">No announcements yet</p>
-          ) : (
-            announcements.map((announcement) => (
-              <div
-                key={announcement.id}
-                className="border border-gray-700 p-4 rounded-lg bg-gray-800/50 hover:bg-gray-800 transition-colors"
-              >
+      <div className="space-y-4">
+        {announcements.length === 0 ? (
+          <p className="text-gray-400 italic">No announcements yet</p>
+        ) : (
+          announcements.map((announcement) => (
+            <div key={announcement.id} className="bg-gray-800/50 hover:bg-gray-800 transition-colors rounded-lg border border-gray-700">
+              <div className="p-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                   <div className="flex-1 min-w-0">
                     <h3 className="text-lg font-medium truncate">{announcement.title}</h3>
@@ -119,24 +101,24 @@ export default function AnnouncementsTab() {
                     </p>
                   </div>
                   <button
-                    onClick={() => announcementToDelete?.id === announcement.id 
+                    onClick={() => announcementToDelete?.id === announcement.id
                       ? handleDeleteAnnouncement(announcement.id)
                       : setAnnouncementToDelete(announcement)
                     }
                     onMouseLeave={() => setAnnouncementToDelete(null)}
-                    className={`px-3 py-1 text-sm rounded-md transition-colors shrink-0 ${
+                    className={`shrink-0 px-4 py-2 rounded-md border transition-colors ${
                       announcementToDelete?.id === announcement.id
-                        ? 'bg-red-700 text-red-200 hover:bg-red-600'
-                        : 'bg-red-900 text-red-300 hover:bg-red-800'
+                        ? 'bg-red-600 text-white hover:bg-red-700 border-red-600'
+                        : 'bg-transparent hover:bg-gray-700 border-gray-600 text-gray-300'
                     }`}
                   >
                     {announcementToDelete?.id === announcement.id ? 'Confirm?' : 'Delete'}
                   </button>
                 </div>
               </div>
-            ))
-          )}
-        </div>
+            </div>
+          ))
+        )}
       </div>
 
       {isModalOpen && (
