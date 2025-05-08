@@ -1,6 +1,6 @@
-import { useMemo, useState, useCallback } from 'react';
-import * as GiIcons from 'react-icons/gi';
-import { AiOutlineDoubleLeft } from 'react-icons/ai';
+import { useMemo, useState, useCallback, useEffect } from 'react';
+import { AiOutlineDoubleLeft, AiOutlineSearch } from 'react-icons/ai';
+import { IconType } from 'react-icons';
 
 interface TeamIconSelectionProps {
   selectedIcon: string;
@@ -8,74 +8,129 @@ interface TeamIconSelectionProps {
   onIconSelect: (iconName: string) => void;
 }
 
-export default function TeamIconSelection({ selectedIcon, selectedColor, onIconSelect }: TeamIconSelectionProps) {
-  // Get all icon names once
-  const iconNames = useMemo(() => Object.keys(GiIcons), []);
-  
-  // Find current icon index
-  const [currentIndex, setCurrentIndex] = useState(() => {
-    const index = iconNames.findIndex(name => name === selectedIcon);
-    return index >= 0 ? index : Math.floor(Math.random() * iconNames.length);
-  });
+interface IconData {
+  name: string;
+  component: IconType | null;
+}
 
-  // Calculate visible icons
-  const visibleIcons = useMemo(() => {
-    const start = Math.max(0, currentIndex - 2);
-    const end = Math.min(iconNames.length, start + 5);
-    return iconNames.slice(start, end);
-  }, [currentIndex, iconNames]);
+export default function TeamIconSelection({ selectedIcon, selectedColor, onIconSelect }: TeamIconSelectionProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [icons, setIcons] = useState<IconData[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const iconsPerPage = 20;
+
+  // Load icons dynamically
+  useEffect(() => {
+    const loadIcons = async () => {
+      setLoading(true);
+      try {
+        const module = await import('react-icons/gi');
+        const iconNames = Object.keys(module);
+        const filteredIcons = iconNames
+          .filter(name => name.toLowerCase().includes(searchQuery.toLowerCase()))
+          .map(name => ({
+            name,
+            component: module[name as keyof typeof module] as IconType
+          }));
+        setIcons(filteredIcons);
+        // Reset to page 1 when search changes
+        setPage(1);
+      } catch (error) {
+        console.error('Error loading icons:', error);
+      }
+      setLoading(false);
+    };
+
+    loadIcons();
+  }, [searchQuery]);
+
+  // Calculate paginated icons
+  const paginatedIcons = useMemo(() => {
+    const start = (page - 1) * iconsPerPage;
+    return icons.slice(start, start + iconsPerPage);
+  }, [icons, page]);
+
+  const totalPages = Math.ceil(icons.length / iconsPerPage);
 
   // Handle navigation
   const handlePrevious = useCallback(() => {
-    setCurrentIndex(prev => Math.max(0, prev - 1));
+    setPage(prev => Math.max(1, prev - 1));
   }, []);
 
   const handleNext = useCallback(() => {
-    setCurrentIndex(prev => Math.min(iconNames.length - 1, prev + 1));
-  }, [iconNames.length]);
+    setPage(prev => Math.min(totalPages, prev + 1));
+  }, [totalPages]);
 
   // Render individual icon
-  const renderIcon = useCallback((iconName: string) => {
-    const Icon = GiIcons[iconName as keyof typeof GiIcons];
-    const isSelected = iconName === selectedIcon;
+  const renderIcon = useCallback((iconData: IconData) => {
+    const { name, component: Icon } = iconData;
+    const isSelected = name === selectedIcon;
     return Icon ? (
-      <Icon 
-        className="w-9 h-9" 
-        style={{ color: isSelected ? selectedColor : '#6B7280' }} 
-      />
+      <div
+        key={name}
+        className={`w-12 h-12 flex items-center justify-center rounded-lg cursor-pointer transition-all
+          ${isSelected ? 'bg-gray-700' : 'hover:bg-gray-800'}`}
+        onClick={() => onIconSelect(name)}
+        title={name}
+      >
+        <Icon 
+          className="w-8 h-8" 
+          style={{ color: isSelected ? selectedColor : '#6B7280' }} 
+        />
+      </div>
     ) : null;
-  }, [selectedIcon, selectedColor]);
+  }, [selectedIcon, selectedColor, onIconSelect]);
 
   return (
-    <div className="w-full">
+    <div className="w-full space-y-4">
       <label className="block text-white mb-2">Team Icon</label>
-      <div className="flex items-center justify-between w-full">
+      
+      {/* Search input */}
+      <div className="relative">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search icons..."
+          className="w-full px-4 py-2 pl-10 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <AiOutlineSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+      </div>
+
+      {/* Icons grid */}
+      <div className="relative min-h-[200px]">
+        {loading ? (
+          <div className="flex items-center justify-center h-[200px]">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-5 gap-4">
+            {paginatedIcons.map(renderIcon)}
+          </div>
+        )}
+      </div>
+
+      {/* Pagination controls */}
+      <div className="flex items-center justify-between">
         <button 
           type="button"
           className="p-2 text-white hover:bg-gray-700 rounded-full disabled:opacity-50"
           onClick={handlePrevious}
-          disabled={currentIndex <= 0}
+          disabled={page <= 1}
         >
           <AiOutlineDoubleLeft className="w-5 h-5" />
         </button>
         
-        <div className="flex items-center space-x-4">
-          {visibleIcons.map((iconName) => (
-            <div
-              key={iconName}
-              className="w-8 h-8 flex items-center justify-center rounded-full cursor-pointer"
-              onClick={() => onIconSelect(iconName)}
-            >
-              {renderIcon(iconName)}
-            </div>
-          ))}
-        </div>
+        <span className="text-white">
+          Page {page} of {totalPages}
+        </span>
 
         <button
           type="button"
           className="p-2 text-white hover:bg-gray-700 rounded-full disabled:opacity-50"
           onClick={handleNext}
-          disabled={currentIndex >= iconNames.length - 1}
+          disabled={page >= totalPages}
         >
           <AiOutlineDoubleLeft className="w-5 h-5 transform rotate-180" />
         </button>
