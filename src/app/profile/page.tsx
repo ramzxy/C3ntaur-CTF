@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import * as GiIcons from 'react-icons/gi';
 import PageLayout from '@/components/layouts/PageLayout';
-import { Team, fetchTeam } from '@/utils/api';
+import { fetchTeam } from '@/utils/api';
+import { Team } from '@/components/admin/types';
 
 export default function Profile() {
   const { data: session, status } = useSession();

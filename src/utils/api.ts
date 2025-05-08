@@ -1,34 +1,69 @@
+import { Team, User } from '@/components/admin/types';
+
 export interface SiteConfig {
-  key: string;
-  value: string;
+  id: string;
+  siteTitle: string;
+  headerText: string;
 }
 
 export interface RulesResponse {
   siteRules: string;
 }
 
+export interface ChallengeFlag {
+  id?: string;
+  flag: string;
+  points: number;
+  challengeId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  isSolved?: boolean;
+}
+
+export interface ChallengeFile {
+  id: string;
+  name: string;
+  path: string;
+  size: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Hint {
+  id: string;
+  content: string;
+  cost: number;
+  challengeId: string;
+  createdAt: string;
+  updatedAt: string;
+  isPurchased?: boolean;
+}
+
+export interface UnlockCondition {
+  id?: string;
+  type: 'CHALLENGE_SOLVED' | 'TIME_REMAINDER';
+  requiredChallengeId?: string | null;
+  timeThresholdSeconds?: number | null;
+}
+
 export interface Challenge {
   id: string;
   title: string;
-  description?: string;
-  points: number;
-  difficulty: string;
-  isSolved?: boolean;
+  description: string;
   category: string;
-  solvedByTeamId?: string;
-  files?: {
-    name: string;
-    path: string;
-    size: number;
-  }[];
-  isLocked?: boolean;
-  unlockReason?: string;
-  multipleFlags?: boolean;
-  flags?: {
-    id: string;
-    points: number;
-    isSolved?: boolean;
-  }[];
+  points: number;
+  flag?: string;
+  flags: ChallengeFlag[];
+  multipleFlags: boolean;
+  difficulty: string;
+  isActive: boolean;
+  isLocked: boolean;
+  files: ChallengeFile[];
+  hints: Hint[];
+  unlockConditions: UnlockCondition[];
+  createdAt: string;
+  updatedAt: string;
+  isSolved?: boolean;
 }
 
 export interface CategoryChallenge {
@@ -50,16 +85,6 @@ export interface TeamMember {
   alias: string;
   name: string;
   isTeamLeader: boolean;
-}
-
-export interface Team {
-  id: string;
-  name: string;
-  code: string;
-  score: number;
-  icon?: string;
-  color?: string;
-  members: TeamMember[];
 }
 
 export interface LeaderboardTeam {
@@ -89,13 +114,13 @@ export interface ActivityLog {
 }
 
 export interface GameConfig {
-  id: string;
-  startTime: string;
-  endTime: string;
+  id?: string;
+  startTime: string | Date | null;
+  endTime: string | Date | null;
   isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  hasEndTime: boolean;
+  hasEndTime?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ScoreboardTeam {
@@ -131,13 +156,6 @@ export interface Score {
   };
 }
 
-export interface Hint {
-  id: string;
-  content: string;
-  cost: number;
-  isPurchased: boolean;
-}
-
 export interface SubmissionResponse {
   message: string;
   isCorrect: boolean;
@@ -147,6 +165,58 @@ export interface SubmissionResponse {
 export interface NewAnnouncement {
   title: string;
   content: string;
+}
+
+export interface CategoriesResponse {
+  categories: string[];
+  challengesByCategory: Record<string, Challenge[]>;
+}
+
+export interface NewChallenge {
+  title: string;
+  description: string;
+  category: string;
+  points: number;
+  flag?: string;
+  flags: ChallengeFlag[];
+  multipleFlags: boolean;
+  difficulty: string;
+  isActive?: boolean;
+  isLocked?: boolean;
+  files: ChallengeFile[];
+  hints: Hint[];
+  unlockConditions?: UnlockCondition[];
+}
+
+export interface ApiError extends Error {
+  message: string;
+  code?: string;
+  meta?: {
+    target?: string[];
+  };
+}
+
+export interface SiteConfiguration {
+  key: string;
+  value: string;
+}
+
+export interface SignUpRequest {
+  name: string;
+  alias: string;
+  password: string;
+  teamOption: 'create' | 'join';
+  teamName?: string;
+  teamCode?: string;
+  teamIcon?: string;
+  teamColor?: string;
+}
+
+export interface SignUpResponse {
+  user: {
+    alias: string;
+    password: string;
+  };
 }
 
 export async function fetchSiteConfig(): Promise<SiteConfig[]> {
@@ -222,11 +292,12 @@ export async function fetchGameConfig(): Promise<GameConfig> {
 }
 
 export async function fetchScoreboardTeams(): Promise<ScoreboardTeam[]> {
-  const response = await fetch('/api/admin/teams');
+  const response = await fetch('/api/leaderboard');
   if (!response.ok) {
     throw new Error('Failed to fetch scoreboard teams');
   }
-  return response.json();
+  const data = await response.json();
+  return data.teams;
 }
 
 export async function fetchTeamPointHistory(teamId: string, limit: number = 1000): Promise<PointHistoryResponse> {
@@ -298,4 +369,256 @@ export async function deleteAnnouncement(id: string): Promise<void> {
   if (!response.ok) {
     throw new Error('Failed to delete announcement');
   }
+}
+
+export async function fetchCategories(): Promise<CategoriesResponse> {
+  const response = await fetch('/api/challenges/categories');
+  if (!response.ok) {
+    throw new Error('Failed to fetch categories');
+  }
+  return response.json();
+}
+
+export async function createChallenge(challenge: NewChallenge): Promise<Challenge> {
+  const response = await fetch('/api/admin/challenges', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(challenge),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to create challenge');
+  }
+
+  return response.json();
+}
+
+export async function updateChallenge(challenge: Challenge): Promise<Challenge> {
+  const response = await fetch('/api/admin/challenges', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(challenge),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to update challenge');
+  }
+
+  return response.json();
+}
+
+export async function uploadFile(file: File): Promise<ChallengeFile> {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  const response = await fetch('/api/files/upload', {
+    method: 'POST',
+    body: formData
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to upload file');
+  }
+  
+  return response.json();
+}
+
+export async function deleteFile(filename: string): Promise<void> {
+  const response = await fetch(`/api/files/${filename}`, {
+    method: 'DELETE'
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to delete file');
+  }
+}
+
+export async function fetchAdminChallenges(): Promise<Challenge[]> {
+  const response = await fetch('/api/admin/challenges');
+  if (!response.ok) {
+    throw new Error('Failed to fetch challenges');
+  }
+  return response.json();
+}
+
+export async function deleteChallenge(id: string): Promise<void> {
+  const response = await fetch('/api/admin/challenges', {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ id }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to delete challenge');
+  }
+}
+
+export async function exportChallenges(): Promise<Challenge[]> {
+  const response = await fetch('/api/admin/challenges/bulk');
+  if (!response.ok) {
+    throw new Error('Failed to export challenges');
+  }
+  return response.json();
+}
+
+export async function importChallenges(challenges: Challenge[]): Promise<void> {
+  const response = await fetch('/api/admin/challenges/bulk', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(challenges),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to import challenges');
+  }
+}
+
+export async function updateSiteConfig(config: SiteConfig): Promise<void> {
+  const response = await fetch('/api/config', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(config),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to update site configuration');
+  }
+}
+
+export async function updateGameConfig(config: GameConfig): Promise<GameConfig> {
+  const response = await fetch('/api/game-config', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(config),
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.error || 'Failed to update game configuration');
+  }
+
+  return response.json();
+}
+
+export async function fetchSiteConfigurations(): Promise<SiteConfiguration[]> {
+  const response = await fetch('/api/config');
+  if (!response.ok) {
+    throw new Error('Failed to fetch site configurations');
+  }
+  return response.json();
+}
+
+export async function updateSiteConfiguration(key: string, value: string): Promise<SiteConfiguration> {
+  const response = await fetch('/api/config', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key, value }),
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Failed to update configuration: ${key}`);
+  }
+  return response.json();
+}
+
+export async function fetchAdminTeams(): Promise<Team[]> {
+  const response = await fetch('/api/admin/teams');
+  if (!response.ok) {
+    throw new Error('Failed to fetch teams');
+  }
+  return response.json();
+}
+
+export async function deleteTeam(id: string): Promise<void> {
+  const response = await fetch('/api/admin/teams', {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ id }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to delete team');
+  }
+}
+
+export async function updateTeam(teamData: Partial<Team>): Promise<Team> {
+  const response = await fetch('/api/admin/teams', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(teamData),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to update team');
+  }
+
+  return response.json();
+}
+
+export async function fetchAdminUsers(): Promise<User[]> {
+  const response = await fetch('/api/admin/users');
+  if (!response.ok) {
+    throw new Error('Failed to fetch users');
+  }
+  return response.json();
+}
+
+export async function deleteAdminUser(id: string): Promise<void> {
+  const response = await fetch('/api/admin/users', {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ id }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to delete user');
+  }
+}
+
+export async function updateAdminUser(userData: Partial<User>): Promise<User> {
+  const response = await fetch('/api/admin/users', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(userData),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to update user');
+  }
+
+  return response.json();
+}
+
+export async function signUp(data: SignUpRequest): Promise<SignUpResponse> {
+  const response = await fetch('/api/auth/signup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to register');
+  }
+
+  return response.json();
 } 

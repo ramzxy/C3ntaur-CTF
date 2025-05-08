@@ -1,11 +1,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-
-interface SiteConfig {
-  key: string;
-  value: string;
-}
+import { fetchSiteConfigurations, updateSiteConfiguration, SiteConfiguration } from '@/utils/api';
 
 export default function SiteConfigurationTab() {
   const [isLoading, setIsLoading] = useState(true);
@@ -24,10 +20,9 @@ export default function SiteConfigurationTab() {
 
   const fetchConfigs = async () => {
     try {
-      const res = await fetch('/api/config');
-      const data = await res.json();
+      const data = await fetchSiteConfigurations();
       setFormData(
-        data.reduce((acc: Record<string, string>, config: SiteConfig) => {
+        data.reduce((acc: Record<string, string>, config: SiteConfiguration) => {
           acc[config.key] = config.value;
           return acc;
         }, {})
@@ -43,16 +38,9 @@ export default function SiteConfigurationTab() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const updates = Object.entries(formData).map(async ([key, value]) => {
-        const response = await fetch('/api/config', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ key, value }),
-        });
-        
-        if (!response.ok) throw new Error(`Failed to update ${key}`);
-        return response.json();
-      });
+      const updates = Object.entries(formData).map(([key, value]) => 
+        updateSiteConfiguration(key, value)
+      );
       
       await Promise.all(updates);
       toast.success('All configurations updated successfully');

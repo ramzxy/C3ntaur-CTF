@@ -5,17 +5,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { TfiMenu } from "react-icons/tfi";
+import { fetchSiteConfigurations, SiteConfiguration } from '@/utils/api';
 
 interface CRTEffects {
   scanlines: boolean;
   flicker: boolean;
   phosphor: boolean;
   glow: boolean;
-}
-
-interface SiteConfig {
-  key: string;
-  value: string;
 }
 
 export default function Navbar() {
@@ -36,12 +32,13 @@ export default function Navbar() {
   const crtRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetch('/api/config')
-      .then(res => res.json())
-      .then((configs: SiteConfig[]) => {
+    fetchSiteConfigurations()
+      .then((configs: SiteConfiguration[]) => {
         const titleConfig = configs.find(c => c.key === 'site_title');
-        
         if (titleConfig) setTitle(titleConfig.value);
+      })
+      .catch(error => {
+        console.error('Failed to fetch site configuration:', error);
       });
   }, []);
 

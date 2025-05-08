@@ -112,7 +112,7 @@ export default function ChallengePage() {
           <p className="text-gray-300 mb-2">Title: {challenge.title}</p>
           <p className="text-gray-300 mb-2">Category: {challenge.category}</p>
           <p className="text-gray-300 mb-4">Points: {challenge.points}</p>
-          <p className="text-yellow-400 mb-6">Reason: {challenge.unlockReason || 'Unlock conditions not met.'}</p>
+          <p className="text-yellow-400 mb-6">Reason: {challenge.unlockConditions.map(condition => condition.type).join(', ') || 'Unlock conditions not met.'}</p>
           <button 
             onClick={() => router.back()} 
             className="px-4 py-2 border border-white hover:bg-white hover:text-black flex items-center mx-auto"

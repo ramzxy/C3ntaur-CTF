@@ -3,6 +3,7 @@ import { User, Team, ApiError } from './types';
 import UserEditModal from './UserEditModal';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { fetchAdminUsers, deleteAdminUser, updateAdminUser, fetchAdminTeams } from '@/utils/api';
 
 export default function UsersTab() {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
@@ -17,17 +18,9 @@ export default function UsersTab() {
     setIsLoading(true);
     setError(null);
     try {
-      const [usersRes, teamsRes] = await Promise.all([
-        fetch('/api/admin/users'),
-        fetch('/api/admin/teams')
-      ]);
-
-      if (!usersRes.ok) throw new Error('Failed to fetch users');
-      if (!teamsRes.ok) throw new Error('Failed to fetch teams');
-
       const [usersData, teamsData] = await Promise.all([
-        usersRes.json(),
-        teamsRes.json()
+        fetchAdminUsers(),
+        fetchAdminTeams()
       ]);
 
       setUsers(usersData);
@@ -48,18 +41,9 @@ export default function UsersTab() {
 
   const handleDeleteUser = async (id: string) => {
     try {
-      const response = await fetch('/api/admin/users', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id }),
-      });
-
-      if (response.ok) {
-        setUserToDelete(null);
-        await fetchUsersAndTeams();
-      }
+      await deleteAdminUser(id);
+      setUserToDelete(null);
+      await fetchUsersAndTeams();
     } catch (error) {
       console.error('Error deleting user:', error);
       toast.error('Error deleting user. See console for details.');
@@ -75,24 +59,14 @@ export default function UsersTab() {
     if (!editingUser) return;
 
     try {
-      const response = await fetch('/api/admin/users', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update user alias');
-      }
-
-      toast.success('User alias updated successfully!');
+      await updateAdminUser(updatedData);
+      toast.success('User updated successfully!');
       setIsEditModalOpen(false);
       setEditingUser(null);
       await fetchUsersAndTeams();
     } catch (err) {
       const error = err as ApiError;
-      console.error('Error updating user alias:', error);
+      console.error('Error updating user:', error);
       toast.error(`Error: ${error.message}`);
       throw error;
     }

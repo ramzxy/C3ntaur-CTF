@@ -4,6 +4,7 @@ import { Challenge, NewChallenge, ApiError } from './types';
 import ChallengeModal from './ChallengeModal';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { toast } from 'react-hot-toast';
+import { fetchAdminChallenges, deleteChallenge, exportChallenges, importChallenges } from '@/utils/api';
 
 export default function ChallengesTab() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,11 +34,7 @@ export default function ChallengesTab() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/admin/challenges');
-      if (!response.ok) {
-        throw new Error('Failed to fetch challenges');
-      }
-      const data = await response.json();
+      const data = await fetchAdminChallenges();
       setChallenges(data);
     } catch (err) {
       const error = err as ApiError;
@@ -53,21 +50,11 @@ export default function ChallengesTab() {
     fetchChallenges();
   }, [fetchChallenges]);
 
-
   const handleDelete = async (id: string) => {
     try {
-      const response = await fetch('/api/admin/challenges', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id }),
-      });
-
-      if (response.ok) {
-        setChallengeToDelete(null);
-        await fetchChallenges();
-      }
+      await deleteChallenge(id);
+      setChallengeToDelete(null);
+      await fetchChallenges();
     } catch (error) {
       const err = error as ApiError;
       console.error('Error deleting challenge:', err);
@@ -80,11 +67,9 @@ export default function ChallengesTab() {
     setIsEditModalOpen(true);
   };
 
-
   const handleExportChallenges = async () => {
     try {
-      const response = await fetch('/api/admin/challenges/bulk');
-      const challenges = await response.json();
+      const challenges = await exportChallenges();
       
       // Create and download file
       const blob = new Blob([JSON.stringify(challenges, null, 2)], { type: 'application/json' });
@@ -110,20 +95,8 @@ export default function ChallengesTab() {
       const content = await file.text();
       const challenges = JSON.parse(content);
 
-      const response = await fetch('/api/admin/challenges/bulk', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(challenges),
-      });
-
-      if (response.ok) {
-        await fetchChallenges();
-      } else {
-        console.error('Error importing challenges:', await response.text());
-        toast.error('Error importing challenges. Check console.');
-      }
+      await importChallenges(challenges);
+      await fetchChallenges();
     } catch (error) {
       console.error('Error importing challenges:', error);
       toast.error('Error processing import file. Check console.');

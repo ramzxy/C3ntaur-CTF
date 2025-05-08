@@ -10,12 +10,22 @@ import {
   LeaderboardResponse, 
   Announcement, 
   ActivityLog, 
-  GameConfig,
   fetchLeaderboard,
   fetchAnnouncements,
   fetchActivity,
   fetchGameConfig
 } from '@/utils/api';
+
+// Add GameConfig type that matches the GameClock component
+interface GameConfig {
+  id: string;
+  startTime: string;
+  endTime: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  hasEndTime: boolean;
+}
 
 export default function Dashboard() {
   // State for each section
@@ -70,21 +80,34 @@ export default function Dashboard() {
         setLeaderboard(leaderboardData);
         setAnnouncements(announcementsData);
         setActivities(activitiesData);
-        setGameConfig(gameConfigData);
 
-        // Update time left in the same interval if game is active
-        if (gameConfigData?.isActive && gameConfigData.hasEndTime) {
-          const endTime = new Date(gameConfigData.endTime).getTime();
-          const now = new Date().getTime();
-          const timeLeftMs = endTime - now;
+        // Convert API GameConfig to component GameConfig
+        if (gameConfigData) {
+          const convertedConfig: GameConfig = {
+            id: gameConfigData.id || '',
+            startTime: gameConfigData.startTime?.toString() || '',
+            endTime: gameConfigData.endTime?.toString() || '',
+            isActive: gameConfigData.isActive,
+            createdAt: gameConfigData.createdAt || '',
+            updatedAt: gameConfigData.updatedAt || '',
+            hasEndTime: gameConfigData.endTime !== null
+          };
+          setGameConfig(convertedConfig);
 
-          if (timeLeftMs <= 0) {
-            setTimeLeft('Game Over');
-          } else {
-            const hours = Math.floor(timeLeftMs / (1000 * 60 * 60));
-            const minutes = Math.floor((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((timeLeftMs % (1000 * 60)) / 1000);
-            setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
+          // Update time left in the same interval if game is active
+          if (gameConfigData.isActive && gameConfigData.endTime) {
+            const endTime = new Date(gameConfigData.endTime).getTime();
+            const now = new Date().getTime();
+            const timeLeftMs = endTime - now;
+
+            if (timeLeftMs <= 0) {
+              setTimeLeft('Game Over');
+            } else {
+              const hours = Math.floor(timeLeftMs / (1000 * 60 * 60));
+              const minutes = Math.floor((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
+              const seconds = Math.floor((timeLeftMs % (1000 * 60)) / 1000);
+              setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
+            }
           }
         }
       } catch (error) {

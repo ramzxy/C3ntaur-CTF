@@ -6,16 +6,17 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { signIn } from 'next-auth/react';
 import TeamIconSelection from '@/components/auth/TeamIconSelection';
+import { signUp } from '@/utils/api';
 
 export default function SignUp() {
   const router = useRouter();
   const [error, setError] = useState('');
-  const [teamOption, setTeamOption] = useState('create');
+  const [teamOption, setTeamOption] = useState<'create' | 'join'>('create');
   const [selectedIcon, setSelectedIcon] = useState('GiSpaceship');
   const [selectedColor, setSelectedColor] = useState('#ffffff');
 
   const handleTeamOptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTeamOption(e.target.value);
+    setTeamOption(e.target.value as 'create' | 'join');
   };
 
   useEffect(() => {
@@ -43,27 +44,17 @@ export default function SignUp() {
     const teamCode = formData.get('teamCode') as string;
 
     try {
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          name,
-          alias, 
-          password,
-          teamOption,
-          teamName,
-          teamCode,
-          teamIcon: selectedIcon,
-          teamColor: selectedColor
-        }),
+      const data = await signUp({ 
+        name,
+        alias, 
+        password,
+        teamOption,
+        teamName,
+        teamCode,
+        teamIcon: selectedIcon,
+        teamColor: selectedColor
       });
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to register');
-      }
-
-      const data = await response.json();
       toast.success('Account created successfully! Signing you in...');
 
       const result = await signIn('credentials', {

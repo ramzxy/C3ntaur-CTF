@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { SiteConfig, GameConfig } from './types';
+import { SiteConfig, GameConfig } from '../../utils/api';
+import { fetchGameConfig, updateSiteConfig, updateGameConfig } from '../../utils/api';
 
 interface ConfigurationTabProps {
   siteConfig: SiteConfig;
@@ -11,21 +12,19 @@ export default function ConfigurationTab({ siteConfig, fetchConfig }: Configurat
   const [gameConfig, setGameConfig] = useState<GameConfig>({
     startTime: new Date(Date.now() + 3600000), // Default 1 hour from now
     endTime: new Date(Date.now() + 86400000), // Default 24 hours from now
-    isActive: false
+    isActive: false,
+    hasEndTime: true
   });
   const [hasEndTime, setHasEndTime] = useState(true);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchGameConfig = async () => {
+    const loadGameConfig = async () => {
       try {
-        const response = await fetch('/api/game-config');
-        if (response.ok) {
-          const data = await response.json();
-          if (data.id) {
-            setGameConfig(data);
-            setHasEndTime(data.hasEndTime !== false);
-          }
+        const data = await fetchGameConfig();
+        if (data.id) {
+          setGameConfig(data);
+          setHasEndTime(data.hasEndTime !== false);
         }
       } catch (error) {
         console.error('Error fetching game config:', error);
@@ -34,23 +33,14 @@ export default function ConfigurationTab({ siteConfig, fetchConfig }: Configurat
       }
     };
 
-    fetchGameConfig();
+    loadGameConfig();
   }, []);
 
   const handleConfigUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/config', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(config),
-      });
-
-      if (response.ok) {
-        fetchConfig();
-      }
+      await updateSiteConfig(config);
+      fetchConfig();
     } catch (error) {
       console.error('Error updating site config:', error);
     }
@@ -61,40 +51,28 @@ export default function ConfigurationTab({ siteConfig, fetchConfig }: Configurat
     try {
       console.log('Current gameConfig:', gameConfig);
       
-      const updatedConfig = {
+      const updatedConfig: GameConfig = {
         ...gameConfig,
         hasEndTime,
-        // Ensure dates are properly formatted as ISO strings
-        startTime: gameConfig.startTime ? new Date(gameConfig.startTime).toISOString() : null,
-        endTime: hasEndTime && gameConfig.endTime ? new Date(gameConfig.endTime).toISOString() : null
+        startTime: gameConfig.startTime instanceof Date ? gameConfig.startTime.toISOString() : gameConfig.startTime,
+        endTime: hasEndTime && gameConfig.endTime ? 
+          (gameConfig.endTime instanceof Date ? gameConfig.endTime.toISOString() : gameConfig.endTime) : 
+          null
       };
 
       console.log('Sending to API:', updatedConfig);
 
-      const response = await fetch('/api/game-config', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedConfig),
+      const data = await updateGameConfig(updatedConfig);
+      console.log('Received from API:', data);
+      
+      // Update state with received data
+      setGameConfig({
+        ...data,
+        startTime: data.startTime ? new Date(data.startTime) : null,
+        endTime: data.endTime ? new Date(data.endTime) : null,
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Received from API:', data);
-        
-        // Update state with received data, ensuring dates are properly handled
-        setGameConfig({
-          ...data,
-          startTime: data.startTime ? new Date(data.startTime).toISOString() : null,
-          endTime: data.endTime ? new Date(data.endTime).toISOString() : null,
-        });
-        setHasEndTime(data.hasEndTime !== false);
-        alert('Game time settings updated successfully!');
-      } else {
-        const data = await response.json();
-        alert(`Error: ${data.error || 'Failed to update game time settings'}`);
-      }
+      setHasEndTime(data.hasEndTime !== false);
+      alert('Game time settings updated successfully!');
     } catch (error) {
       console.error('Error updating game config:', error);
       alert('Error updating game time settings');
@@ -107,7 +85,7 @@ export default function ConfigurationTab({ siteConfig, fetchConfig }: Configurat
     const localDate = new Date(value);
     setGameConfig(prev => ({
       ...prev,
-      [field]: localDate.toISOString()
+      [field]: localDate
     }));
   };
 

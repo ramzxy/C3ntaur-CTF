@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { GameConfig } from './types';
+import { GameConfig, fetchGameConfig, updateGameConfig } from '@/utils/api';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { toast } from 'react-hot-toast';
 
@@ -13,31 +13,27 @@ export default function GameConfigurationTab() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchGameConfig = async () => {
+    const loadGameConfig = async () => {
       try {
-        const response = await fetch('/api/game-config');
-        if (response.ok) {
-          const data = await response.json();
-          if (data.id) {
-            setGameConfig(data);
-            setHasEndTime(data.hasEndTime !== false);
-          }
+        const data = await fetchGameConfig();
+        if (data.id) {
+          setGameConfig(data);
+          setHasEndTime(data.hasEndTime !== false);
         }
       } catch (error) {
         console.error('Error fetching game config:', error);
+        toast.error('Failed to load game configuration');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchGameConfig();
+    loadGameConfig();
   }, []);
 
   const handleGameConfigUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      console.log('Current gameConfig:', gameConfig);
-      
       const updatedConfig = {
         ...gameConfig,
         hasEndTime,
@@ -45,31 +41,15 @@ export default function GameConfigurationTab() {
         endTime: hasEndTime && gameConfig.endTime ? new Date(gameConfig.endTime).toISOString() : null
       };
 
-      console.log('Sending to API:', updatedConfig);
-
-      const response = await fetch('/api/game-config', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedConfig),
+      const data = await updateGameConfig(updatedConfig);
+      
+      setGameConfig({
+        ...data,
+        startTime: data.startTime ? new Date(data.startTime).toISOString() : null,
+        endTime: data.endTime ? new Date(data.endTime).toISOString() : null,
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Received from API:', data);
-        
-        setGameConfig({
-          ...data,
-          startTime: data.startTime ? new Date(data.startTime).toISOString() : null,
-          endTime: data.endTime ? new Date(data.endTime).toISOString() : null,
-        });
-        setHasEndTime(data.hasEndTime !== false);
-        toast.success('Game time settings updated successfully!');
-      } else {
-        const data = await response.json();
-        toast.error(`Error: ${data.error || 'Failed to update game time settings'}`);
-      }
+      setHasEndTime(data.hasEndTime !== false);
+      toast.success('Game time settings updated successfully!');
     } catch (error) {
       console.error('Error updating game config:', error);
       toast.error('Error updating game time settings');

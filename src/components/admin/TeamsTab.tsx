@@ -3,6 +3,7 @@ import { Team, ApiError } from './types';
 import TeamEditModal from './TeamEditModal';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { fetchAdminTeams, deleteTeam, updateTeam } from '@/utils/api';
 
 export default function TeamsTab() {
   const [teamToDelete, setTeamToDelete] = useState<Team | null>(null);
@@ -16,11 +17,7 @@ export default function TeamsTab() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/admin/teams');
-      if (!response.ok) {
-        throw new Error('Failed to fetch teams');
-      }
-      const data = await response.json();
+      const data = await fetchAdminTeams();
       setTeams(data);
     } catch (err) {
       const error = err as ApiError;
@@ -38,18 +35,9 @@ export default function TeamsTab() {
 
   const handleDeleteTeam = async (id: string) => {
     try {
-      const response = await fetch('/api/admin/teams', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id }),
-      });
-
-      if (response.ok) {
-        setTeamToDelete(null);
-        await fetchTeams();
-      }
+      await deleteTeam(id);
+      setTeamToDelete(null);
+      await fetchTeams();
     } catch (error) {
       console.error('Error deleting team:', error);
       toast.error('Error deleting team. See console for details.');
@@ -65,17 +53,7 @@ export default function TeamsTab() {
     if (!editingTeam) return;
 
     try {
-      const response = await fetch('/api/admin/teams', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update team');
-      }
-
+      await updateTeam(updatedData);
       toast.success('Team updated successfully!');
       setIsEditModalOpen(false);
       setEditingTeam(null);

@@ -5,30 +5,15 @@ import * as THREE from 'three';
 import { useRouter } from 'next/navigation';
 import { ApiError } from '@/components/admin/types';
 import { toast } from 'react-hot-toast';
+import { fetchCategories, Challenge as ApiChallenge } from '@/utils/api';
 
-interface Challenge {
-  id: string;
-  title: string;
-  description?: string;
-  points: number;
-  category: string;
-  difficulty: string;
-  isActive?: boolean;
+interface Challenge extends ApiChallenge {
+  isActive: boolean;
   isLocked: boolean;
   isSolved: boolean;
   solvedBy: Array<{ teamId: string; teamColor: string; }>;
-  files?: ChallengeFile[];
   isUnlocked: boolean;
   unlockReason?: string;
-}
-
-interface ChallengeFile {
-  id: string;
-  name: string;
-  path: string;
-  size: number;
-  createdAt: string;
-  updatedAt: string;
 }
 
 interface CategorySatellite {
@@ -241,17 +226,14 @@ export default function SpaceScene({ isMobile }: { isMobile?: boolean }) {
   const router = useRouter();
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const loadCategories = async () => {
       try {
-        const response = await fetch('/api/challenges/categories');
-        if (!response.ok) return;
-
-        const { categories: categoryNames, challengesByCategory } = await response.json();
+        const { categories: categoryNames, challengesByCategory } = await fetchCategories();
 
         const configs = generateOrbitConfigurations(categoryNames.length);
         const newCategories = categoryNames.map((category: string, index: number) => {
           const config = configs[index];
-          const challenges = challengesByCategory[category];
+          const challenges = challengesByCategory[category] as unknown as Challenge[];
           const solvedCount = challenges.filter((c: Challenge) => c.isSolved).length;
 
           return {
@@ -276,9 +258,8 @@ export default function SpaceScene({ isMobile }: { isMobile?: boolean }) {
       }
     };
 
-    fetchCategories();
+    loadCategories();
   }, []);
-
 
   return (
     <div className={`${isMobile ? 'h-full' : 'fixed inset-0'}`}>

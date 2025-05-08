@@ -1,7 +1,8 @@
 import React from 'react';
-import { Challenge, NewChallenge, UnlockCondition, ChallengeFile, ApiError } from './types';
+import { Challenge, NewChallenge, UnlockCondition, ChallengeFile, ApiError } from '@/utils/api';
 import { FaTrash } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
+import { createChallenge, updateChallenge, uploadFile, deleteFile } from '@/utils/api';
 
 interface ChallengeModalProps {
   title: string;
@@ -29,17 +30,11 @@ export default function ChallengeModal({
   const handleFileDelete = async (file: ChallengeFile) => {
     try {
       const filename = file.path.split('/').pop();
-      const response = await fetch(`/api/files/${filename}`, {
-        method: 'DELETE'
-      });
+      await deleteFile(filename!);
       
-      if (response.ok) {
-        const updatedFiles = challenge.files.filter((f) => f.id !== file.id);
-        setChallenge({ ...challenge, files: updatedFiles });
-        if (onDataRefresh) await onDataRefresh();
-      } else {
-        throw new Error('Failed to delete file');
-      }
+      const updatedFiles = challenge.files.filter((f) => f.id !== file.id);
+      setChallenge({ ...challenge, files: updatedFiles });
+      if (onDataRefresh) await onDataRefresh();
     } catch (error) {
       console.error('Error deleting file:', error);
       toast.error('Failed to delete file');
@@ -253,19 +248,11 @@ export default function ChallengeModal({
               onChange={async (e) => {
                 const files = await Promise.all(
                   Array.from(e.target.files || []).map(async (file) => {
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    
-                    const response = await fetch('/api/files/upload', {
-                      method: 'POST',
-                      body: formData
-                    });
-                    
-                    if (!response.ok) {
-                      throw new Error('Failed to upload file');
+                    try {
+                      return await uploadFile(file);
+                    } catch (error) {
+                      throw new Error('Failed to upload file + ' + error);
                     }
-                    
-                    return await response.json();
                   })
                 );
                 
@@ -487,16 +474,10 @@ const handleChallengeSubmit = async (
   e.preventDefault();
 
   try {
-    const apiUrl = '/api/admin/challenges';
-    const response = await fetch(apiUrl, {
-      method: apiMethod,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(challenge),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || `Failed to ${apiMethod === 'POST' ? 'create' : 'update'} challenge`);
+    if (apiMethod === 'POST') {
+      await createChallenge(challenge as NewChallenge);
+    } else {
+      await updateChallenge(challenge as Challenge);
     }
 
     toast.success(`Challenge ${apiMethod === 'POST' ? 'created' : 'updated'} successfully!`);
