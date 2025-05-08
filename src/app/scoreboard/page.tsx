@@ -102,8 +102,8 @@ export default function ScoreboardPage() {
   }
 
   const ChartView = () => (
-    <div className="h-full bg-gray-900/50 border border-gray-700 rounded-lg">
-      <div className="p-6 border-b border-gray-700">
+    <div className="h-full bg-gray-900/50 border border-gray-700">
+      <div className="p-6">
         <h2 className="text-2xl font-semibold text-blue-400">Score Progression</h2>
       </div>
       <div className="p-6">
@@ -140,8 +140,8 @@ export default function ScoreboardPage() {
   );
 
   const StandingsView = () => (
-    <div className="h-full bg-gray-900/50 border border-gray-700 rounded-lg shadow-none">
-      <div className="p-6 border-b border-gray-700">
+    <div className="h-full bg-gray-900/50 border border-gray-700 shadow-none">
+      <div className="p-6">
         <h2 className="text-2xl font-semibold text-blue-400">Current Standings</h2>
       </div>
       <div className="p-6">
