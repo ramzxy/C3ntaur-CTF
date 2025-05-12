@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FaPlus } from "react-icons/fa";
-import { Announcement, NewAnnouncement } from '@/utils/api';
+import { Announcement, NewAnnouncement } from '@/types';
 import { fetchAnnouncements, createAnnouncement, deleteAnnouncement } from '@/utils/api';
 import AnnouncementModal from './AnnouncementModal';
 import LoadingSpinner from '@/components/common/LoadingSpinner';

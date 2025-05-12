@@ -13,7 +13,7 @@ import TeamsTab from '@/components/admin/TeamsTab';
 import AnnouncementsTab from '@/components/admin/AnnouncementsTab';
 import GameConfigurationTab from '@/components/admin/GameConfigurationTab';
 import SiteConfigurationTab from '@/components/admin/SiteConfigurationTab';
-import { Tab } from '@/components/admin/types';
+import { Tab } from '@/types';
 
 const TABS = [
   { id: 'challenges' as Tab, label: 'Challenges' },

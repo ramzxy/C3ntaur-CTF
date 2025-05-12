@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import { fetchSiteConfigurations, updateSiteConfiguration, SiteConfiguration } from '@/utils/api';
+import { fetchSiteConfigurations, updateSiteConfiguration } from '@/utils/api';
+import { SiteConfiguration } from '@/types';
 
 export default function SiteConfigurationTab() {
   const [isLoading, setIsLoading] = useState(true);

@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import * as GiIcons from 'react-icons/gi';
 import PageLayout from '@/components/layouts/PageLayout';
 import { fetchTeam } from '@/utils/api';
-import { Team } from '@/components/admin/types';
+import { Team } from '@/types';
 
 export default function Profile() {
   const { data: session, status } = useSession();

@@ -3,14 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { Billboard, Box, Cylinder, Edges, Sphere, Text } from '@react-three/drei';
 import { useRouter } from 'next/navigation';
 import * as THREE from 'three';
-
-interface Challenge {
-  id: string;
-  title: string;
-  isSolved: boolean;
-  isLocked: boolean;
-  solvedBy: { teamId: string; teamColor: string }[];
-}
+import { Challenge } from '@/types';
 
 interface DetailedCategoryViewProps {
   challenges: Challenge[];

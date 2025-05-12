@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Team, ApiError } from './types';
+import { Team, ApiError } from '@/types';
 import TeamEditModal from './TeamEditModal';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '@/components/common/LoadingSpinner';

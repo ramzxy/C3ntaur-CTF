@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { GameConfig, fetchGameConfig, updateGameConfig } from '@/utils/api';
+import { GameConfig } from '@/types';
+import { fetchGameConfig, updateGameConfig } from '@/utils/api';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { toast } from 'react-hot-toast';
 

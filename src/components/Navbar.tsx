@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { TfiMenu } from "react-icons/tfi";
-import { fetchSiteConfigurations, SiteConfiguration } from '@/utils/api';
+import { fetchSiteConfigurations } from '@/utils/api';
+import { SiteConfiguration } from '@/types';
 
 interface CRTEffects {
   scanlines: boolean;

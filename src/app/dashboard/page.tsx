@@ -128,8 +128,20 @@ export default function Dashboard() {
         {/* Top Left - Leaderboard */}
         <div className="col-span-1 pointer-events-auto w-11/12 z-10">
           <Leaderboard
-            teams={leaderboard.teams}
-            currentUserTeam={leaderboard.currentUserTeam}
+            teams={leaderboard.teams.map(t => ({
+              ...t,
+              code: '',
+              icon: undefined,
+              color: undefined,
+              members: [],
+            }))}
+            currentUserTeam={leaderboard.currentUserTeam ? {
+              ...leaderboard.currentUserTeam,
+              code: '',
+              icon: undefined,
+              color: undefined,
+              members: [],
+            } : null}
             isOpen={isLeaderboardOpen}
             setIsOpen={setIsLeaderboardOpen}
             isMobile={false}
@@ -251,10 +263,22 @@ export default function Dashboard() {
             <div className="flex-1 overflow-y-auto">
               {activeMobileSection === 'leaderboard' && (
                 <Leaderboard
-                  teams={leaderboard.teams}
-                  currentUserTeam={leaderboard.currentUserTeam}
-                  isOpen={true}
-                  setIsOpen={() => {}}
+                  teams={leaderboard.teams.map(t => ({
+                    ...t,
+                    code: '',
+                    icon: undefined,
+                    color: undefined,
+                    members: [],
+                  }))}
+                  currentUserTeam={leaderboard.currentUserTeam ? {
+                    ...leaderboard.currentUserTeam,
+                    code: '',
+                    icon: undefined,
+                    color: undefined,
+                    members: [],
+                  } : null}
+                  isOpen={isLeaderboardOpen}
+                  setIsOpen={setIsLeaderboardOpen}
                   isMobile={true}
                 />
               )}

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FaPlus, FaDownload, FaUpload } from "react-icons/fa";
-import { Challenge, NewChallenge, ApiError } from './types';
+import { Challenge, NewChallenge, ApiError } from '@/types';
 import ChallengeModal from './ChallengeModal';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { toast } from 'react-hot-toast';

@@ -1,14 +1,7 @@
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import * as GiIcons from 'react-icons/gi';
 import { IconType } from 'react-icons';
-
-interface Team {
-  id: string;
-  name: string;
-  score: number;
-  color?: string;
-  icon?: string;
-}
+import { Team } from '@/types';
 
 interface LeaderboardProps {
   teams: Team[];

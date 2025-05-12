@@ -4,7 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';
 import * as GiIcons from 'react-icons/gi';
-import { fetchScoreboardTeams, fetchTeamPointHistory, fetchGameConfig, type ScoreboardTeam, type PointHistory, type GameConfig } from '@/utils/api';
+import { fetchScoreboardTeams, fetchTeamPointHistory, fetchGameConfig } from '@/utils/api';
+import type { ScoreboardTeam, PointHistory, GameConfig } from '@/types';
 import PageLayout from '@/components/layouts/PageLayout';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 

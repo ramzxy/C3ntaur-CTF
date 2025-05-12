@@ -3,18 +3,7 @@
 import { useMemo } from 'react';
 import * as GiIcons from 'react-icons/gi';
 import { IconType } from 'react-icons';
-
-interface Score {
-  id: string;
-  points: number;
-  createdAt: string;
-  team: {
-    id: string;
-    name: string;
-    color: string;
-    icon: string;
-  };
-}
+import { Score } from '@/types';
 
 interface ScoreboardStandingsProps {
   scores: Score[];

@@ -10,22 +10,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-
-interface Team {
-  id: string;
-  name: string;
-  color: string;
-  icon: string;
-}
-
-interface PointHistory {
-  id: string;
-  points: number;
-  totalPoints: number;
-  reason: string;
-  metadata: string | null;
-  createdAt: string;
-}
+import { Team, PointHistory } from '@/types';
 
 interface ChartData {
   teams: Team[];

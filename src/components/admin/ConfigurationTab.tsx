@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { SiteConfig, GameConfig } from '../../utils/api';
-import { fetchGameConfig, updateSiteConfig, updateGameConfig } from '../../utils/api';
+import { SiteConfig, GameConfig } from '@/types';
+import { fetchGameConfig, updateSiteConfig, updateGameConfig } from '@/utils/api';
 
 interface ConfigurationTabProps {
   siteConfig: SiteConfig;

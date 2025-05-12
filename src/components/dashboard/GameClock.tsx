@@ -1,16 +1,7 @@
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { useEffect, useState } from 'react';
 import { Share_Tech_Mono } from "next/font/google";
-
-interface GameConfig {
-  id: string;
-  startTime: string;
-  endTime: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  hasEndTime: boolean;
-}
+import { GameConfig } from '@/types';
 
 interface GameClockProps {
   timeLeft: string;
@@ -34,8 +25,8 @@ export default function GameClock({ gameConfig, isOpen, setIsOpen, isMobile }: G
       
       // Only animate milliseconds if game is active and within time bounds
       if (gameConfig?.isActive && 
-          (!gameConfig.hasEndTime || now.getTime() < new Date(gameConfig.endTime).getTime()) &&
-          now.getTime() >= new Date(gameConfig.startTime).getTime()) {
+          (!gameConfig.hasEndTime || (gameConfig.endTime && now.getTime() < new Date(gameConfig.endTime ?? '').getTime())) &&
+          (gameConfig.startTime && now.getTime() >= new Date(gameConfig.startTime ?? '').getTime())) {
         setAnimatedMs(prev => (prev - 1 + 100) % 100);
       }
       
@@ -61,8 +52,8 @@ export default function GameClock({ gameConfig, isOpen, setIsOpen, isMobile }: G
     }
 
     const now = currentTime.getTime();
-    const start = new Date(gameConfig.startTime).getTime();
-    const end = new Date(gameConfig.endTime).getTime();
+    const start = new Date(gameConfig.startTime ?? '').getTime();
+    const end = new Date(gameConfig.endTime ?? '').getTime();
     
     // Calculate progress (0 to 1)
     const totalDuration = end - start;
@@ -99,7 +90,8 @@ export default function GameClock({ gameConfig, isOpen, setIsOpen, isMobile }: G
     return num.toString().padStart(length, '0');
   };
 
-  const formatTime = (dateStr: string) => {
+  const formatTime = (dateStr: string | Date | null | undefined) => {
+    if (!dateStr) return '';
     const date = new Date(dateStr);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
   };
@@ -222,7 +214,7 @@ export default function GameClock({ gameConfig, isOpen, setIsOpen, isMobile }: G
                   {/* START + END labels */}
                   <div className="w-full flex justify-between items-center text-xs uppercase tracking-widest relative">
                     <span>[{formatTime(gameConfig.startTime)}]</span>
-                    {gameConfig.hasEndTime && currentTime.getTime() > new Date(gameConfig.endTime).getTime() && (
+                    {gameConfig.hasEndTime && gameConfig.endTime && currentTime.getTime() > new Date(gameConfig.endTime ?? '').getTime() && (
                       <span className="absolute left-1/2 transform -translate-x-1/2 text-red-300">[GAMEOVER]</span>
                     )}
                     <span>[{gameConfig.hasEndTime ? formatTime(gameConfig.endTime) : '∞'}]</span>

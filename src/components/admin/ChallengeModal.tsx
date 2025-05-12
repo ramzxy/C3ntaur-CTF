@@ -1,5 +1,5 @@
 import React from 'react';
-import { Challenge, NewChallenge, UnlockCondition, ChallengeFile, ApiError } from '@/utils/api';
+import { Challenge, NewChallenge, UnlockCondition, ChallengeFile, ApiError } from '@/types';
 import { FaTrash } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import { createChallenge, updateChallenge, uploadFile, deleteFile } from '@/utils/api';

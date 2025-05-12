@@ -3,18 +3,10 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { Billboard, OrbitControls, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { useRouter } from 'next/navigation';
-import { ApiError } from '@/components/admin/types';
 import { toast } from 'react-hot-toast';
-import { fetchCategories, Challenge as ApiChallenge } from '@/utils/api';
+import { fetchCategories } from '@/utils/api';
+import { Challenge, ApiError } from '@/types';
 
-interface Challenge extends ApiChallenge {
-  isActive: boolean;
-  isLocked: boolean;
-  isSolved: boolean;
-  solvedBy: Array<{ teamId: string; teamColor: string; }>;
-  isUnlocked: boolean;
-  unlockReason?: string;
-}
 
 interface CategorySatellite {
   id: string;
@@ -82,28 +74,9 @@ function CategorySatellite({ satellite, onSelect }: { satellite: CategorySatelli
   const sizeMultiplier = 1 + (satellite.challenges.length / 2);
   const satelliteSize = baseSize * sizeMultiplier;
 
-  // Calculate color based on solved challenges
+  // TODO: Calculate color based on solved challenges
   const getSatelliteColor = () => {
-    if (satellite.solvedCount === 0) return "#ffffff";
-
-    // Get the most common team color among solved challenges
-    const teamColors = satellite.challenges
-      .filter(c => c.isSolved)
-      .flatMap(c => c.solvedBy.map(s => s.teamColor));
-
-    if (teamColors.length === 0) return "#ffffff";
-
-    // Count occurrences of each color
-    const colorCounts = teamColors.reduce((acc, color) => {
-      acc[color] = (acc[color] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-
-    // Find the most common color
-    const mostCommonColor = Object.entries(colorCounts)
-      .sort((a, b) => b[1] - a[1])[0][0];
-
-    return mostCommonColor;
+    return "#ffffff";
   };
 
   // Determine the color based on solved status

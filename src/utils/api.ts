@@ -1,223 +1,26 @@
-import { Team, User } from '@/components/admin/types';
-
-export interface SiteConfig {
-  id: string;
-  siteTitle: string;
-  headerText: string;
-}
-
-export interface RulesResponse {
-  siteRules: string;
-}
-
-export interface ChallengeFlag {
-  id?: string;
-  flag: string;
-  points: number;
-  challengeId?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  isSolved?: boolean;
-}
-
-export interface ChallengeFile {
-  id: string;
-  name: string;
-  path: string;
-  size: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Hint {
-  id: string;
-  content: string;
-  cost: number;
-  challengeId: string;
-  createdAt: string;
-  updatedAt: string;
-  isPurchased?: boolean;
-}
-
-export interface UnlockCondition {
-  id?: string;
-  type: 'CHALLENGE_SOLVED' | 'TIME_REMAINDER';
-  requiredChallengeId?: string | null;
-  timeThresholdSeconds?: number | null;
-}
-
-export interface Challenge {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  points: number;
-  flag?: string;
-  flags: ChallengeFlag[];
-  multipleFlags: boolean;
-  difficulty: string;
-  isActive: boolean;
-  isLocked: boolean;
-  files: ChallengeFile[];
-  hints: Hint[];
-  unlockConditions: UnlockCondition[];
-  createdAt: string;
-  updatedAt: string;
-  isSolved?: boolean;
-}
-
-export interface CategoryChallenge {
-  id: string;
-  title: string;
-  isSolved: boolean;
-  isLocked: boolean;
-  points: number;
-  category: string;
-  solvedBy: { teamId: string; teamColor: string }[];
-}
-
-export interface CategoryResponse {
-  challenges: CategoryChallenge[];
-}
-
-export interface TeamMember {
-  id: string;
-  alias: string;
-  name: string;
-  isTeamLeader: boolean;
-}
-
-export interface LeaderboardTeam {
-  id: string;
-  name: string;
-  score: number;
-}
-
-export interface LeaderboardResponse {
-  teams: LeaderboardTeam[];
-  currentUserTeam: LeaderboardTeam | null;
-}
-
-export interface Announcement {
-  id: string;
-  title: string;
-  content: string;
-  createdAt: string;
-}
-
-export interface ActivityLog {
-  id: string;
-  type: string;
-  description: string;
-  createdAt: string;
-  team?: LeaderboardTeam;
-}
-
-export interface GameConfig {
-  id?: string;
-  startTime: string | Date | null;
-  endTime: string | Date | null;
-  isActive: boolean;
-  hasEndTime?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface ScoreboardTeam {
-  id: string;
-  name: string;
-  color: string;
-  icon: string;
-  score: number;
-}
-
-export interface PointHistory {
-  id: string;
-  points: number;
-  totalPoints: number;
-  reason: string;
-  metadata: string | null;
-  createdAt: string;
-}
-
-export interface PointHistoryResponse {
-  items: PointHistory[];
-}
-
-export interface Score {
-  id: string;
-  points: number;
-  createdAt: string;
-  team: {
-    id: string;
-    name: string;
-    color: string;
-    icon: string;
-  };
-}
-
-export interface SubmissionResponse {
-  message: string;
-  isCorrect: boolean;
-  points?: number;
-}
-
-export interface NewAnnouncement {
-  title: string;
-  content: string;
-}
-
-export interface CategoriesResponse {
-  categories: string[];
-  challengesByCategory: Record<string, Challenge[]>;
-}
-
-export interface NewChallenge {
-  title: string;
-  description: string;
-  category: string;
-  points: number;
-  flag?: string;
-  flags: ChallengeFlag[];
-  multipleFlags: boolean;
-  difficulty: string;
-  isActive?: boolean;
-  isLocked?: boolean;
-  files: ChallengeFile[];
-  hints: Hint[];
-  unlockConditions?: UnlockCondition[];
-}
-
-export interface ApiError extends Error {
-  message: string;
-  code?: string;
-  meta?: {
-    target?: string[];
-  };
-}
-
-export interface SiteConfiguration {
-  key: string;
-  value: string;
-}
-
-export interface SignUpRequest {
-  name: string;
-  alias: string;
-  password: string;
-  teamOption: 'create' | 'join';
-  teamName?: string;
-  teamCode?: string;
-  teamIcon?: string;
-  teamColor?: string;
-}
-
-export interface SignUpResponse {
-  user: {
-    alias: string;
-    password: string;
-  };
-}
+import {
+  SiteConfig,
+  RulesResponse,
+  ChallengeFile,
+  Hint,
+  Challenge,
+  CategoryResponse,
+  LeaderboardResponse,
+  Announcement,
+  ActivityLog,
+  GameConfig,
+  ScoreboardTeam,
+  PointHistoryResponse,
+  SubmissionResponse,
+  NewAnnouncement,
+  CategoriesResponse,
+  NewChallenge,
+  SiteConfiguration,
+  SignUpRequest,
+  SignUpResponse,
+  User,
+  Team
+} from '@/types';
 
 export async function fetchSiteConfig(): Promise<SiteConfig[]> {
   const response = await fetch('/api/config');
@@ -621,4 +424,22 @@ export async function signUp(data: SignUpRequest): Promise<SignUpResponse> {
   }
 
   return response.json();
-} 
+}
+
+export type {
+  LeaderboardResponse,
+  Announcement,
+  ActivityLog,
+  GameConfig,
+  ScoreboardTeam,
+  PointHistoryResponse,
+  SubmissionResponse,
+  NewAnnouncement,
+  CategoriesResponse,
+  NewChallenge,
+  SiteConfiguration,
+  SignUpRequest,
+  SignUpResponse,
+  User,
+  Team,
+}; 

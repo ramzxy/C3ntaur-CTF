@@ -42,28 +42,6 @@ export function evaluateUnlockConditions(
   }
 
   // If no conditions were met after checking all of them, the challenge remains locked.
-  // We can optionally provide a generic reason or details based on the conditions.
-  // For simplicity, just returning locked status.
   // TODO: Generate a more descriptive reason string based on unmet conditions.
   return { isUnlocked: false, reason: 'Unlock conditions not met.' };
 }
-
-// Example of how to potentially format a reason (can be expanded)
-// function formatLockReason(conditions: UnlockCondition[]): string {
-//   const reasons = conditions.map(cond => {
-//     if (cond.type === 'CHALLENGE_SOLVED' && cond.requiredChallengeId) {
-//       // In a real app, you might fetch the required challenge title here
-//       return `Solve challenge ${cond.requiredChallengeId}`;
-//     }
-//     if (cond.type === 'TIME_REMAINDER' && cond.timeThresholdSeconds !== null) {
-//       const hours = Math.floor(cond.timeThresholdSeconds / 3600);
-//       const minutes = Math.floor((cond.timeThresholdSeconds % 3600) / 60);
-//       let timeStr = '';
-//       if (hours > 0) timeStr += `${hours}h `;
-//       if (minutes > 0) timeStr += `${minutes}m`;
-//       return `Time remaining < ${timeStr.trim()}`;
-//     }
-//     return 'Unknown condition';
-//   });
-//   return `Requires: ${reasons.join(' OR ')}`;
-// } 

@@ -7,7 +7,8 @@ import { OrbitControls } from '@react-three/drei';
 import DetailedCategoryView from '@/components/DetailedCategoryView';
 import { useRouter } from 'next/navigation';
 import { IoArrowBack } from 'react-icons/io5';
-import { CategoryChallenge, fetchChallengesByCategory } from '@/utils/api';
+import { CategoryChallenge } from '@/types';
+import { fetchChallengesByCategory } from '@/utils/api';
 
 export default function CategoryPage() {
   const params = useParams();
@@ -108,7 +109,19 @@ export default function CategoryPage() {
             <ambientLight intensity={0.5} />
             <pointLight position={[10, 10, 10]} />
             <DetailedCategoryView
-              challenges={challenges}
+              challenges={challenges.map((c) => ({
+                ...c,
+                description: '',
+                flags: [],
+                multipleFlags: false,
+                difficulty: '',
+                isActive: true,
+                files: [],
+                hints: [],
+                unlockConditions: [],
+                createdAt: new Date(0).toISOString(),
+                updatedAt: new Date(0).toISOString(),
+              }))}
               hoveredChallenge={hoveredChallenge}
               setHoveredChallenge={setHoveredChallenge}
             />

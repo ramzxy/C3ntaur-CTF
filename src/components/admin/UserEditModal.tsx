@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Team, ApiError } from './types'; // Import Team type and ApiError type
+import { User, Team, ApiError } from '@/types'; // Import Team type and ApiError type
 
 interface UserEditModalProps {
   user: User | null;

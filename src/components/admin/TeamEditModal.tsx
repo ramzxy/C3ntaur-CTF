@@ -1,5 +1,5 @@
 import React from 'react';
-import { Team, ApiError } from './types'; // Assuming Team type exists here
+import { Team, ApiError } from '@/types'; // Assuming Team type exists here
 
 interface TeamEditModalProps {
   team: Team | null;

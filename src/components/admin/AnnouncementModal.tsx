@@ -1,5 +1,5 @@
 import React from 'react';
-import { NewAnnouncement } from './types';
+import { NewAnnouncement } from '@/types';
 
 interface AnnouncementModalProps {
   title: string;
