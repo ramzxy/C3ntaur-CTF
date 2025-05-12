@@ -162,6 +162,28 @@ body::after {
   animation: flicker 0.15s infinite;
 }
 
+/* Add rolling scanline effect */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    0deg,
+    transparent 0%,
+    transparent 49.9%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 50.1%,
+    transparent 100%
+  );
+  background-repeat: no-repeat;
+  animation: scan 15s linear 0s infinite;
+  pointer-events: none;
+  z-index: 1000;
+}
+
 * {
   text-shadow: 0.4389924193300864px 0 1px rgba(0,30,255,0.5), 
                -0.4389924193300864px 0 1px rgba(255,0,80,0.3), 
@@ -214,6 +236,38 @@ body::after {
 
 .crt-glow-disabled {
   background: rgb(var(--background-start-rgb)) !important;
+}
+
+@keyframes scan {
+  0% { background-position: 0 -100vh; }
+  35%, 100% { background-position: 0 100vh; }
+}
+
+/* CRT Effects disable classes */
+.crt-scanlines-disabled::before {
+  display: none !important;
+}
+
+.crt-flicker-disabled::after {
+  display: none !important;
+}
+
+.crt-transform-disabled #__next {
+  transform: none !important;
+  filter: none !important;
+}
+
+.crt-phosphor-disabled * {
+  text-shadow: none !important;
+  animation: none !important;
+}
+
+.crt-glow-disabled {
+  background: rgb(var(--background-start-rgb)) !important;
+}
+
+.crt-rolling-scan-disabled::before {
+  display: none !important;
 }
 
 @layer components {

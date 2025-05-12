@@ -13,6 +13,7 @@ interface CRTEffects {
   flicker: boolean;
   phosphor: boolean;
   glow: boolean;
+  rollingScan: boolean;
 }
 
 export default function Navbar() {
@@ -26,6 +27,7 @@ export default function Navbar() {
     flicker: true,
     phosphor: true,
     glow: true,
+    rollingScan: true,
   });
   const [title, setTitle] = useState('ORBITAL CTF');
 
@@ -73,6 +75,7 @@ export default function Navbar() {
     document.body.classList.toggle('crt-flicker-disabled', !crtEffects.flicker);
     document.body.classList.toggle('crt-phosphor-disabled', !crtEffects.phosphor);
     document.body.classList.toggle('crt-glow-disabled', !crtEffects.glow);
+    document.body.classList.toggle('crt-rolling-scan-disabled', !crtEffects.rollingScan);
     localStorage.setItem('crtEffects', JSON.stringify(crtEffects));
   }, [crtEffects]);
 
@@ -256,6 +259,12 @@ export default function Navbar() {
                     >
                       Background Glow {crtEffects.glow ? '☑' : '☐'}
                     </div>
+                    <div
+                      className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 cursor-pointer"
+                      onClick={() => toggleEffect('rollingScan')}
+                    >
+                      Rolling Scan {crtEffects.rollingScan ? '☑' : '☐'}
+                    </div>
                   </div>
                 )}
               </div>
@@ -359,6 +368,12 @@ export default function Navbar() {
                 onClick={() => toggleEffect('glow')}
               >
                 Background Glow {crtEffects.glow ? '☑' : '☐'}
+              </div>
+              <div
+                className="px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
+                onClick={() => toggleEffect('rollingScan')}
+              >
+                Rolling Scan {crtEffects.rollingScan ? '☑' : '☐'}
               </div>
             </div>
           )}
