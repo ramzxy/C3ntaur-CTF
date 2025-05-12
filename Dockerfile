@@ -30,8 +30,9 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 
-# Ensure uploads directory exists
+# Ensure uploads and challenges directories exist
 RUN mkdir -p public/uploads
+RUN mkdir -p /challenges
 
 # Copy other necessary files
 COPY --from=builder /app/next.config.ts ./
@@ -48,6 +49,9 @@ EXPOSE 3000
 # Set environment variables
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV CHALLENGES_DIR=/challenges
+ENV INGEST_CHALLENGES_AT_STARUP=false
+
 
 # Initialize database and run the app
 CMD npx prisma migrate deploy && \
