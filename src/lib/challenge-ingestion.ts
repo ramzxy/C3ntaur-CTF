@@ -37,7 +37,7 @@ export class ChallengeIngestionService {
       
       for (const fileName of files) {
         const sourcePath = path.join(filesDir, fileName);
-        const destPath = path.join(process.cwd(), 'public', 'challenges', challengeName, fileName);
+        const destPath = path.join(process.cwd(), 'public', 'uploads', challengeName, fileName);
         
         try {
           const stats = await fs.stat(sourcePath);
@@ -45,7 +45,7 @@ export class ChallengeIngestionService {
             await this.copyFile(sourcePath, destPath);
             processedFiles.push({
               name: fileName,
-              path: `/challenges/${challengeName}/${fileName}`,
+              path: `/uploads/${challengeName}/${fileName}`,
               size: stats.size
             });
           }
