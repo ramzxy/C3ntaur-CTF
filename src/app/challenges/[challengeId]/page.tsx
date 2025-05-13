@@ -161,6 +161,21 @@ export default function ChallengePage() {
               </ReactMarkdown>
             </div>
 
+            {challenge.link && (
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-4">Challenge Link</h2>
+                <div className="border-t-2 border-b-2 border-gray-700 mb-6" />
+                <a 
+                  href={challenge.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:text-blue-300 underline break-all"
+                >
+                  [{challenge.link}]
+                </a>
+              </div>
+            )}
+
             {challenge.files && challenge.files.length > 0 && (
               <div className="mb-6">
                 <h2 className="text-xl font-semibold mb-4">Files</h2>

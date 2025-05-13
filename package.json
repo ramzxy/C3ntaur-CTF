@@ -7,11 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "prisma:seed": "ts-node --compiler-options {\\\"module\\\":\\\"commonjs\\\"}  prisma/seed-example.ts",
+    "prisma:seed": "ts-node --compiler-options {\\\"module\\\":\\\"commonjs\\\"}  prisma/seed.ts",
     "prisma:generate": "prisma generate"
   },
   "prisma": {
-    "seed": "ts-node --compiler-options {\"module\":\"commonjs\"}  prisma/seed-example.ts"
+    "seed": "ts-node --compiler-options {\"module\":\"commonjs\"}  prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.6.0",

@@ -27,7 +27,8 @@ export default function ChallengesTab() {
     difficulty: 'easy',
     isActive: true,
     isLocked: false,
-    unlockConditions: []
+    unlockConditions: [],
+    link: ''
   });
 
   const fetchChallenges = useCallback(async () => {

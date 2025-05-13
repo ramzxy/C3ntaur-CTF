@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { title, description, category, points, flag, flags, multipleFlags, difficulty, isLocked, files, hints, unlockConditions } = await req.json();
+    const { title, description, category, points, flag, flags, multipleFlags, difficulty, isLocked, files, hints, unlockConditions, link } = await req.json();
 
     const challenge = await prisma.challenge.create({
       data: {
@@ -32,6 +32,7 @@ export async function POST(req: Request) {
         } : undefined,
         difficulty,
         isLocked: isLocked || false,
+        link,
         files: files ? {
           create: files.map((file: { name: string; path: string; size: number }) => ({
             name: file.name,
@@ -123,7 +124,7 @@ export async function PATCH(req: Request) {
   }
 
   try {
-    const { id, title, description, category, points, flag, flags, multipleFlags, difficulty, isActive, isLocked, files, hints, unlockConditions } = await req.json();
+    const { id, title, description, category, points, flag, flags, multipleFlags, difficulty, isActive, isLocked, files, hints, unlockConditions, link } = await req.json();
 
     // Get the current challenge state to check if it was previously locked
     const currentChallenge = await prisma.challenge.findUnique({
@@ -150,6 +151,7 @@ export async function PATCH(req: Request) {
         difficulty,
         isActive,
         isLocked,
+        link,
         unlockConditions: unlockConditions ? {
           deleteMany: {},
           create: unlockConditions.map((cond: { type: string; requiredChallengeId?: string; timeThresholdSeconds?: number }) => ({

@@ -51,6 +51,7 @@ export interface Challenge extends BaseEntity {
   difficulty: string;
   isActive: boolean;
   isLocked: boolean;
+  link?: string;
   files: ChallengeFile[];
   hints: Hint[];
   unlockConditions: UnlockCondition[];
@@ -69,6 +70,7 @@ export interface NewChallenge {
   difficulty: string;
   isActive?: boolean;
   isLocked?: boolean;
+  link?: string;
   files: ChallengeFile[];
   hints: Hint[];
   unlockConditions?: UnlockCondition[];

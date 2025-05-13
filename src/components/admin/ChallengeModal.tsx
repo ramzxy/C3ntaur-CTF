@@ -95,6 +95,18 @@ export default function ChallengeModal({
             />
           </div>
           <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Link (Optional)</label>
+            <input
+              type="url"
+              value={challenge.link || ''}
+              onChange={(e) =>
+                setChallenge({ ...challenge, link: e.target.value })
+              }
+              className="w-full bg-gray-700 text-white px-3 py-2 rounded"
+              placeholder="https://example.com"
+            />
+          </div>
+          <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">Points</label>
             <input
               type="number"
