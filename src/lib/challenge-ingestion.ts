@@ -73,6 +73,18 @@ export class ChallengeIngestionService {
       const jsonContent = await fs.readFile(jsonPath, 'utf-8');
       const challengeData: NewChallenge = JSON.parse(jsonContent);
 
+      // Check if challenge already exists
+      const existingChallenge = await prisma.challenge.findFirst({
+        where: {
+          title: challengeData.title
+        }
+      });
+
+      if (existingChallenge) {
+        console.log(`Challenge "${challengeData.title}" already exists, skipping...`);
+        return;
+      }
+
       // Read solve explanation if it exists
       let solveExplanation: string | undefined;
       try {
