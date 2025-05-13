@@ -53,6 +53,7 @@ model Challenge {
   isActive         Boolean           @default(true)
   isLocked         Boolean           @default(false)
   link             String?           // Optional link field for challenges
+  solveExplanation String?           // Optional explanation shown after solving
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   unlockConditions UnlockCondition[]

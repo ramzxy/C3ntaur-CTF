@@ -52,6 +52,7 @@ export interface Challenge extends BaseEntity {
   isActive: boolean;
   isLocked: boolean;
   link?: string;
+  solveExplanation?: string;
   files: ChallengeFile[];
   hints: Hint[];
   unlockConditions: UnlockCondition[];
@@ -71,6 +72,7 @@ export interface NewChallenge {
   isActive?: boolean;
   isLocked?: boolean;
   link?: string;
+  solveExplanation?: string;
   files: ChallengeFile[];
   hints: Hint[];
   unlockConditions?: UnlockCondition[];

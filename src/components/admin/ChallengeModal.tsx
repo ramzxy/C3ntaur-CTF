@@ -82,6 +82,18 @@ export default function ChallengeModal({
             />
           </div>
           <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Solution Explanation (Markdown supported)</label>
+            <textarea
+              value={challenge.solveExplanation || ''}
+              onChange={(e) =>
+                setChallenge({ ...challenge, solveExplanation: e.target.value })
+              }
+              className="w-full bg-gray-700 text-white px-3 py-2 rounded"
+              rows={4}
+              placeholder="This explanation will be shown to users after they solve the challenge"
+            />
+          </div>
+          <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">Category</label>
             <input
               type="text"

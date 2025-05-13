@@ -4911,6 +4911,7 @@ export namespace Prisma {
     isActive: boolean | null
     isLocked: boolean | null
     link: string | null
+    solveExplanation: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -4927,6 +4928,7 @@ export namespace Prisma {
     isActive: boolean | null
     isLocked: boolean | null
     link: string | null
+    solveExplanation: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -4943,6 +4945,7 @@ export namespace Prisma {
     isActive: number
     isLocked: number
     link: number
+    solveExplanation: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -4969,6 +4972,7 @@ export namespace Prisma {
     isActive?: true
     isLocked?: true
     link?: true
+    solveExplanation?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -4985,6 +4989,7 @@ export namespace Prisma {
     isActive?: true
     isLocked?: true
     link?: true
+    solveExplanation?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -5001,6 +5006,7 @@ export namespace Prisma {
     isActive?: true
     isLocked?: true
     link?: true
+    solveExplanation?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -5104,6 +5110,7 @@ export namespace Prisma {
     isActive: boolean
     isLocked: boolean
     link: string | null
+    solveExplanation: string | null
     createdAt: Date
     updatedAt: Date
     _count: ChallengeCountAggregateOutputType | null
@@ -5139,6 +5146,7 @@ export namespace Prisma {
     isActive?: boolean
     isLocked?: boolean
     link?: boolean
+    solveExplanation?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     flags?: boolean | Challenge$flagsArgs<ExtArgs>
@@ -5162,6 +5170,7 @@ export namespace Prisma {
     isActive?: boolean
     isLocked?: boolean
     link?: boolean
+    solveExplanation?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["challenge"]>
@@ -5178,6 +5187,7 @@ export namespace Prisma {
     isActive?: boolean
     isLocked?: boolean
     link?: boolean
+    solveExplanation?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["challenge"]>
@@ -5194,11 +5204,12 @@ export namespace Prisma {
     isActive?: boolean
     isLocked?: boolean
     link?: boolean
+    solveExplanation?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ChallengeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "points" | "flag" | "multipleFlags" | "category" | "difficulty" | "isActive" | "isLocked" | "link" | "createdAt" | "updatedAt", ExtArgs["result"]["challenge"]>
+  export type ChallengeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "points" | "flag" | "multipleFlags" | "category" | "difficulty" | "isActive" | "isLocked" | "link" | "solveExplanation" | "createdAt" | "updatedAt", ExtArgs["result"]["challenge"]>
   export type ChallengeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     flags?: boolean | Challenge$flagsArgs<ExtArgs>
     unlockConditions?: boolean | Challenge$unlockConditionsArgs<ExtArgs>
@@ -5233,6 +5244,7 @@ export namespace Prisma {
       isActive: boolean
       isLocked: boolean
       link: string | null
+      solveExplanation: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["challenge"]>
@@ -5675,6 +5687,7 @@ export namespace Prisma {
     readonly isActive: FieldRef<"Challenge", 'Boolean'>
     readonly isLocked: FieldRef<"Challenge", 'Boolean'>
     readonly link: FieldRef<"Challenge", 'String'>
+    readonly solveExplanation: FieldRef<"Challenge", 'String'>
     readonly createdAt: FieldRef<"Challenge", 'DateTime'>
     readonly updatedAt: FieldRef<"Challenge", 'DateTime'>
   }
@@ -19296,6 +19309,7 @@ export namespace Prisma {
     isActive: 'isActive',
     isLocked: 'isLocked',
     link: 'link',
+    solveExplanation: 'solveExplanation',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -19698,6 +19712,7 @@ export namespace Prisma {
     isActive?: BoolFilter<"Challenge"> | boolean
     isLocked?: BoolFilter<"Challenge"> | boolean
     link?: StringNullableFilter<"Challenge"> | string | null
+    solveExplanation?: StringNullableFilter<"Challenge"> | string | null
     createdAt?: DateTimeFilter<"Challenge"> | Date | string
     updatedAt?: DateTimeFilter<"Challenge"> | Date | string
     flags?: ChallengeFlagListRelationFilter
@@ -19720,6 +19735,7 @@ export namespace Prisma {
     isActive?: SortOrder
     isLocked?: SortOrder
     link?: SortOrderInput | SortOrder
+    solveExplanation?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     flags?: ChallengeFlagOrderByRelationAggregateInput
@@ -19745,6 +19761,7 @@ export namespace Prisma {
     isActive?: BoolFilter<"Challenge"> | boolean
     isLocked?: BoolFilter<"Challenge"> | boolean
     link?: StringNullableFilter<"Challenge"> | string | null
+    solveExplanation?: StringNullableFilter<"Challenge"> | string | null
     createdAt?: DateTimeFilter<"Challenge"> | Date | string
     updatedAt?: DateTimeFilter<"Challenge"> | Date | string
     flags?: ChallengeFlagListRelationFilter
@@ -19767,6 +19784,7 @@ export namespace Prisma {
     isActive?: SortOrder
     isLocked?: SortOrder
     link?: SortOrderInput | SortOrder
+    solveExplanation?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: ChallengeCountOrderByAggregateInput
@@ -19791,6 +19809,7 @@ export namespace Prisma {
     isActive?: BoolWithAggregatesFilter<"Challenge"> | boolean
     isLocked?: BoolWithAggregatesFilter<"Challenge"> | boolean
     link?: StringNullableWithAggregatesFilter<"Challenge"> | string | null
+    solveExplanation?: StringNullableWithAggregatesFilter<"Challenge"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Challenge"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Challenge"> | Date | string
   }
@@ -20757,6 +20776,7 @@ export namespace Prisma {
     isActive?: boolean
     isLocked?: boolean
     link?: string | null
+    solveExplanation?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     flags?: ChallengeFlagCreateNestedManyWithoutChallengeInput
@@ -20779,6 +20799,7 @@ export namespace Prisma {
     isActive?: boolean
     isLocked?: boolean
     link?: string | null
+    solveExplanation?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     flags?: ChallengeFlagUncheckedCreateNestedManyWithoutChallengeInput
@@ -20801,6 +20822,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isLocked?: BoolFieldUpdateOperationsInput | boolean
     link?: NullableStringFieldUpdateOperationsInput | string | null
+    solveExplanation?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     flags?: ChallengeFlagUpdateManyWithoutChallengeNestedInput
@@ -20823,6 +20845,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isLocked?: BoolFieldUpdateOperationsInput | boolean
     link?: NullableStringFieldUpdateOperationsInput | string | null
+    solveExplanation?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     flags?: ChallengeFlagUncheckedUpdateManyWithoutChallengeNestedInput
@@ -20845,6 +20868,7 @@ export namespace Prisma {
     isActive?: boolean
     isLocked?: boolean
     link?: string | null
+    solveExplanation?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -20861,6 +20885,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isLocked?: BoolFieldUpdateOperationsInput | boolean
     link?: NullableStringFieldUpdateOperationsInput | string | null
+    solveExplanation?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -20877,6 +20902,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isLocked?: BoolFieldUpdateOperationsInput | boolean
     link?: NullableStringFieldUpdateOperationsInput | string | null
+    solveExplanation?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -21970,6 +21996,7 @@ export namespace Prisma {
     isActive?: SortOrder
     isLocked?: SortOrder
     link?: SortOrder
+    solveExplanation?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -21990,6 +22017,7 @@ export namespace Prisma {
     isActive?: SortOrder
     isLocked?: SortOrder
     link?: SortOrder
+    solveExplanation?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -22006,6 +22034,7 @@ export namespace Prisma {
     isActive?: SortOrder
     isLocked?: SortOrder
     link?: SortOrder
+    solveExplanation?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -24524,6 +24553,7 @@ export namespace Prisma {
     isActive?: boolean
     isLocked?: boolean
     link?: string | null
+    solveExplanation?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     flags?: ChallengeFlagCreateNestedManyWithoutChallengeInput
@@ -24545,6 +24575,7 @@ export namespace Prisma {
     isActive?: boolean
     isLocked?: boolean
     link?: string | null
+    solveExplanation?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     flags?: ChallengeFlagUncheckedCreateNestedManyWithoutChallengeInput
@@ -24679,6 +24710,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isLocked?: BoolFieldUpdateOperationsInput | boolean
     link?: NullableStringFieldUpdateOperationsInput | string | null
+    solveExplanation?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     flags?: ChallengeFlagUpdateManyWithoutChallengeNestedInput
@@ -24700,6 +24732,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isLocked?: BoolFieldUpdateOperationsInput | boolean
     link?: NullableStringFieldUpdateOperationsInput | string | null
+    solveExplanation?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     flags?: ChallengeFlagUncheckedUpdateManyWithoutChallengeNestedInput
@@ -24867,6 +24900,7 @@ export namespace Prisma {
     isActive?: boolean
     isLocked?: boolean
     link?: string | null
+    solveExplanation?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     flags?: ChallengeFlagCreateNestedManyWithoutChallengeInput
@@ -24888,6 +24922,7 @@ export namespace Prisma {
     isActive?: boolean
     isLocked?: boolean
     link?: string | null
+    solveExplanation?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     flags?: ChallengeFlagUncheckedCreateNestedManyWithoutChallengeInput
@@ -24925,6 +24960,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isLocked?: BoolFieldUpdateOperationsInput | boolean
     link?: NullableStringFieldUpdateOperationsInput | string | null
+    solveExplanation?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     flags?: ChallengeFlagUpdateManyWithoutChallengeNestedInput
@@ -24946,6 +24982,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isLocked?: BoolFieldUpdateOperationsInput | boolean
     link?: NullableStringFieldUpdateOperationsInput | string | null
+    solveExplanation?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     flags?: ChallengeFlagUncheckedUpdateManyWithoutChallengeNestedInput
@@ -24967,6 +25004,7 @@ export namespace Prisma {
     isActive?: boolean
     isLocked?: boolean
     link?: string | null
+    solveExplanation?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     flags?: ChallengeFlagCreateNestedManyWithoutChallengeInput
@@ -24988,6 +25026,7 @@ export namespace Prisma {
     isActive?: boolean
     isLocked?: boolean
     link?: string | null
+    solveExplanation?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     flags?: ChallengeFlagUncheckedCreateNestedManyWithoutChallengeInput
@@ -25048,6 +25087,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isLocked?: BoolFieldUpdateOperationsInput | boolean
     link?: NullableStringFieldUpdateOperationsInput | string | null
+    solveExplanation?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     flags?: ChallengeFlagUpdateManyWithoutChallengeNestedInput
@@ -25069,6 +25109,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isLocked?: BoolFieldUpdateOperationsInput | boolean
     link?: NullableStringFieldUpdateOperationsInput | string | null
+    solveExplanation?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     flags?: ChallengeFlagUncheckedUpdateManyWithoutChallengeNestedInput
@@ -25275,6 +25316,7 @@ export namespace Prisma {
     isActive?: boolean
     isLocked?: boolean
     link?: string | null
+    solveExplanation?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     flags?: ChallengeFlagCreateNestedManyWithoutChallengeInput
@@ -25296,6 +25338,7 @@ export namespace Prisma {
     isActive?: boolean
     isLocked?: boolean
     link?: string | null
+    solveExplanation?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     flags?: ChallengeFlagUncheckedCreateNestedManyWithoutChallengeInput
@@ -25407,6 +25450,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isLocked?: BoolFieldUpdateOperationsInput | boolean
     link?: NullableStringFieldUpdateOperationsInput | string | null
+    solveExplanation?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     flags?: ChallengeFlagUpdateManyWithoutChallengeNestedInput
@@ -25428,6 +25472,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isLocked?: BoolFieldUpdateOperationsInput | boolean
     link?: NullableStringFieldUpdateOperationsInput | string | null
+    solveExplanation?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     flags?: ChallengeFlagUncheckedUpdateManyWithoutChallengeNestedInput
@@ -25486,6 +25531,7 @@ export namespace Prisma {
     isActive?: boolean
     isLocked?: boolean
     link?: string | null
+    solveExplanation?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     flags?: ChallengeFlagCreateNestedManyWithoutChallengeInput
@@ -25507,6 +25553,7 @@ export namespace Prisma {
     isActive?: boolean
     isLocked?: boolean
     link?: string | null
+    solveExplanation?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     flags?: ChallengeFlagUncheckedCreateNestedManyWithoutChallengeInput
@@ -25544,6 +25591,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isLocked?: BoolFieldUpdateOperationsInput | boolean
     link?: NullableStringFieldUpdateOperationsInput | string | null
+    solveExplanation?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     flags?: ChallengeFlagUpdateManyWithoutChallengeNestedInput
@@ -25565,6 +25613,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isLocked?: BoolFieldUpdateOperationsInput | boolean
     link?: NullableStringFieldUpdateOperationsInput | string | null
+    solveExplanation?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     flags?: ChallengeFlagUncheckedUpdateManyWithoutChallengeNestedInput
@@ -25586,6 +25635,7 @@ export namespace Prisma {
     isActive?: boolean
     isLocked?: boolean
     link?: string | null
+    solveExplanation?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     unlockConditions?: UnlockConditionCreateNestedManyWithoutChallengeInput
@@ -25607,6 +25657,7 @@ export namespace Prisma {
     isActive?: boolean
     isLocked?: boolean
     link?: string | null
+    solveExplanation?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     unlockConditions?: UnlockConditionUncheckedCreateNestedManyWithoutChallengeInput
@@ -25675,6 +25726,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isLocked?: BoolFieldUpdateOperationsInput | boolean
     link?: NullableStringFieldUpdateOperationsInput | string | null
+    solveExplanation?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     unlockConditions?: UnlockConditionUpdateManyWithoutChallengeNestedInput
@@ -25696,6 +25748,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isLocked?: BoolFieldUpdateOperationsInput | boolean
     link?: NullableStringFieldUpdateOperationsInput | string | null
+    solveExplanation?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     unlockConditions?: UnlockConditionUncheckedUpdateManyWithoutChallengeNestedInput

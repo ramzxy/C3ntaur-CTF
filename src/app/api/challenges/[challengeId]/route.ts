@@ -85,6 +85,9 @@ export async function GET(
     // Get set of solved flag IDs for this challenge
     const solvedFlagIds = new Set(challenge.submissions.map(sub => sub.flagId));
 
+    // Check if user's team has solved this challenge
+    const userTeamSolved = session?.user?.teamId && challenge.submissions.some(sub => sub.teamId === session.user.teamId);
+
     // Transform the challenge to include isSolved and solvedByTeamId
     const transformedChallenge = {
       ...challenge,
@@ -100,7 +103,8 @@ export async function GET(
       solvedByTeamId: challenge.submissions[0]?.teamId,
       submissions: undefined,
       unlockConditions: undefined,
-      isUnlocked: true
+      isUnlocked: true,
+      solveExplanation: userTeamSolved ? challenge.solveExplanation : undefined
     };
 
     return NextResponse.json(transformedChallenge);

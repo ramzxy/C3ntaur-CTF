@@ -67,10 +67,20 @@ export class ChallengeIngestionService {
   ): Promise<void> {
     const challengeDir = path.join(categoryDir, challengeName);
     const jsonPath = path.join(challengeDir, 'challenge.json');
+    const solvePath = path.join(challengeDir, 'solve', 'solve.md');
 
     try {
       const jsonContent = await fs.readFile(jsonPath, 'utf-8');
       const challengeData: NewChallenge = JSON.parse(jsonContent);
+
+      // Read solve explanation if it exists
+      let solveExplanation: string | undefined;
+      try {
+        solveExplanation = await fs.readFile(solvePath, 'utf-8');
+      } catch (error) {
+        // Solve file doesn't exist, which is fine
+        console.log(`No solve explanation found for challenge ${challengeName}: ${error}`);
+      }
 
       // Process all files in the files directory
       const processedFiles = await this.processChallengeFiles(challengeDir, challengeName);
@@ -92,6 +102,7 @@ export class ChallengeIngestionService {
           } : undefined,
           difficulty: challengeData.difficulty,
           isLocked: challengeData.isLocked || false,
+          solveExplanation: solveExplanation,
           files: processedFiles.length > 0 ? {
             create: processedFiles.map(file => ({
               name: file.name,

@@ -8,7 +8,7 @@ import remarkGfm from 'remark-gfm';
 import { Righteous } from 'next/font/google';
 import { MarkdownComponents } from '@/components/MarkdownComponents';
 import toast from 'react-hot-toast';
-import { IoArrowBack } from 'react-icons/io5';
+import { IoArrowBack, IoChevronDown, IoChevronUp } from 'react-icons/io5';
 import { fetchChallenge, fetchHints, purchaseHint, submitFlag } from '@/utils/api';
 import { Challenge, Hint } from '@/types/index';
 
@@ -27,6 +27,7 @@ export default function ChallengePage() {
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPurchasing, setIsPurchasing] = useState(false);
+  const [showSolution, setShowSolution] = useState(false);
   const challengeId = params.challengeId as string;
 
   useEffect(() => {
@@ -97,8 +98,8 @@ export default function ChallengePage() {
           <p className="text-gray-300 mb-2">Category: {challenge.category}</p>
           <p className="text-gray-300 mb-4">Points: {challenge.points}</p>
           <p className="text-yellow-400 mb-6">Reason: {challenge.unlockConditions?.map(condition => condition.type).join(', ') || 'Unlock conditions not met.'}</p>
-          <button 
-            onClick={() => router.back()} 
+          <button
+            onClick={() => router.back()}
             className="px-4 py-2 border border-white hover:bg-white hover:text-black flex items-center mx-auto"
           >
             <IoArrowBack className="mr-2" /> Go Back
@@ -121,7 +122,7 @@ export default function ChallengePage() {
               <h1 className={`text-5xl font-bold ${righteous.className}`}>{challenge.title}</h1>
               <div className="flex md:flex-row md:items-center gap-2 md:gap-4 mt-2 md:mt-0">
                 <span className="max-w-fit px-3 py-1 bg-green-500/10 border border-green-500 text-green-400 rounded-full font-mono text-sm">
-                  {challenge.multipleFlags 
+                  {challenge.multipleFlags
                     ? `${challenge.flags?.reduce((sum, flag) => sum + flag.points, 0)} TOTAL POINTS`
                     : `${challenge.points} POINTS`
                   }
@@ -146,9 +147,9 @@ export default function ChallengePage() {
 
             {challenge.link && (
               <div className="mb-6">
-                <h2 className="text-xl font-semibold mb-4">Challenge Link</h2>
+                <h2 className="text-xl font-semibold mb-4">Link</h2>
                 <div className="border-t-2 border-b-2 border-gray-700 mb-6" />
-                <a 
+                <a
                   href={challenge.link}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -216,49 +217,18 @@ export default function ChallengePage() {
               </div>
             )}
 
-            {session && !challenge.isSolved && (
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold mb-4">Submit Flag</h2>
-                <div className="border-t-2 border-b-2 border-gray-700 mb-6" />
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="flex gap-4">
-                    <input
-                      type="text"
-                      value={flag}
-                      onChange={(e) => setFlag(e.target.value)}
-                      placeholder="Enter flag"
-                      className="flex-1 px-4 py-2 bg-black border border-white"
-                    />
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="px-4 py-2 border-2 border-white hover:bg-white hover:text-black disabled:opacity-50"
-                    >
-                      {isSubmitting ? 'Submitting...' : 'Submit'}
-                    </button>
-                  </div>
-                  {submissionStatus && (
-                    <div className={`p-4 border-2 ${submissionStatus.isCorrect ? 'border-green-500 text-green-500' : 'border-red-500 text-red-500'}`}>
-                      {submissionStatus.message}
-                    </div>
-                  )}
-                </form>
-              </div>
-            )}
-
             {challenge.multipleFlags && (
               <div className="mb-6">
                 <h2 className="text-xl font-semibold mb-4">Challenge Progress</h2>
                 <div className="border-t-2 border-b-2 border-gray-700 mb-6" />
                 <div className="space-y-2">
                   {challenge.flags?.map((flag) => (
-                    <div 
+                    <div
                       key={flag.id}
-                      className={`flex justify-between items-center p-3 border ${
-                        flag.isSolved 
+                      className={`flex justify-between items-center p-3 border ${flag.isSolved
                           ? 'border-green-500 bg-green-500/10'
                           : 'border-blue-500 bg-blue-500/10'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-2">
                         <span className="text-xl">
@@ -284,6 +254,72 @@ export default function ChallengePage() {
                 </div>
               </div>
             )}
+
+            {session && (
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-4">Submit Flag</h2>
+                <div className="border-t-2 border-b-2 border-gray-700 mb-6" />
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="flex gap-4">
+                    <input
+                      type="text"
+                      value={flag}
+                      onChange={(e) => setFlag(e.target.value)}
+                      placeholder={challenge.isSolved ? "Challenge Solved" : "Enter flag"}
+                      disabled={challenge.isSolved}
+                      className={`flex-1 px-4 py-2 bg-black border ${challenge.isSolved
+                          ? 'border-green-500 text-green-500'
+                          : 'border-white'
+                        }`}
+                    />
+                    <button
+                      type="submit"
+                      disabled={isSubmitting || challenge.isSolved}
+                      className={`px-4 py-2 border-2 ${challenge.isSolved
+                          ? 'border-green-500 text-green-500'
+                          : 'border-white hover:bg-white hover:text-black'
+                        } disabled:opacity-50`}
+                    >
+                      {challenge.isSolved
+                        ? 'Solved ✓'
+                        : isSubmitting
+                          ? 'Submitting...'
+                          : 'Submit'}
+                    </button>
+                  </div>
+                  {submissionStatus && (
+                    <div className={`p-4 border-2 ${submissionStatus.isCorrect ? 'border-green-500 text-green-500' : 'border-red-500 text-red-500'}`}>
+                      {submissionStatus.message}
+                    </div>
+                  )}
+                </form>
+              </div>
+            )}
+            
+
+            {challenge.solveExplanation && (
+              <div className="mb-6">
+                <button
+                  onClick={() => setShowSolution(!showSolution)}
+                  className="w-full flex items-center justify-center gap-2 text-blue-400 hover:text-blue-300 mb-2 px-4 py-2 border border-blue-400 hover:bg-blue-400/10"
+                >
+                  <span>{showSolution ? 'Hide' : 'View'} Solution</span>
+                  {showSolution ? <IoChevronUp /> : <IoChevronDown />}
+                </button>
+                {showSolution && (
+                  <div className="prose prose-invert max-w-none p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+                    <ReactMarkdown
+                      components={MarkdownComponents}
+                      remarkPlugins={[remarkGfm]}
+                      skipHtml={false}
+                    >
+                      {challenge.solveExplanation}
+                    </ReactMarkdown>
+                  </div>
+                )}
+              </div>
+            )}
+
           </div>
         </div>
       </div>

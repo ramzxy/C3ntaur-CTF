@@ -152,6 +152,7 @@ exports.Prisma.ChallengeScalarFieldEnum = {
   isActive: 'isActive',
   isLocked: 'isLocked',
   link: 'link',
+  solveExplanation: 'solveExplanation',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

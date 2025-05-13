@@ -37,6 +37,7 @@ CREATE TABLE "Challenge" (
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "isLocked" BOOLEAN NOT NULL DEFAULT false,
     "link" TEXT,
+    "solveExplanation" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL
 );
