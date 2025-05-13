@@ -69,10 +69,8 @@ function CategorySatellite({ satellite, onSelect }: { satellite: CategorySatelli
     setTextWidth(Math.max(2.5, approximateWidth));
   }, [text]);
 
-  // Calculate base size based on number of challenges
-  const baseSize = 0.1;
-  const sizeMultiplier = 1 + (satellite.challenges.length / 2);
-  const satelliteSize = baseSize * sizeMultiplier;
+  // Fixed size for all satellites
+  const satelliteSize = 0.15;
 
   // TODO: Calculate color based on solved challenges
   const getSatelliteColor = () => {

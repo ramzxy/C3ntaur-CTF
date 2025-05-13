@@ -9,7 +9,7 @@ import { Righteous } from 'next/font/google';
 import { MarkdownComponents } from '@/components/MarkdownComponents';
 import toast from 'react-hot-toast';
 import { IoArrowBack } from 'react-icons/io5';
-import { fetchChallenge, fetchHints, purchaseHint, submitFlag, downloadFile } from '@/utils/api';
+import { fetchChallenge, fetchHints, purchaseHint, submitFlag } from '@/utils/api';
 import { Challenge, Hint } from '@/types/index';
 
 const righteous = Righteous({ weight: '400', subsets: ['latin'] });
@@ -28,23 +28,6 @@ export default function ChallengePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const challengeId = params.challengeId as string;
-
-  const handleDownload = async (url: string, filename: string) => {
-    try {
-      const blob = await downloadFile(filename);
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = downloadUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(downloadUrl);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error('Error downloading file:', error);
-      alert('Error downloading file. Please try again.');
-    }
-  };
 
   useEffect(() => {
     const loadChallenge = async () => {
@@ -188,12 +171,13 @@ export default function ChallengePage() {
                         <span>{file.name}</span>
                         <span className="text-gray-400 text-sm">({file.size} bytes)</span>
                       </div>
-                      <button
-                        onClick={() => handleDownload(file.path, file.name)}
+                      <a
+                        href={file.path}
+                        download={file.name}
                         className="px-3 py-1 border border-white hover:bg-white hover:text-black"
                       >
                         Download
-                      </button>
+                      </a>
                     </div>
                   ))}
                 </div>

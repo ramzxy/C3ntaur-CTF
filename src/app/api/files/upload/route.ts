@@ -3,6 +3,7 @@ import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
   try {
@@ -13,31 +14,66 @@ export async function POST(request: Request) {
 
     const formData = await request.formData();
     const file = formData.get('file') as File;
+    const challengeId = formData.get('challengeId') as string;
     
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const filename = `${Date.now()}-${file.name}`;
-    const uploadsDir = join(process.cwd(), 'public', 'uploads');
-    
-    // Create uploads directory if it doesn't exist
-    try {
-      await mkdir(uploadsDir, { recursive: true });
-    } catch (error) {
-      console.error('Error creating uploads directory:', error);
+    if (!challengeId) {
+      return NextResponse.json({ error: 'No challenge ID provided' }, { status: 400 });
     }
 
-    const path = join(uploadsDir, filename);
+    // Get challenge details
+    const challenge = await prisma.challenge.findUnique({
+      where: { id: challengeId }
+    });
 
-    // Write the file to the uploads directory
+    if (!challenge) {
+      return NextResponse.json({ error: 'Challenge not found' }, { status: 404 });
+    }
+
+    // Create normalized folder name from challenge title
+    const normalizedFolderName = challenge.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const filename = file.name;
+    const challengeDir = join(process.cwd(), 'public', 'uploads', normalizedFolderName);
+    
+    // Create challenge directory if it doesn't exist
+    try {
+      await mkdir(challengeDir, { recursive: true });
+    } catch (error) {
+      console.error('Error creating challenge directory:', error);
+      return NextResponse.json(
+        { error: 'Error creating challenge directory' },
+        { status: 500 }
+      );
+    }
+
+    const path = join(challengeDir, filename);
+
+    // Write the file to the challenge directory
     await writeFile(path, buffer);
+
+    // Create ChallengeFile record
+    const challengeFile = await prisma.challengeFile.create({
+      data: {
+        name: file.name,
+        path: `/uploads/${normalizedFolderName}/${filename}`,
+        size: file.size,
+        challengeId: challenge.id
+      }
+    });
 
     return NextResponse.json({
       name: file.name,
-      path: `/uploads/${filename}`,
-      size: file.size
+      path: challengeFile.path,
+      size: file.size,
+      id: challengeFile.id
     });
   } catch (error) {
     console.error('Error uploading file:', error);

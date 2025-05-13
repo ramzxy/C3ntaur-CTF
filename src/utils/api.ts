@@ -143,14 +143,6 @@ export async function submitFlag(challengeId: string, flag: string): Promise<Sub
   return response.json();
 }
 
-export async function downloadFile(filename: string): Promise<Blob> {
-  const response = await fetch(`/api/files/download?filename=${encodeURIComponent(filename)}`);
-  if (!response.ok) {
-    throw new Error('Failed to download file');
-  }
-  return response.blob();
-}
-
 export async function createAnnouncement(announcement: NewAnnouncement): Promise<void> {
   const response = await fetch('/api/announcements', {
     method: 'POST',
@@ -212,9 +204,10 @@ export async function updateChallenge(challenge: Challenge): Promise<Challenge> 
   return response.json();
 }
 
-export async function uploadFile(file: File): Promise<ChallengeFile> {
+export async function uploadFile(file: File, challengeId: string): Promise<ChallengeFile> {
   const formData = new FormData();
   formData.append('file', file);
+  formData.append('challengeId', challengeId);
   
   const response = await fetch('/api/files/upload', {
     method: 'POST',
@@ -222,19 +215,21 @@ export async function uploadFile(file: File): Promise<ChallengeFile> {
   });
   
   if (!response.ok) {
-    throw new Error('Failed to upload file');
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to upload file');
   }
   
   return response.json();
 }
 
-export async function deleteFile(filename: string): Promise<void> {
-  const response = await fetch(`/api/files/${filename}`, {
+export async function deleteFile(filePath: string): Promise<void> {
+  const response = await fetch(`/api/files/${encodeURIComponent(filePath)}`, {
     method: 'DELETE'
   });
   
   if (!response.ok) {
-    throw new Error('Failed to delete file');
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to delete file');
   }
 }
 

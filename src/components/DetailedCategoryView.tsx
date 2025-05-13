@@ -114,36 +114,36 @@ export default function DetailedCategoryView({
         <Edges color="#6b6b6b" threshold={15} />
       </Box>
       {/* Left solar panel */}
-      <Box args={[5, 0.05, 1.5]} position={[-3.8, 0, 0]} rotation={[0.4, 0, 0]}>
+      <Box args={[5, 0.05, 1.5]} position={[-3.8, 0, 0]} rotation={[0.5, 0, 0]}>
         <meshBasicMaterial visible={false} />
         <Edges color="#6b6b6b" threshold={15} />
       </Box>
-      <Box args={[1.3, 0.01, 1.3]} position={[-2.1, 0, 0]} rotation={[0.4, 0, 0]}>
+      <Box args={[1.3, 0.01, 1.3]} position={[-2.1, 0, 0]} rotation={[0.5, 0, 0]}>
         <meshBasicMaterial visible={false} />
         <Edges color="#6b6b6b" threshold={15} />
       </Box>
-      <Box args={[1.3, 0.01, 1.3]} position={[-3.8, 0, 0]} rotation={[0.4, 0, 0]}>
+      <Box args={[1.3, 0.01, 1.3]} position={[-3.8, 0, 0]} rotation={[0.5, 0, 0]}>
         <meshBasicMaterial visible={false} />
         <Edges color="#6b6b6b" threshold={15} />
       </Box>
-      <Box args={[1.3, 0.01, 1.3]} position={[-5.5, 0, 0]} rotation={[0.4, 0, 0]}>
+      <Box args={[1.3, 0.01, 1.3]} position={[-5.5, 0, 0]} rotation={[0.5, 0, 0]}>
         <meshBasicMaterial visible={false} />
         <Edges color="#6b6b6b" threshold={15} />
       </Box>
       {/* Right solar panel */}
-      <Box args={[5, 0.05, 1.5]} position={[3.8, 0, 0]} rotation={[-0.4, 0, 0]}>
+      <Box args={[5, 0.05, 1.5]} position={[3.8, 0, 0]} rotation={[0.5, 0, 0]}>
         <meshBasicMaterial visible={false} />
         <Edges color="#6b6b6b" threshold={15} />
       </Box>
-      <Box args={[1.3, 0.01, 1.3]} position={[2.1, 0, 0]} rotation={[-0.4, 0, 0]}>
+      <Box args={[1.3, 0.01, 1.3]} position={[2.1, 0, 0]} rotation={[0.5, 0, 0]}>
         <meshBasicMaterial visible={false} />
         <Edges color="#6b6b6b" threshold={15} />
       </Box>
-      <Box args={[1.3, 0.01, 1.3]} position={[3.8, 0, 0]} rotation={[-0.4, 0, 0]}>
+      <Box args={[1.3, 0.01, 1.3]} position={[3.8, 0, 0]} rotation={[0.5, 0, 0]}>
         <meshBasicMaterial visible={false} />
         <Edges color="#6b6b6b" threshold={15} />
       </Box>
-      <Box args={[1.3, 0.01, 1.3]} position={[5.5, 0, 0]} rotation={[-0.4, 0, 0]}>
+      <Box args={[1.3, 0.01, 1.3]} position={[5.5, 0, 0]} rotation={[0.5, 0, 0]}>
         <meshBasicMaterial visible={false} />
         <Edges color="#6b6b6b" threshold={15} />
       </Box>

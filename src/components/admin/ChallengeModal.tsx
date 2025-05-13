@@ -29,8 +29,7 @@ export default function ChallengeModal({
 
   const handleFileDelete = async (file: ChallengeFile) => {
     try {
-      const filename = file.path.split('/').pop();
-      await deleteFile(filename!);
+      await deleteFile(file.path);
       
       const updatedFiles = challenge.files.filter((f) => f.id !== file.id);
       setChallenge({ ...challenge, files: updatedFiles });
@@ -261,9 +260,13 @@ export default function ChallengeModal({
                 const files = await Promise.all(
                   Array.from(e.target.files || []).map(async (file) => {
                     try {
-                      return await uploadFile(file);
+                      if (!('id' in challenge)) {
+                        throw new Error('Please save the challenge first before uploading files');
+                      }
+                      return await uploadFile(file, challenge.id);
                     } catch (error) {
-                      throw new Error('Failed to upload file + ' + error);
+                      toast.error(error instanceof Error ? error.message : 'Failed to upload file');
+                      throw error;
                     }
                   })
                 );
