@@ -1,7 +1,13 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { prisma } from './prisma';
-import { ChallengeFile, NewChallenge } from '@/types';
+import { NewChallenge } from '@/types';
+
+interface FileInput {
+  name: string;
+  path: string;
+  size: number;
+}
 
 export class ChallengeIngestionService {
   private challengesDir: string;
@@ -17,24 +23,39 @@ export class ChallengeIngestionService {
 
   private async processChallengeFiles(
     challengeDir: string,
-    challengeName: string,
-    files: ChallengeFile[]
-  ): Promise<ChallengeFile[]> {
-    const processedFiles: ChallengeFile[] = [];
+    challengeName: string
+  ): Promise<FileInput[]> {
+    const processedFiles: FileInput[] = [];
+    const filesDir = path.join(challengeDir, 'files');
 
-    for (const file of files) {
-      const sourcePath = path.join(challengeDir, 'files', file.name);
-      const destPath = path.join(process.cwd(), 'public', 'challenges', challengeName, file.name);
+    try {
+      // Check if files directory exists
+      await fs.access(filesDir);
       
-      try {
-        await this.copyFile(sourcePath, destPath);
-        processedFiles.push({
-          ...file,
-          path: `/challenges/${challengeName}/${file.name}`
-        });
-      } catch (error) {
-        console.error(`Error copying file ${file.name}:`, error);
+      // Get all files in the directory
+      const files = await fs.readdir(filesDir);
+      
+      for (const fileName of files) {
+        const sourcePath = path.join(filesDir, fileName);
+        const destPath = path.join(process.cwd(), 'public', 'challenges', challengeName, fileName);
+        
+        try {
+          const stats = await fs.stat(sourcePath);
+          if (stats.isFile()) {
+            await this.copyFile(sourcePath, destPath);
+            processedFiles.push({
+              name: fileName,
+              path: `/challenges/${challengeName}/${fileName}`,
+              size: stats.size
+            });
+          }
+        } catch (error) {
+          console.error(`Error processing file ${fileName}:`, error);
+        }
       }
+    } catch (error) {
+      // Directory doesn't exist or other error, just return empty array
+      console.log(`No files directory found for challenge ${challengeName}: ${error}`);
     }
 
     return processedFiles;
@@ -51,14 +72,8 @@ export class ChallengeIngestionService {
       const jsonContent = await fs.readFile(jsonPath, 'utf-8');
       const challengeData: NewChallenge = JSON.parse(jsonContent);
 
-      // Process files if they exist
-      if (challengeData.files) {
-        challengeData.files = await this.processChallengeFiles(
-          challengeDir,
-          challengeName,
-          challengeData.files
-        );
-      }
+      // Process all files in the files directory
+      const processedFiles = await this.processChallengeFiles(challengeDir, challengeName);
 
       // Create challenge in database
       await prisma.challenge.create({
@@ -77,8 +92,8 @@ export class ChallengeIngestionService {
           } : undefined,
           difficulty: challengeData.difficulty,
           isLocked: challengeData.isLocked || false,
-          files: challengeData.files ? {
-            create: challengeData.files.map(file => ({
+          files: processedFiles.length > 0 ? {
+            create: processedFiles.map(file => ({
               name: file.name,
               path: file.path,
               size: file.size
