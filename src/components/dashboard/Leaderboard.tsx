@@ -1,11 +1,11 @@
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import * as GiIcons from 'react-icons/gi';
 import { IconType } from 'react-icons';
-import { Team } from '@/types';
+import { LeaderboardTeam } from '@/types';
 
 interface LeaderboardProps {
-  teams: Team[];
-  currentUserTeam: Team | null;
+  teams: LeaderboardTeam[];
+  currentUserTeam: LeaderboardTeam | null;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   isMobile: boolean;

@@ -6,32 +6,8 @@ dotenv.config();
 const prisma = new PrismaClient();
 
 async function main() {
-  // Create challenges
-  const challenges = [
-    {
-      title: 'Welcome to Space',
-      description: 'Find the hidden flag in this simple challenge.',
-      points: 100,
-      category: 'Misc',
-      difficulty: 'Easy',
-      flag: 'CTF{Welcome_To_Space}',
-    }
-  ];
-
   // Create seed data
   console.log('Starting database seed...');
-
-
-  // Create challenges
-  const createdChallenges = [];
-  for (const challenge of challenges) {
-    const createdChallenge = await prisma.challenge.create({
-      data: challenge,
-    });
-    createdChallenges.push(createdChallenge);
-  }
-
-  console.log('Challenges created successfully');
 
   // Create game config
   await prisma.gameConfig.create({

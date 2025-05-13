@@ -7,6 +7,13 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     const teams = await prisma.team.findMany({
+      select: {
+        id: true,
+        name: true,
+        score: true,
+        icon: true,
+        color: true,
+      },
       orderBy: {
         score: 'desc',
       },
@@ -17,6 +24,13 @@ export async function GET() {
     const currentUserTeam = session?.user?.teamId 
       ? await prisma.team.findUnique({
           where: { id: session.user.teamId },
+          select: {
+            id: true,
+            name: true,
+            score: true,
+            icon: true,
+            color: true,
+          },
         })
       : null;
 

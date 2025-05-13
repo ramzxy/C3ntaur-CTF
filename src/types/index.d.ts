@@ -136,6 +136,14 @@ export interface Team {
   members: User[];
 }
 
+export interface LeaderboardTeam {
+  id: string;
+  name: string;
+  score: number;
+  icon: string;
+  color: string;
+}
+
 // CategoryChallenge
 export interface CategoryChallenge {
   id: string;
