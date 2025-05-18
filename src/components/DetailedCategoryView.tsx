@@ -26,6 +26,12 @@ export default function DetailedCategoryView({
   const startY = -0.8; // Start near the bottom of the main box
   const startZ = 0;
 
+  // Calculate box height based on number of challenges
+  const baseHeight = 2;
+  const extraHeight = Math.max(0, Math.ceil((challenges.length - 10) / 2)) * 0.25;
+  const totalHeight = baseHeight + extraHeight;
+  const adjustedStartY = startY - (extraHeight / 2); // Adjust starting Y position to keep challenges centered
+
   useFrame((state) => {
     if (groupRef.current) {
       // Subtle floating animation instead of rotation
@@ -39,7 +45,7 @@ export default function DetailedCategoryView({
       const row = Math.floor(index / challengesPerRow);
       const col = index % challengesPerRow;
       const x = startX + (col * 1.0); // 1.0 units between columns
-      const y = startY + (row * spacing);
+      const y = adjustedStartY + (row * spacing);
 
       const getChallengeColor = () => {
         if (challenge.isLocked) return "gold";
@@ -91,7 +97,7 @@ export default function DetailedCategoryView({
   return (
     <group ref={groupRef}>
       {/* main box */}
-      <Box args={[2, 2, 2]} position={[0, 0, 0]}>
+      <Box args={[2, totalHeight, 2]} position={[0, 0, 0]}>
         <meshBasicMaterial visible={false} />
         <Edges color="#6b6b6b" threshold={15} />
       </Box>

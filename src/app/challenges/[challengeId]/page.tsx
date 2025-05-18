@@ -8,11 +8,46 @@ import remarkGfm from 'remark-gfm';
 import { Righteous } from 'next/font/google';
 import { MarkdownComponents } from '@/components/MarkdownComponents';
 import toast from 'react-hot-toast';
-import { IoArrowBack, IoChevronDown, IoChevronUp } from 'react-icons/io5';
+import { IoArrowBack, IoClose } from 'react-icons/io5';
 import { fetchChallenge, fetchHints, purchaseHint, submitFlag } from '@/utils/api';
 import { Challenge, Hint } from '@/types/index';
 
 const righteous = Righteous({ weight: '400', subsets: ['latin'] });
+
+interface SolutionModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  explanation: string;
+}
+
+function SolutionModal({ isOpen, onClose, explanation }: SolutionModalProps) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+      <div className="bg-black p-6 w-full max-w-4xl shadow-xl max-h-[90vh] overflow-y-auto border-2 border-white">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-semibold">Solution Explanation</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white"
+          >
+            <IoClose size={24} />
+          </button>
+        </div>
+        <div className="prose prose-invert max-w-none">
+          <ReactMarkdown
+            components={MarkdownComponents}
+            remarkPlugins={[remarkGfm]}
+            skipHtml={false}
+          >
+            {explanation}
+          </ReactMarkdown>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function ChallengePage() {
   const params = useParams();
@@ -300,23 +335,16 @@ export default function ChallengePage() {
             {challenge.solveExplanation && (
               <div className="mb-6">
                 <button
-                  onClick={() => setShowSolution(!showSolution)}
+                  onClick={() => setShowSolution(true)}
                   className="w-full flex items-center justify-center gap-2 text-blue-400 hover:text-blue-300 mb-2 px-4 py-2 border border-blue-400 hover:bg-blue-400/10"
                 >
-                  <span>{showSolution ? 'Hide' : 'View'} Solution</span>
-                  {showSolution ? <IoChevronUp /> : <IoChevronDown />}
+                  <span>View Solution</span>
                 </button>
-                {showSolution && (
-                  <div className="prose prose-invert max-w-none p-4 bg-gray-800/50 rounded-lg border border-gray-700">
-                    <ReactMarkdown
-                      components={MarkdownComponents}
-                      remarkPlugins={[remarkGfm]}
-                      skipHtml={false}
-                    >
-                      {challenge.solveExplanation}
-                    </ReactMarkdown>
-                  </div>
-                )}
+                <SolutionModal
+                  isOpen={showSolution}
+                  onClose={() => setShowSolution(false)}
+                  explanation={challenge.solveExplanation}
+                />
               </div>
             )}
 
