@@ -13,9 +13,12 @@ A retro space-themed Capture The Flag platform built with modern tech stack that
 
 Experience a CTF in a sleek, dark-themed environment with real-time scoring and team collaboration.
 
-[Demo](https://asynchronous-x.github.io/orbital-ctf/) · [Report Bug](https://github.com/asynchronous-x/orbital-ctf/issues) · [Request Feature](https://github.com/asynchronous-x/orbital-ctf/issues)
+[Static Demo Site](https://asynchronous-x.github.io/orbital-ctf/) · [Report Bug](https://github.com/asynchronous-x/orbital-ctf/issues) · [Request Feature](https://github.com/asynchronous-x/orbital-ctf/issues)
+
+[![Watch the demo](./orbital-ctf-promo.gif)](https://x.com/i/status/1922884608200188109)
 
 </div>
+
 
 ## ✨ Features
 
@@ -113,11 +116,13 @@ The platform can be configured through environment variables:
 DATABASE_URL="file:./dev.db"
 NEXTAUTH_SECRET="your-secret-here"
 NEXTAUTH_URL="http://localhost:3000"
+INGEST_CHALLENGES_AT_STARTUP=true // if set to true, tries to ingest challenges in the CHALLENGES_DIR directory at startup, see expected structure
+CHALLENGES_DIR="./challenges" // path to the folder of challenges you want ingested
 ```
 
 ## 📝 License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the GPL-3.0 License. See the [LICENSE](LICENSE) file for details.
 
 ## 🌟 Acknowledgments
 
