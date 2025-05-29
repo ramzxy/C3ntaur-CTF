@@ -8,13 +8,13 @@ export async function POST(request: Request) {
     const session = await getServerSession(authOptions);
 
     if (!session) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Check if user has a team
     if (!session.user.teamId) {
       return NextResponse.json(
-        { message: 'You must be part of a team to submit flags' },
+        { error: 'You must be part of a team to submit flags' },
         { status: 403 }
       );
     }
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       // If game hasn't started yet, reject submissions
       if (!gameStarted) {
         return NextResponse.json(
-          { message: "The competition hasn't started yet. Please check back later." },
+          { error: "The competition hasn't started yet. Please check back later." },
           { status: 403 }
         );
       }
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
         // If game has ended, reject submissions
         if (gameEnded) {
           return NextResponse.json(
-            { message: "The competition has ended. Flag submissions are no longer accepted." },
+            { error: "The competition has ended. Flag submissions are no longer accepted." },
             { status: 403 }
           );
         }
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
 
     if (!challengeId || !flag) {
       return NextResponse.json(
-        { message: 'Missing required fields' },
+        { error: 'Missing required fields' },
         { status: 400 }
       );
     }
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
 
     if (!challenge) {
       return NextResponse.json(
-        { message: 'Challenge not found' },
+        { error: 'Challenge not found' },
         { status: 404 }
       );
     }
@@ -88,7 +88,15 @@ export async function POST(request: Request) {
     // Check if the challenge is locked
     if (challenge.isLocked && !session.user.isAdmin) {
       return NextResponse.json(
-        { message: 'This challenge is locked. Complete previous challenges to unlock it.' },
+        { error: 'This challenge is locked. Complete previous challenges to unlock it.' },
+        { status: 403 }
+      );
+    }
+
+    // Check if the user has a team
+    if (!session.user.teamId) {
+      return NextResponse.json(
+        { error: 'You must be part of a team to submit flags' },
         { status: 403 }
       );
     }
@@ -110,14 +118,14 @@ export async function POST(request: Request) {
       const solvedFlagIds = new Set(existingSubmissions.map(sub => sub.flagId));
       if (solvedFlagIds.size === challenge.flags.length) {
         return NextResponse.json(
-          { message: 'All flags for this challenge have been solved' },
+          { error: 'All flags for this challenge have been solved' },
           { status: 400 }
         );
       }
     } else if (existingSubmissions.length > 0) {
       // For single flag challenges, check if it's already solved
       return NextResponse.json(
-        { message: 'Challenge already solved' },
+        { error: 'Challenge already solved' },
         { status: 400 }
       );
     }
@@ -261,7 +269,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Error submitting flag:', error);
     return NextResponse.json(
-      { message: 'An error occurred while submitting the flag' },
+      { error: 'An error occurred while submitting the flag' },
       { status: 500 }
     );
   }

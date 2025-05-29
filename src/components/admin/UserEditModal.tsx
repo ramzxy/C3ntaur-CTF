@@ -64,7 +64,7 @@ export default function UserEditModal({ user, isOpen, onClose, onSave, teams, on
       }
     } catch (err) {
       const error = err as ApiError;
-      setError(error.message || 'Failed to update user alias.');
+      setError(error.error || 'Failed to update user alias.');
     } finally {
       setIsSaving(false);
     }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { SiteConfig, GameConfig } from '@/types';
+import { SiteConfig, GameConfig, ApiError } from '@/types';
 import { fetchGameConfig, updateSiteConfig, updateGameConfig } from '@/utils/api';
+import { toast } from 'react-hot-toast';
 
 interface ConfigurationTabProps {
   siteConfig: SiteConfig;
@@ -27,7 +28,9 @@ export default function ConfigurationTab({ siteConfig, fetchConfig }: Configurat
           setHasEndTime(data.hasEndTime !== false);
         }
       } catch (error) {
-        console.error('Error fetching game config:', error);
+        const err = error as ApiError;
+        console.error('Error fetching game config:', err.error);
+        toast.error(`Error fetching game config: ${err.error}`);
       } finally {
         setLoading(false);
       }
@@ -42,7 +45,9 @@ export default function ConfigurationTab({ siteConfig, fetchConfig }: Configurat
       await updateSiteConfig(config);
       fetchConfig();
     } catch (error) {
-      console.error('Error updating site config:', error);
+      const err = error as ApiError;
+      console.error('Error updating site config:', err.error);
+      toast.error(`Error updating site config: ${err.error}`);
     }
   };
 
@@ -74,8 +79,9 @@ export default function ConfigurationTab({ siteConfig, fetchConfig }: Configurat
       setHasEndTime(data.hasEndTime !== false);
       alert('Game time settings updated successfully!');
     } catch (error) {
-      console.error('Error updating game config:', error);
-      alert('Error updating game time settings');
+      const err = error as ApiError;
+      console.error('Error updating game config:', err.error);
+      toast.error(`Error updating game config: ${err.error}`);
     }
   };
 

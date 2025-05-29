@@ -10,9 +10,9 @@ datasource db {
 
 model User {
   id           String       @id @default(cuid())
-  alias        String       @unique
-  password     String
-  name         String
+  alias        String       @unique // max 32 chars
+  password     String       // max 128 chars
+  name         String       // max 48 chars
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
   teamId       String?
@@ -25,8 +25,8 @@ model User {
 
 model Team {
   id          String        @id @default(cuid())
-  name        String        @unique
-  code        String        @unique
+  name        String        @unique // max 32 chars
+  code        String        @unique // max 12 chars
   icon        String        @default("GiSpaceship")
   color       String        @default("#ffffff")
   createdAt   DateTime      @default(now())

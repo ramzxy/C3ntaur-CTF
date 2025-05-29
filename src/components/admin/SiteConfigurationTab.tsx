@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { fetchSiteConfigurations, updateSiteConfiguration } from '@/utils/api';
-import { SiteConfiguration } from '@/types';
+import { ApiError, SiteConfiguration } from '@/types';
 
 export default function SiteConfigurationTab() {
   const [isLoading, setIsLoading] = useState(true);
@@ -30,7 +30,8 @@ export default function SiteConfigurationTab() {
       );
       setIsLoading(false);
     } catch (fetchError) {
-      toast.error('Failed to fetch configurations');
+      const err = fetchError as ApiError;
+      toast.error(`Error fetching configurations: ${err.error}`);
       console.error('Error fetching configs:', fetchError);
       setIsLoading(false);
     }
@@ -47,7 +48,8 @@ export default function SiteConfigurationTab() {
       toast.success('All configurations updated successfully');
       fetchConfigs();
     } catch (updateError) {
-      toast.error('Failed to update some configurations');
+      const err = updateError as ApiError;
+      toast.error(`Error updating configurations: ${err.error}`);
       console.error('Error updating configs:', updateError);
     }
   };

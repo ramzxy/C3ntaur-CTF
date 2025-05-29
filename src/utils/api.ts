@@ -138,7 +138,8 @@ export async function submitFlag(challengeId: string, flag: string): Promise<Sub
     body: JSON.stringify({ challengeId, flag }),
   });
   if (!response.ok) {
-    throw new Error('Failed to submit flag');
+    const data = await response.json();
+    throw new Error(data.error || 'Failed to submit flag');
   }
   return response.json();
 }
@@ -162,7 +163,8 @@ export async function deleteAnnouncement(id: string): Promise<void> {
     method: 'DELETE',
   });
   if (!response.ok) {
-    throw new Error('Failed to delete announcement');
+    const data = await response.json();
+    throw new Error(data.error || 'Failed to delete announcement');
   }
 }
 
@@ -182,8 +184,8 @@ export async function createChallenge(challenge: NewChallenge): Promise<Challeng
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Failed to create challenge');
+    const data = await response.json();
+    throw new Error(data.error || 'Failed to create challenge');
   }
 
   return response.json();
@@ -197,8 +199,8 @@ export async function updateChallenge(challenge: Challenge): Promise<Challenge> 
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Failed to update challenge');
+    const data = await response.json();
+    throw new Error(data.error || 'Failed to update challenge');
   }
 
   return response.json();
@@ -215,8 +217,8 @@ export async function uploadFile(file: File, challengeId: string): Promise<Chall
   });
   
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to upload file');
+    const data = await response.json();
+    throw new Error(data.error || 'Failed to upload file');
   }
   
   return response.json();
@@ -228,8 +230,8 @@ export async function deleteFile(filePath: string): Promise<void> {
   });
   
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to delete file');
+    const data = await response.json();
+    throw new Error(data.error || 'Failed to delete file');
   }
 }
 
@@ -251,8 +253,8 @@ export async function deleteChallenge(id: string): Promise<void> {
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Failed to delete challenge');
+    const data = await response.json();
+    throw new Error(data.error || 'Failed to delete challenge');
   }
 }
 
@@ -274,8 +276,8 @@ export async function importChallenges(challenges: Challenge[]): Promise<void> {
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Failed to import challenges');
+    const data = await response.json();
+    throw new Error(data.error || 'Failed to import challenges');
   }
 }
 
@@ -289,7 +291,8 @@ export async function updateSiteConfig(config: SiteConfig): Promise<void> {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to update site configuration');
+    const data = await response.json();
+    throw new Error(data.error || 'Failed to update site configuration');
   }
 }
 
@@ -326,7 +329,8 @@ export async function updateSiteConfiguration(key: string, value: string): Promi
   });
   
   if (!response.ok) {
-    throw new Error(`Failed to update configuration: ${key}`);
+    const data = await response.json();
+    throw new Error(data.error || `Failed to update configuration: ${key}`);
   }
   return response.json();
 }
@@ -349,8 +353,8 @@ export async function deleteTeam(id: string): Promise<void> {
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Failed to delete team');
+    const data = await response.json(); 
+    throw new Error(data.error || 'Failed to delete team');
   }
 }
 
@@ -362,8 +366,8 @@ export async function updateTeam(teamData: Partial<Team>): Promise<Team> {
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Failed to update team');
+    const data = await response.json();
+    throw new Error(data.error || 'Failed to update team');
   }
 
   return response.json();
@@ -387,7 +391,8 @@ export async function deleteAdminUser(id: string): Promise<void> {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to delete user');
+    const data = await response.json();
+    throw new Error(data.error || 'Failed to delete user');
   }
 }
 
@@ -399,8 +404,8 @@ export async function updateAdminUser(userData: Partial<User>): Promise<User> {
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Failed to update user');
+    const data = await response.json();
+    throw new Error(data.error || 'Failed to update user');
   }
 
   return response.json();
@@ -414,8 +419,8 @@ export async function signUp(data: SignUpRequest): Promise<SignUpResponse> {
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Failed to register');
+    const data = await response.json();
+    throw new Error(data.error || 'Failed to register');
   }
 
   return response.json();

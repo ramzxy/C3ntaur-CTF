@@ -50,6 +50,7 @@ export default function SignIn() {
               required
               className="input-field"
               placeholder="Alias"
+              maxLength={32}
             />
           </div>
           <div>
@@ -61,6 +62,7 @@ export default function SignIn() {
               required
               className="input-field"
               placeholder="Password"
+              maxLength={128}
             />
           </div>
 

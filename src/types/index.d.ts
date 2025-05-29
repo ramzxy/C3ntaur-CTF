@@ -108,7 +108,7 @@ export interface GameConfig extends Partial<BaseEntity> {
 
 // ApiError
 export interface ApiError extends Error {
-  message: string;
+  error: string;
   code?: string;
   meta?: {
     target?: string[];

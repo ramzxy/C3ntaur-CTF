@@ -24,12 +24,30 @@ export default function Leaderboard({ teams, currentUserTeam, isOpen, setIsOpen,
   const getTeamIcon = (iconName?: string, color?: string) => {
     if (!iconName) return null;
     const IconComponent: IconType | undefined = (GiIcons as Record<string, IconType>)[iconName];
-    return IconComponent ? (
-      <IconComponent 
-        className="w-9 h-9" 
-        style={{ color: color || '#fff' }}
+    // Only use white outline if color is exactly true black
+    const isTrueBlack = color === '#000' || color === '#000000';
+    if (!IconComponent) return null;
+    if (isTrueBlack) {
+      // Render white outline by stacking icons
+      return (
+        <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <IconComponent
+            className="w-10 h-10 absolute"
+            style={{ color: '#fff', left: -2, top: -1, zIndex: 0, filter: 'blur(1px)' }}
+          />
+          <IconComponent
+            className="w-9 h-9 relative"
+            style={{ color: color || '#fff', zIndex: 1 }}
+          />
+        </span>
+      );
+    }
+    return (
+      <IconComponent
+        className="w-9 h-9"
+        style={{ color: color || '#fff', background: 'transparent' }}
       />
-    ) : null;
+    );
   };
 
   return (

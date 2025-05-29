@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import * as GiIcons from 'react-icons/gi';
+import { FaRegCopy, FaCheck } from 'react-icons/fa';
 import PageLayout from '@/components/layouts/PageLayout';
 import { fetchTeam } from '@/utils/api';
 import { Team } from '@/types';
@@ -14,6 +15,7 @@ export default function Profile() {
   const router = useRouter();
   const [team, setTeam] = useState<Team | null>(null);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
 
   const loadTeamData = useCallback(async () => {
     try {
@@ -27,6 +29,14 @@ export default function Profile() {
       setLoading(false);
     }
   }, [session?.user?.teamId]);
+
+  const handleCopy = useCallback(() => {
+    if (team?.code) {
+      navigator.clipboard.writeText(team.code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }
+  }, [team?.code]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -81,7 +91,29 @@ export default function Profile() {
                 </div>
                 <div>
                   <label className="text-gray-400 text-sm">Team Code</label>
-                  <p className="text-white text-lg font-mono">{team.code}</p>
+                  <div className="flex items-center space-x-3 mt-1">
+                    <span className="text-blue-400 bg-gray-800 border border-blue-500 font-mono px-3 py-1 rounded-lg text-base select-all tracking-wider">
+                      {team.code}
+                    </span>
+                    <button
+                      onClick={handleCopy}
+                      className={`flex items-center space-x-2 px-3 py-1 border border-blue-500 rounded-lg bg-transparent text-blue-500 hover:bg-blue-50 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 font-medium text-sm transition-colors`}
+                      aria-label="Copy team code"
+                      type="button"
+                    >
+                      {copied ? (
+                        <>
+                          <FaCheck className="text-green-500" size={18} />
+                          <span>Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <FaRegCopy className="" size={18} />
+                          <span>Copy to clipboard</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label className="text-gray-400 text-sm">Team Score</label>

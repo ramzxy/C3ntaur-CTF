@@ -4,6 +4,7 @@ interface Team {
   id: string;
   name: string;
   score: number;
+  color?: string;
 }
 
 interface ActivityLog {
@@ -61,7 +62,31 @@ export default function Activity({ activities, isOpen, setIsOpen, isMobile = fal
                         {new Date(activity.createdAt).toLocaleTimeString()}
                       </span>
                     </div>
-                    <p className="text-white text-sm mt-0.5">{activity.description}</p>
+                    {/* Inline team badge in description if present */}
+                    <p className="text-white text-sm mt-0.5">
+                      {activity.team && activity.team.name && activity.description.includes(activity.team.name)
+                        ? (() => {
+                            const teamName = activity.team?.name ?? '';
+                            const teamColor = activity.team?.color;
+                            const parts = activity.description.split(new RegExp(`(${teamName})`, 'g'));
+                            return parts.map((part, i) =>
+                              part === teamName ? (
+                                <span
+                                  key={i}
+                                  className={`inline-block font-semibold px-1 rounded ${teamColor === '#000000' || teamColor === 'black' ? 'bg-white text-black' : ''}`}
+                                  style={{
+                                    color: teamColor && teamColor !== '#000000' && teamColor !== 'black' ? teamColor : undefined,
+                                  }}
+                                >
+                                  {teamName}
+                                </span>
+                              ) : (
+                                part
+                              )
+                            );
+                          })()
+                        : activity.description}
+                    </p>
                   </div>
                 </div>
               ))

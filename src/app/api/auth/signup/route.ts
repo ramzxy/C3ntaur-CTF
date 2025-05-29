@@ -6,6 +6,23 @@ export async function POST(req: Request) {
   try {
     const { alias, password, name, teamName, teamCode, teamOption, teamIcon, teamColor } = await req.json();
 
+    // Enforce max length constraints
+    if (alias && alias.length > 32) {
+      return NextResponse.json({ error: 'Alias must be at most 32 characters' }, { status: 400 });
+    }
+    if (password && password.length > 128) {
+      return NextResponse.json({ error: 'Password must be at most 128 characters' }, { status: 400 });
+    }
+    if (name && name.length > 48) {
+      return NextResponse.json({ error: 'Name must be at most 48 characters' }, { status: 400 });
+    }
+    if (teamName && teamName.length > 32) {
+      return NextResponse.json({ error: 'Team name must be at most 32 characters' }, { status: 400 });
+    }
+    if (teamCode && teamCode.length > 12) {
+      return NextResponse.json({ error: 'Team code must be at most 12 characters' }, { status: 400 });
+    }
+
     // Check if user already exists
     const existingUser = await prisma.user.findFirst({
       where: {

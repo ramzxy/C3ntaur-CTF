@@ -21,13 +21,12 @@ export default function TeamsTab() {
       setTeams(data);
     } catch (err) {
       const error = err as ApiError;
-      setError(error.message);
-      toast.error(`Error fetching teams: ${error.message}`);
+      setError(error.error);
       console.error('Error fetching teams:', error);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, []); 
 
   useEffect(() => {
     fetchTeams();
@@ -39,8 +38,9 @@ export default function TeamsTab() {
       setTeamToDelete(null);
       await fetchTeams();
     } catch (error) {
+      const err = error as ApiError;
       console.error('Error deleting team:', error);
-      toast.error('Error deleting team. See console for details.');
+      toast.error(`Error deleting team: ${err.error}`);
     }
   };
 
@@ -61,7 +61,7 @@ export default function TeamsTab() {
     } catch (err) {
       const error = err as ApiError;
       console.error('Error updating team:', error);
-      toast.error(`Error: ${error.message}`);
+      toast.error(`Error updating team: ${error.error}`);
       throw error;
     }
   };

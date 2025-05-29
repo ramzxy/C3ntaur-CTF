@@ -10,7 +10,7 @@ import { MarkdownComponents } from '@/components/MarkdownComponents';
 import toast from 'react-hot-toast';
 import { IoArrowBack, IoClose } from 'react-icons/io5';
 import { fetchChallenge, fetchHints, purchaseHint, submitFlag } from '@/utils/api';
-import { Challenge, Hint } from '@/types/index';
+import { ApiError, Challenge, Hint } from '@/types/index';
 
 const righteous = Righteous({ weight: '400', subsets: ['latin'] });
 
@@ -113,9 +113,10 @@ export default function ChallengePage() {
         toast.success(`Correct! You earned ${data.points} points!`);
       }
     } catch (error) {
-      console.error('Error submitting flag:', error);
+      const err = error as ApiError;
+      console.error('Error submitting flag:', err.message);
       setSubmissionStatus({
-        message: 'Error submitting flag. Please try again.',
+        message: err.message || 'Error submitting flag. Please try again.',
         isCorrect: false,
       });
     } finally {

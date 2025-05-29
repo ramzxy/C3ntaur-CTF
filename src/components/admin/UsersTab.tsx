@@ -27,8 +27,7 @@ export default function UsersTab() {
       setTeams(teamsData);
     } catch (err) {
       const error = err as ApiError;
-      setError(error.message);
-      toast.error(`Error fetching data: ${error.message}`);
+      setError(error.error);
       console.error('Error fetching users or teams:', error);
     } finally {
       setIsLoading(false);
@@ -45,8 +44,9 @@ export default function UsersTab() {
       setUserToDelete(null);
       await fetchUsersAndTeams();
     } catch (error) {
-      console.error('Error deleting user:', error);
-      toast.error('Error deleting user. See console for details.');
+      const err = error as ApiError;
+      console.error('Error deleting user:', err.error);
+      toast.error(`Error deleting user: ${err.error}`);
     }
   };
 
@@ -67,7 +67,7 @@ export default function UsersTab() {
     } catch (err) {
       const error = err as ApiError;
       console.error('Error updating user:', error);
-      toast.error(`Error: ${error.message}`);
+      toast.error(`Error updating user: ${error.error}`);
       throw error;
     }
   };

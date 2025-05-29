@@ -39,8 +39,7 @@ export default function ChallengesTab() {
       setChallenges(data);
     } catch (err) {
       const error = err as ApiError;
-      setError(error.message);
-      toast.error(`Error fetching challenges: ${error.message}`);
+      setError(error.error);
       console.error('Error fetching challenges:', error);
     } finally {
       setIsLoading(false);
@@ -59,7 +58,7 @@ export default function ChallengesTab() {
     } catch (error) {
       const err = error as ApiError;
       console.error('Error deleting challenge:', err);
-      toast.error(err.message || 'Failed to delete challenge');
+      toast.error(err.error || 'Failed to delete challenge');
     }
   };
 
@@ -83,8 +82,9 @@ export default function ChallengesTab() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error exporting challenges:', error);
-      toast.error('Error exporting challenges. Check console.');
+      const err = error as ApiError;
+      console.error('Error exporting challenges:', err.error);
+      toast.error(`Error exporting challenges: ${err.error}`);
     }
   };
 
@@ -99,8 +99,9 @@ export default function ChallengesTab() {
       await importChallenges(challenges);
       await fetchChallenges();
     } catch (error) {
-      console.error('Error importing challenges:', error);
-      toast.error('Error processing import file. Check console.');
+      const err = error as ApiError;
+      console.error('Error importing challenges:', err.error);
+      toast.error(`Error importing challenges: ${err.error}`);
     }
   };
 

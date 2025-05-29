@@ -82,7 +82,7 @@ export default function SignUp() {
       <div className="min-h-full w-full flex items-center justify-center py-20 px-4 md:py-0">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold">Create your account or team</h2>
+            <h2 className="text-2xl md:text-3xl font-bold">Create your account and team</h2>
           </div>
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
@@ -94,6 +94,7 @@ export default function SignUp() {
                 required
                 className="input-field"
                 placeholder="Full Name"
+                maxLength={48}
               />
             </div>
             <div>
@@ -105,6 +106,7 @@ export default function SignUp() {
                 required
                 className="input-field"
                 placeholder="Alias"
+                maxLength={32}
               />
             </div>
             <div>
@@ -116,6 +118,7 @@ export default function SignUp() {
                 required
                 className="input-field"
                 placeholder="Password"
+                maxLength={128}
               />
             </div>
 
@@ -153,6 +156,7 @@ export default function SignUp() {
                 type="text"
                 className="input-field"
                 placeholder="Team Name"
+                maxLength={32}
               />
               
               <div className="mt-4">
@@ -182,6 +186,7 @@ export default function SignUp() {
                 type="text"
                 className="input-field"
                 placeholder="Team Code"
+                maxLength={12}
               />
             </div>
 

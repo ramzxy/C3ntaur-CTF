@@ -48,7 +48,6 @@ export default async function RootLayout({
                 border: '2px solid',
                 fontSize: '1.25rem',
                 padding: '1rem 2rem',
-                boxShadow: '0 0 10px #00ff00',
                 fontFamily: 'Roboto Mono, monospace',
                 maxWidth: '600px',
                 width: '100%',
@@ -66,7 +65,6 @@ export default async function RootLayout({
                 style: {
                   border: '2px solid #ff0000',
                   color: '#ff0000',
-                  boxShadow: '0 0 10px #ff0000',
                   borderRadius: '0',
                 },
                 icon: <FaTimes className="text-[#ff0000]" />,

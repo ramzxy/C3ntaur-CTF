@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FaPlus } from "react-icons/fa";
-import { Announcement, NewAnnouncement } from '@/types';
+import { Announcement, ApiError, NewAnnouncement } from '@/types';
 import { fetchAnnouncements, createAnnouncement, deleteAnnouncement } from '@/utils/api';
 import AnnouncementModal from './AnnouncementModal';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
@@ -23,10 +23,10 @@ export default function AnnouncementsTab() {
     try {
       const data = await fetchAnnouncements();
       setAnnouncements(data);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      setError(errorMessage);
-      toast.error(`Error fetching announcements: ${errorMessage}`);
+    } catch (error) {
+      const err = error as ApiError;
+      setError(err.error);
+      toast.error(`Error fetching announcements: ${err.error}`);
       console.error('Error fetching announcements:', err);
     } finally {
       setIsLoading(false);
@@ -46,9 +46,9 @@ export default function AnnouncementsTab() {
       await fetchAnnouncementsData();
       toast.success('Announcement created successfully');
     } catch (error) {
-      const err = error as Error;
+      const err = error as ApiError;
       console.error('Error creating announcement:', err);
-      toast.error(err.message || 'Failed to create announcement');
+      toast.error(`Error creating announcement: ${err.error}`);
     }
   };
 
@@ -59,8 +59,9 @@ export default function AnnouncementsTab() {
       await fetchAnnouncementsData();
       toast.success('Announcement deleted successfully');
     } catch (error) {
-      console.error('Error deleting announcement:', error);
-      toast.error('Error deleting announcement. See console for details.');
+      const err = error as ApiError;
+      console.error('Error deleting announcement:', err.error);
+      toast.error(`Error deleting announcement: ${err.error}`);
     }
   };
 

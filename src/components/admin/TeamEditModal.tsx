@@ -45,7 +45,7 @@ export default function TeamEditModal({ team, isOpen, onClose, onSave, onDataRef
       }
     } catch (err) {
       const error = err as ApiError;
-      setError(error.message || 'Failed to update team.');
+      setError(error.error || 'Failed to update team.');
     } finally {
       setIsSaving(false);
     }

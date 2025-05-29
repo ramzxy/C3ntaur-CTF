@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { GameConfig } from '@/types';
+import { ApiError, GameConfig } from '@/types';
 import { fetchGameConfig, updateGameConfig } from '@/utils/api';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { toast } from 'react-hot-toast';
@@ -22,8 +22,9 @@ export default function GameConfigurationTab() {
           setHasEndTime(data.hasEndTime !== false);
         }
       } catch (error) {
-        console.error('Error fetching game config:', error);
-        toast.error('Failed to load game configuration');
+        const err = error as ApiError;
+        console.error('Error fetching game config:', err.error);
+        toast.error(`Error fetching game config: ${err.error}`);
       } finally {
         setLoading(false);
       }
@@ -51,9 +52,10 @@ export default function GameConfigurationTab() {
       });
       setHasEndTime(data.hasEndTime !== false);
       toast.success('Game time settings updated successfully!');
-    } catch (error) {
-      console.error('Error updating game config:', error);
-      toast.error('Error updating game time settings');
+    } catch (error) { 
+      const err = error as ApiError;
+      console.error('Error updating game config:', err.error);
+      toast.error(`Error updating game time settings: ${err.error}`);
     }
   };
 
