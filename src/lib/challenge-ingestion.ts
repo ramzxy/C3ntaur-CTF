@@ -114,6 +114,7 @@ export class ChallengeIngestionService {
           } : undefined,
           difficulty: challengeData.difficulty,
           isLocked: challengeData.isLocked || false,
+          link: challengeData.link,
           solveExplanation: solveExplanation,
           files: processedFiles.length > 0 ? {
             create: processedFiles.map(file => ({
