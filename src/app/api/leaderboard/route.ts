@@ -17,7 +17,6 @@ export async function GET() {
       orderBy: {
         score: 'desc',
       },
-      take: 10,
     });
 
     // Get current user's team only if authenticated

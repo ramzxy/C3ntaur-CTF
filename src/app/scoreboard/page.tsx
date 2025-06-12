@@ -29,11 +29,12 @@ export default function ScoreboardPage() {
           fetchGameConfig()
         ]);
 
-        setTeams(teamsData);
+        const scoredTeams = teamsData.filter(team => team.score > 0);
+        setTeams(scoredTeams);
         setGameConfig(gameConfigData);
 
         // Fetch point history for each team
-        const historyPromises = teamsData.map(team => 
+        const historyPromises = scoredTeams.map(team =>
           fetchTeamPointHistory(team.id)
             .then(response => ({ teamId: team.id, history: response.items }))
             .catch(error => {
