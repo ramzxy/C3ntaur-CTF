@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
+const SUBMISSION_RATE_LIMIT_MS = 10_000; // 10 seconds per team per challenge
+
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -127,6 +129,30 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: 'Challenge already solved' },
         { status: 400 }
+      );
+    }
+
+    // Rate limit incorrect submissions per team for this challenge
+    const lastSubmission = await prisma.submission.findFirst({
+      where: {
+        teamId,
+        challengeId,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (
+      lastSubmission &&
+      !lastSubmission.isCorrect &&
+      now.getTime() - lastSubmission.createdAt.getTime() < SUBMISSION_RATE_LIMIT_MS
+    ) {
+      const wait = Math.ceil(
+        (SUBMISSION_RATE_LIMIT_MS - (now.getTime() - lastSubmission.createdAt.getTime())) /
+          1000
+      );
+      return NextResponse.json(
+        { error: `Too many attempts. Please wait ${wait}s before trying again.` },
+        { status: 429 }
       );
     }
 
