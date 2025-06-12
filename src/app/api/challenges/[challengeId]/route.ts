@@ -85,6 +85,30 @@ export async function GET(
     // Get set of solved flag IDs for this challenge
     const solvedFlagIds = new Set(challenge.submissions.map(sub => sub.flagId));
 
+    // Determine which hints have been purchased by the user's team
+    const teamHints = session?.user?.teamId ? await prisma.teamHint.findMany({
+      where: {
+        teamId: session.user.teamId,
+        hint: {
+          challengeId,
+        },
+      },
+      select: {
+        hintId: true,
+      },
+    }) : [];
+
+    const purchasedHintIds = new Set(teamHints.map(th => th.hintId));
+
+    const sanitizedHints = challenge.hints.map(hint => {
+      const isPurchased = purchasedHintIds.has(hint.id);
+      return {
+        ...hint,
+        content: isPurchased ? hint.content : undefined,
+        isPurchased,
+      };
+    });
+
     // Check if user's team has solved this challenge
     const userTeamSolved = session?.user?.teamId && challenge.submissions.some(sub => sub.teamId === session.user.teamId);
 
@@ -97,8 +121,9 @@ export async function GET(
         points: flag.points,
         isSolved: solvedFlagIds.has(flag.id)
       })) : undefined,
-      isSolved: challenge.multipleFlags 
-        ? solvedFlagIds.size === challenge.flags.length 
+      hints: sanitizedHints,
+      isSolved: challenge.multipleFlags
+        ? solvedFlagIds.size === challenge.flags.length
         : challenge.submissions.length > 0,
       solvedByTeamId: challenge.submissions[0]?.teamId,
       submissions: undefined,

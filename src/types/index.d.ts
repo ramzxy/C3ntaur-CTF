@@ -25,7 +25,7 @@ export interface ChallengeFile extends BaseEntity {
 
 // Hint
 export interface Hint extends BaseEntity {
-  content: string;
+  content?: string;
   cost: number;
   challengeId: string;
   isPurchased?: boolean; // For API/UI

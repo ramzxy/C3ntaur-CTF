@@ -71,11 +71,15 @@ export async function GET(req: Request) {
 
     const purchasedHintIds = new Set(teamHints.map(th => th.hintId));
 
-    // Return hints with purchase status
-    const hintsWithStatus = hints.map(hint => ({
-      ...hint,
-      isPurchased: purchasedHintIds.has(hint.id),
-    }));
+    // Return hints with purchase status, excluding content if not purchased
+    const hintsWithStatus = hints.map(hint => {
+      const isPurchased = purchasedHintIds.has(hint.id);
+      return {
+        ...hint,
+        content: isPurchased ? hint.content : undefined,
+        isPurchased,
+      };
+    });
 
     return NextResponse.json(hintsWithStatus);
   } catch (error) {
