@@ -48,14 +48,23 @@ export async function PUT(request: Request) {
 
     // Parse dates consistently using UTC
     const startDate = new Date(startTime);
-    const endDate = hasEndTime && endTime ? new Date(endTime) : null;
+    const endDate = hasEndTime ? (endTime ? new Date(endTime) : null) : null;
 
     // Validate dates
-    if (hasEndTime && startDate >= endDate!) {
-      return NextResponse.json(
-        { error: 'Start time must be before end time' },
-        { status: 400 }
-      );
+    if (hasEndTime) {
+      if (!endDate) {
+        return NextResponse.json(
+          { error: 'End time is required when hasEndTime is true' },
+          { status: 400 }
+        );
+      }
+
+      if (startDate >= endDate) {
+        return NextResponse.json(
+          { error: 'Start time must be before end time' },
+          { status: 400 }
+        );
+      }
     }
 
     // Find existing config
