@@ -19,7 +19,8 @@ import {
   SignUpRequest,
   SignUpResponse,
   User,
-  Team
+  Team,
+  AdminSubmission,
 } from '@/types';
 
 export async function fetchSiteConfig(): Promise<SiteConfig[]> {
@@ -411,6 +412,14 @@ export async function updateAdminUser(userData: Partial<User>): Promise<User> {
   return response.json();
 }
 
+export async function fetchAdminSubmissions(): Promise<AdminSubmission[]> {
+  const response = await fetch('/api/admin/submissions');
+  if (!response.ok) {
+    throw new Error('Failed to fetch submissions');
+  }
+  return response.json();
+}
+
 export async function signUp(data: SignUpRequest): Promise<SignUpResponse> {
   const response = await fetch('/api/auth/signup', {
     method: 'POST',
@@ -442,4 +451,5 @@ export type {
   SignUpResponse,
   User,
   Team,
-}; 
+  AdminSubmission,
+};

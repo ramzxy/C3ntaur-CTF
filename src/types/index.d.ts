@@ -226,6 +226,27 @@ export interface Score {
   };
 }
 
+export interface AdminSubmission {
+  id: string;
+  flag: string;
+  isCorrect: boolean;
+  createdAt: string;
+  user: {
+    id: string;
+    alias: string;
+  };
+  team: {
+    id: string;
+    name: string;
+    color?: string;
+    icon?: string;
+  };
+  challenge: {
+    id: string;
+    title: string;
+  };
+}
+
 // SubmissionResponse
 export interface SubmissionResponse {
   message: string;
@@ -265,7 +286,14 @@ export interface SignUpResponse {
   };
 }
 
-export type Tab = 'challenges' | 'users' | 'teams' | 'announcements' | 'configuration' | 'siteconfig';
+export type Tab =
+  | 'challenges'
+  | 'users'
+  | 'teams'
+  | 'submissions'
+  | 'announcements'
+  | 'configuration'
+  | 'siteconfig';
 
 export interface RulesResponse {
   siteRules: string;
