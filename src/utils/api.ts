@@ -21,6 +21,7 @@ import {
   User,
   Team,
   AdminSubmission,
+  AdminActivityLog,
 } from '@/types';
 
 export async function fetchSiteConfig(): Promise<SiteConfig[]> {
@@ -420,6 +421,44 @@ export async function fetchAdminSubmissions(): Promise<AdminSubmission[]> {
   return response.json();
 }
 
+export async function fetchAdminActivityLogs(): Promise<AdminActivityLog[]> {
+  const response = await fetch('/api/admin/activity');
+  if (!response.ok) {
+    throw new Error('Failed to fetch activity logs');
+  }
+  return response.json();
+}
+
+export async function updateAdminActivityLog(
+  data: Partial<AdminActivityLog> & { id: string }
+): Promise<AdminActivityLog> {
+  const response = await fetch('/api/admin/activity', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const res = await response.json();
+    throw new Error(res.error || 'Failed to update activity log');
+  }
+
+  return response.json();
+}
+
+export async function deleteAdminActivityLog(id: string): Promise<void> {
+  const response = await fetch('/api/admin/activity', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id }),
+  });
+
+  if (!response.ok) {
+    const res = await response.json();
+    throw new Error(res.error || 'Failed to delete activity log');
+  }
+}
+
 export async function signUp(data: SignUpRequest): Promise<SignUpResponse> {
   const response = await fetch('/api/auth/signup', {
     method: 'POST',
@@ -452,4 +491,5 @@ export type {
   User,
   Team,
   AdminSubmission,
+  AdminActivityLog,
 };

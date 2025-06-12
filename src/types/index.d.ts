@@ -247,6 +247,15 @@ export interface AdminSubmission {
   };
 }
 
+export interface AdminActivityLog {
+  id: string;
+  type: string;
+  description: string;
+  createdAt: string;
+  teamId: string | null;
+  team?: Team | null;
+}
+
 // SubmissionResponse
 export interface SubmissionResponse {
   message: string;
@@ -292,6 +301,7 @@ export type Tab =
   | 'teams'
   | 'submissions'
   | 'announcements'
+  | 'activity'
   | 'configuration'
   | 'siteconfig';
 
