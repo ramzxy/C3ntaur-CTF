@@ -12,6 +12,7 @@ import UsersTab from '@/components/admin/UsersTab';
 import TeamsTab from '@/components/admin/TeamsTab';
 import AnnouncementsTab from '@/components/admin/AnnouncementsTab';
 import SubmissionsTab from '@/components/admin/SubmissionsTab';
+import ActivityLogTab from '@/components/admin/ActivityLogTab';
 import GameConfigurationTab from '@/components/admin/GameConfigurationTab';
 import SiteConfigurationTab from '@/components/admin/SiteConfigurationTab';
 import { Tab } from '@/types';
@@ -22,6 +23,7 @@ const TABS = [
   { id: 'teams' as Tab, label: 'Teams' },
   { id: 'submissions' as Tab, label: 'Submissions' },
   { id: 'announcements' as Tab, label: 'Announcements' },
+  { id: 'activity' as Tab, label: 'Activity Log' },
   { id: 'siteconfig' as Tab, label: 'Site Configuration' },
   { id: 'configuration' as Tab, label: 'Game Configuration' },
 ] as const;
@@ -64,6 +66,7 @@ export default function AdminDashboard() {
           {activeTab === 'teams' && <TeamsTab />}
           {activeTab === 'submissions' && <SubmissionsTab />}
           {activeTab === 'announcements' && <AnnouncementsTab />}
+          {activeTab === 'activity' && <ActivityLogTab />}
           {activeTab === 'siteconfig' && <SiteConfigurationTab />}
           {activeTab === 'configuration' && <GameConfigurationTab />}
         </div>
