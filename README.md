@@ -27,13 +27,16 @@ Experience a CTF in a sleek, dark-themed environment with real-time scoring and 
 - 📊 **Real-time Scoring** - Live leaderboard updates
 - 🌙 **Retro UI Theme** - Space-inspired design with stunning visuals for both the categories and challenge selection screens
 - 📱 **Responsive Design** - Works on both desktop and mobile
-- 🚀 **Modern Stack** - Built with Next.js 14, Prisma, and Tailwind CSS
+- 🚀 **Modern Stack** - Built with Next.js 15, Prisma, and Tailwind CSS
+- 🏁 **Multi-Flag Challenges** - Supports problems with multiple flags for partial credit
+- 📈 **Scoreboard History** - Visualize team progress with a dynamic chart
+- 🔓 **Unlock Conditions** - Time-based and prerequisite challenge gates
 
 ## 🛠️ Prerequisites
 
 Before you begin, ensure you have the following installed:
 
-- Node.js 18.x or later
+- Node.js 20.x or later
 - npm or yarn
 - SQLite (included with Prisma)
 
@@ -52,19 +55,24 @@ Before you begin, ensure you have the following installed:
    yarn install
    ```
 
-3. **Set up the database**
+3. **Create a `.env` file**
+   ```bash
+   cp .env.example .env
+   ```
+
+4. **Set up the database**
    ```bash
    npx prisma migrate reset
    ```
 
-4. **Seed initial challenges**
+5. **Seed initial challenges**
    ```bash
    npm run prisma:seed
    # or
    yarn prisma:seed
    ```
 
-5. **Start development server**
+6. **Start development server**
    ```bash
    npm run dev
    # or
@@ -78,9 +86,13 @@ Before you begin, ensure you have the following installed:
 ```
 orbital-ctf/
 ├── src/
-│   ├── app/          # Next.js app router pages
-│   ├── components/   # React components
-│   └── lib/          # Utilities and configurations
+│   ├── app/            # Next.js app router pages
+│   ├── components/     # React components
+│   ├── lib/            # Server-side helpers
+│   ├── utils/          # Client-side utilities
+│   ├── types/          # Shared TypeScript types
+│   ├── middleware.ts   # Next.js middleware
+│   └── instrumentation.ts # Startup tasks (challenge import)
 ├── prisma/
 │   ├── schema.prisma # Database schema
 │   └── migrations/   # Database migrations
@@ -96,8 +108,9 @@ The platform is built on these core models:
 |-------|-------------|
 | `User` | User accounts with authentication and team membership |
 | `Team` | Team information, scoring, and member management |
-| `Challenge` | CTF challenges with points, flags, and dependencies |
-| `ChallengeDependency` | Manages challenge unlock requirements |
+| `Challenge` | CTF challenges with points and locking rules |
+| `UnlockCondition` | Challenge unlock requirements |
+| `ChallengeFlag` | Supports multi-flag scoring |
 | `Submission` | Challenge submission tracking and validation |
 | `Announcement` | Platform-wide announcements |
 | `ActivityLog` | Team activity tracking |
@@ -107,6 +120,7 @@ The platform is built on these core models:
 | `TeamHint` | Tracks which teams have purchased hints |
 | `SiteConfig` | Platform configuration settings |
 | `Score` | Detailed scoring history for teams and users |
+| `TeamPointHistory` | Chronological log of team score changes |
 
 ## 🔧 Configuration
 
@@ -116,9 +130,11 @@ The platform can be configured through environment variables:
 DATABASE_URL="file:./dev.db"
 NEXTAUTH_SECRET="your-secret-here"
 NEXTAUTH_URL="http://localhost:3000"
-INGEST_CHALLENGES_AT_STARTUP=true // if set to true, tries to ingest challenges in the CHALLENGES_DIR directory at startup, see expected structure
-CHALLENGES_DIR="./challenges" // path to the folder of challenges you want ingested
+INGEST_CHALLENGES_AT_STARTUP=true
+CHALLENGES_DIR="./challenges"
 ```
+
+Set `INGEST_CHALLENGES_AT_STARTUP` to `true` if you want challenges in `CHALLENGES_DIR` automatically imported when the server starts.
 
 ## 📝 License
 
