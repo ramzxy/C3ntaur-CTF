@@ -124,10 +124,12 @@ export class ChallengeIngestionService {
             }))
           } : undefined,
           hints: challengeData.hints ? {
-            create: challengeData.hints.map(hint => ({
-              content: hint.content,
-              cost: hint.cost
-            }))
+            create: challengeData.hints
+              .filter(hint => hint.content !== undefined)
+              .map(hint => ({
+                content: hint.content as string,
+                cost: hint.cost
+              }))
           } : undefined,
           unlockConditions: challengeData.unlockConditions ? {
             create: challengeData.unlockConditions.map(cond => ({
