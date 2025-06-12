@@ -100,7 +100,7 @@ export async function POST(req: Request) {
         await tx.activityLog.create({
           data: {
             type: 'HINT_PURCHASE',
-            description: `Team purchased a hint for challenge "${hint.challenge.title}" (-${hint.cost} points)`,
+            description: `Team ${team.name} purchased a hint for challenge "${hint.challenge.title}" (-${hint.cost} points)`,
             teamId: team.id,
           },
         });
