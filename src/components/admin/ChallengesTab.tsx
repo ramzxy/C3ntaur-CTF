@@ -12,9 +12,9 @@ export default function ChallengesTab() {
   const [editingChallenge, setEditingChallenge] = useState<Challenge | null>(null);
   const [challengeToDelete, setChallengeToDelete] = useState<Challenge | null>(null);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
-  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewingSolves, setViewingSolves] = useState<Challenge | null>(null);
   const [newChallenge, setNewChallenge] = useState<NewChallenge>({
     title: '',
     description: '',
@@ -147,7 +147,6 @@ export default function ChallengesTab() {
           </label>
         </div>
       </div>
-      {/* Table Container with horizontal scroll on mobile */}
       <div className="overflow-x-auto">
         <table className="min-w-full text-gray-300">
           <thead>
@@ -155,7 +154,6 @@ export default function ChallengesTab() {
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Title</th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Category</th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Points</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Difficulty</th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Solves</th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Status</th>
               <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">Actions</th>
@@ -163,106 +161,77 @@ export default function ChallengesTab() {
           </thead>
           <tbody className="divide-y divide-gray-700">
             {challenges.map((challenge) => (
-              <>
-                <tr key={challenge.id} className="border-t border-gray-700 hover:bg-gray-800/50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <button
-                      onClick={() => setExpandedRows(prev => {
-                        const next = new Set(prev);
-                        next.has(challenge.id) ? next.delete(challenge.id) : next.add(challenge.id);
-                        return next;
-                      })}
-                      className="mr-2 text-blue-400"
-                    >
-                      {expandedRows.has(challenge.id) ? '-' : '+'}
-                    </button>
-                    {challenge.title}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">{challenge.category}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {challenge.multipleFlags ? (
-                      <div className="flex flex-col gap-1">
-                        {challenge.flags.map((flag, index) => (
-                          <span key={flag.id || index} className="text-sm">
-                            {flag.points} pts
-                          </span>
-                        ))}
-                        <span className="text-xs text-gray-500">
-                          Total: {challenge.flags.reduce((sum, flag) => sum + flag.points, 0)} pts
-                        </span>
-                      </div>
-                    ) : (
-                      challenge.points
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">{challenge.difficulty}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{challenge.solvedBy?.length || 0}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+              <tr key={challenge.id} className="border-t border-gray-700 hover:bg-gray-800/50 transition-colors">
+                <td className="px-6 py-4 whitespace-nowrap">{challenge.title}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{challenge.category}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {challenge.multipleFlags ? (
                     <div className="flex flex-col gap-1">
-                      <span className={`max-w-fit inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        challenge.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                        {challenge.isActive ? 'Active' : 'Inactive'}
+                      {challenge.flags.map((flag, index) => (
+                        <span key={flag.id || index} className="text-sm">
+                          {flag.points} pts
+                        </span>
+                      ))}
+                      <span className="text-xs text-gray-500">
+                        Total: {challenge.flags.reduce((sum, flag) => sum + flag.points, 0)} pts
                       </span>
-                      {challenge.isLocked && (
-                        <span className="max-w-fit inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                          Locked
-                        </span>
-                      )}
-                      {challenge.multipleFlags && (
-                        <span className="max-w-fit inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                          Multiple Flags
-                        </span>
-                      )}
                     </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-row gap-2 justify-end">
-                      <button
-                        onClick={() => handleEdit(challenge)}
-                        className="bg-blue-900 text-blue-300 px-3 py-1 rounded hover:bg-blue-800 transition-colors"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => challengeToDelete?.id === challenge.id
-                          ? handleDelete(challenge.id)
-                          : setChallengeToDelete(challenge)
-                        }
-                        onMouseLeave={() => setChallengeToDelete(null)}
-                        className={`px-3 py-1 rounded transition-colors ${
-                          challengeToDelete?.id === challenge.id
-                            ? 'bg-red-700 text-red-200 hover:bg-red-600'
-                            : 'bg-red-900 text-red-300 hover:bg-red-800'
-                        }`}
-                      >
-                        {challengeToDelete?.id === challenge.id ? 'Confirm?' : 'Delete'}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                {expandedRows.has(challenge.id) && (
-                  <tr className="border-t border-gray-700 bg-gray-800/30" key={`${challenge.id}-expanded`}>
-                    <td colSpan={7} className="px-6 py-4">
-                      {challenge.solvedBy && challenge.solvedBy.length > 0 ? (
-                        <div className="flex flex-wrap gap-2">
-                          {challenge.solvedBy.map(team => (
-                            <span
-                              key={team.id}
-                              className="px-2 py-1 rounded text-sm"
-                              style={{ backgroundColor: team.color || '#333' }}
-                            >
-                              {team.name}
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="text-gray-400">No solves yet</span>
-                      )}
-                    </td>
-                  </tr>
-                )}
-              </>
+                  ) : (
+                    challenge.points
+                  )}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <button
+                    onClick={() => setViewingSolves(challenge)}
+                    className="text-blue-400 hover:text-blue-300 transition-colors"
+                  >
+                    {challenge.solvedBy?.length || 0} solves
+                  </button>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex flex-col gap-1">
+                    <span className={`max-w-fit inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      challenge.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {challenge.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                    {challenge.isLocked && (
+                      <span className="max-w-fit inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        Locked
+                      </span>
+                    )}
+                    {challenge.multipleFlags && (
+                      <span className="max-w-fit inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        Multiple Flags
+                      </span>
+                    )}
+                  </div>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex flex-row gap-2 justify-end">
+                    <button
+                      onClick={() => handleEdit(challenge)}
+                      className="bg-blue-900 text-blue-300 px-3 py-1 rounded hover:bg-blue-800 transition-colors"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => challengeToDelete?.id === challenge.id
+                        ? handleDelete(challenge.id)
+                        : setChallengeToDelete(challenge)
+                      }
+                      onMouseLeave={() => setChallengeToDelete(null)}
+                      className={`px-3 py-1 rounded transition-colors ${
+                        challengeToDelete?.id === challenge.id
+                          ? 'bg-red-700 text-red-200 hover:bg-red-600'
+                          : 'bg-red-900 text-red-300 hover:bg-red-800'
+                      }`}
+                    >
+                      {challengeToDelete?.id === challenge.id ? 'Confirm?' : 'Delete'}
+                    </button>
+                  </div>
+                </td>
+              </tr>
             ))}
           </tbody>
         </table>
@@ -293,6 +262,42 @@ export default function ChallengesTab() {
           submitText="Save Changes"
           isEditing={true}
         />
+      )}
+
+      {/* Solves Modal */}
+      {viewingSolves && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 rounded-lg p-6 max-w-lg w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold text-white">
+                Solves for {viewingSolves.title}
+              </h3>
+              <button
+                onClick={() => setViewingSolves(null)}
+                className="text-gray-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="max-h-96 overflow-y-auto">
+              {viewingSolves.solvedBy && viewingSolves.solvedBy.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {viewingSolves.solvedBy.map(team => (
+                    <span
+                      key={team.id}
+                      className="px-3 py-2 rounded text-sm"
+                      style={{ backgroundColor: team.color || '#333' }}
+                    >
+                      {team.name}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <span className="text-gray-400">No solves yet</span>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
