@@ -10,14 +10,22 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    const [totalTeams, totalUsers, totalChallenges, totalSubmissions, challenges] = await Promise.all([
+    const [
+      totalTeams,
+      totalUsers,
+      totalChallenges,
+      totalSubmissions,
+      challenges,
+      totalPointsResult,
+    ] = await Promise.all([
       prisma.team.count(),
       prisma.user.count(),
       prisma.challenge.count(),
       prisma.submission.count(),
       prisma.challenge.findMany({
         select: { points: true, flags: { select: { points: true } }, multipleFlags: true }
-      })
+      }),
+      prisma.team.aggregate({ _sum: { score: true } }),
     ]);
 
     let totalPossiblePoints = 0;
@@ -29,12 +37,15 @@ export async function GET() {
       }
     }
 
+    const totalPointsScored = totalPointsResult._sum.score ?? 0;
+
     return NextResponse.json({
       totalTeams,
       totalUsers,
       totalChallenges,
       totalSubmissions,
-      totalPossiblePoints
+      totalPossiblePoints,
+      totalPointsScored,
     });
   } catch (error) {
     console.error('Error fetching metrics:', error);

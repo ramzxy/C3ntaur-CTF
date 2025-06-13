@@ -53,6 +53,10 @@ export default function MetricsTab() {
         <p className="text-3xl font-bold text-blue-400">{metrics.totalPossiblePoints}</p>
       </div>
       <div className="bg-gray-800 p-4 rounded border border-gray-700">
+        <h3 className="text-lg font-semibold mb-2">Points Scored</h3>
+        <p className="text-3xl font-bold text-blue-400">{metrics.totalPointsScored}</p>
+      </div>
+      <div className="bg-gray-800 p-4 rounded border border-gray-700">
         <h3 className="text-lg font-semibold mb-2">Submissions</h3>
         <p className="text-3xl font-bold text-blue-400">{metrics.totalSubmissions}</p>
       </div>
