@@ -256,6 +256,14 @@ export interface AdminActivityLog {
   team?: Team | null;
 }
 
+export interface AdminMetrics {
+  totalTeams: number;
+  totalUsers: number;
+  totalChallenges: number;
+  totalSubmissions: number;
+  totalPossiblePoints: number;
+}
+
 // SubmissionResponse
 export interface SubmissionResponse {
   message: string;
@@ -303,7 +311,8 @@ export type Tab =
   | 'announcements'
   | 'activity'
   | 'configuration'
-  | 'siteconfig';
+  | 'siteconfig'
+  | 'metrics';
 
 export interface RulesResponse {
   siteRules: string;
