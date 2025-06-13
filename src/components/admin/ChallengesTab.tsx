@@ -14,6 +14,7 @@ export default function ChallengesTab() {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewingSolves, setViewingSolves] = useState<Challenge | null>(null);
   const [newChallenge, setNewChallenge] = useState<NewChallenge>({
     title: '',
     description: '',
@@ -146,7 +147,6 @@ export default function ChallengesTab() {
           </label>
         </div>
       </div>
-      {/* Table Container with horizontal scroll on mobile */}
       <div className="overflow-x-auto">
         <table className="min-w-full text-gray-300">
           <thead>
@@ -154,7 +154,7 @@ export default function ChallengesTab() {
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Title</th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Category</th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Points</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Difficulty</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Solves</th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Status</th>
               <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">Actions</th>
             </tr>
@@ -180,7 +180,14 @@ export default function ChallengesTab() {
                     challenge.points
                   )}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">{challenge.difficulty}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <button
+                    onClick={() => setViewingSolves(challenge)}
+                    className="text-blue-400 hover:text-blue-300 transition-colors"
+                  >
+                    {challenge.solvedBy?.length || 0} solves
+                  </button>
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex flex-col gap-1">
                     <span className={`max-w-fit inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -209,7 +216,7 @@ export default function ChallengesTab() {
                       Edit
                     </button>
                     <button
-                      onClick={() => challengeToDelete?.id === challenge.id 
+                      onClick={() => challengeToDelete?.id === challenge.id
                         ? handleDelete(challenge.id)
                         : setChallengeToDelete(challenge)
                       }
@@ -255,6 +262,42 @@ export default function ChallengesTab() {
           submitText="Save Changes"
           isEditing={true}
         />
+      )}
+
+      {/* Solves Modal */}
+      {viewingSolves && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 rounded-lg p-6 max-w-lg w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold text-white">
+                Solves for {viewingSolves.title}
+              </h3>
+              <button
+                onClick={() => setViewingSolves(null)}
+                className="text-gray-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="max-h-96 overflow-y-auto">
+              {viewingSolves.solvedBy && viewingSolves.solvedBy.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {viewingSolves.solvedBy.map(team => (
+                    <span
+                      key={team.id}
+                      className="px-3 py-2 rounded text-sm"
+                      style={{ backgroundColor: team.color || '#333' }}
+                    >
+                      {team.name}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <span className="text-gray-400">No solves yet</span>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
