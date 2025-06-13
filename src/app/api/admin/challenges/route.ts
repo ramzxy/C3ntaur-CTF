@@ -84,10 +84,27 @@ export async function GET() {
         files: true,
         hints: true,
         flags: true,
-        unlockConditions: true
+        unlockConditions: true,
+        submissions: {
+          where: { isCorrect: true },
+          select: {
+            teamId: true,
+            team: { select: { name: true, color: true } }
+          }
+        }
       }
     });
-    return NextResponse.json(challenges);
+
+    const transformed = challenges.map(ch => ({
+      ...ch,
+      solvedBy: ch.submissions.map(sub => ({
+        id: sub.teamId,
+        name: sub.team.name,
+        color: sub.team.color
+      }))
+    }));
+
+    return NextResponse.json(transformed);
   } catch (error) {
     console.error('Error fetching challenges:', error);
     return NextResponse.json(

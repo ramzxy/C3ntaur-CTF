@@ -57,6 +57,7 @@ export interface Challenge extends BaseEntity {
   hints: Hint[];
   unlockConditions: UnlockCondition[];
   isSolved?: boolean; // For API/UI
+  solvedBy?: { id: string; name: string; color?: string }[];
 }
 
 // NewChallenge
