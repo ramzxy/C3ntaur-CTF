@@ -49,6 +49,45 @@ function SolutionModal({ isOpen, onClose, explanation }: SolutionModalProps) {
   );
 }
 
+interface PurchaseHintModalProps {
+  hint: Hint | null;
+  isOpen: boolean;
+  onConfirm: () => void;
+  onClose: () => void;
+}
+
+function PurchaseHintModal({ hint, isOpen, onConfirm, onClose }: PurchaseHintModalProps) {
+  if (!isOpen || !hint) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+      <div className="bg-black p-6 w-full max-w-sm shadow-xl border-2 border-white">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Confirm Purchase</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-white">
+            <IoClose size={24} />
+          </button>
+        </div>
+        <p className="mb-6">Purchase this hint for {hint.cost} points?</p>
+        <div className="flex justify-end gap-2">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 border border-white hover:bg-white hover:text-black"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 border-2 border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-black"
+          >
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ChallengePage() {
   const params = useParams();
   const router = useRouter();
@@ -63,6 +102,7 @@ export default function ChallengePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
+  const [hintToPurchase, setHintToPurchase] = useState<Hint | null>(null);
   const challengeId = params.challengeId as string;
 
   useEffect(() => {
@@ -96,6 +136,20 @@ export default function ChallengePage() {
     } finally {
       setIsPurchasing(false);
     }
+  };
+
+  const openPurchaseModal = (hint: Hint) => {
+    setHintToPurchase(hint);
+  };
+
+  const closePurchaseModal = () => {
+    setHintToPurchase(null);
+  };
+
+  const confirmPurchaseHint = async () => {
+    if (!hintToPurchase) return;
+    await handlePurchaseHint(hintToPurchase.id);
+    setHintToPurchase(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -221,6 +275,13 @@ export default function ChallengePage() {
               </div>
             )}
 
+            <PurchaseHintModal
+              hint={hintToPurchase}
+              isOpen={hintToPurchase !== null}
+              onConfirm={confirmPurchaseHint}
+              onClose={closePurchaseModal}
+            />
+
             {session && hints.length > 0 && (
               <div className="mb-6">
                 <h2 className="text-xl font-semibold mb-4">Hints</h2>
@@ -232,7 +293,7 @@ export default function ChallengePage() {
                         <span>Cost: {hint.cost} points</span>
                         {!hint.isPurchased ? (
                           <button
-                            onClick={() => handlePurchaseHint(hint.id)}
+                            onClick={() => openPurchaseModal(hint)}
                             disabled={isPurchasing}
                             className="px-4 py-2 border-2 border-white hover:bg-white hover:text-black disabled:opacity-50"
                           >
