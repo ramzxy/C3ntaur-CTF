@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
-const SUBMISSION_RATE_LIMIT_MS = 10_000; // 10 seconds per team per challenge
+const SUBMISSION_RATE_LIMIT_MS = 60_000; // 60 seconds per team per challenge
 
 export async function POST(request: Request) {
   try {
