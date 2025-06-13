@@ -263,6 +263,8 @@ export interface AdminMetrics {
   totalChallenges: number;
   totalSubmissions: number;
   totalPossiblePoints: number;
+  /** Total number of points all teams have accumulated */
+  totalPointsScored: number;
 }
 
 // SubmissionResponse
