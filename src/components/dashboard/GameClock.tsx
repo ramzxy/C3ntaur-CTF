@@ -62,8 +62,19 @@ export default function GameClock({ gameConfig, isOpen, setIsOpen, isMobile }: G
     const progress = Math.max(0, Math.min(1, elapsed / totalDuration));
 
     if (now < start) {
-      // Before start
-      return { hours: 0, minutes: 0, seconds: 0, milliseconds: 0, progress: 0 };
+      // Countdown to start
+      const remainingMs = Math.max(0, start - now);
+      const hours = Math.floor(remainingMs / (1000 * 60 * 60));
+      const minutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((remainingMs % (1000 * 60)) / 1000);
+      const ms = Math.floor((remainingMs % 1000) / 10);
+      return {
+        hours,
+        minutes,
+        seconds,
+        milliseconds: ms,
+        progress: 0,
+      };
     } else if (now > end) {
       // After end
       return { hours: 0, minutes: 0, seconds: 0, milliseconds: 0, progress: 1 };
@@ -214,6 +225,9 @@ export default function GameClock({ gameConfig, isOpen, setIsOpen, isMobile }: G
                   {/* START + END labels */}
                   <div className="w-full flex justify-between items-center text-xs uppercase tracking-widest relative">
                     <span>[{formatTime(gameConfig.startTime)}]</span>
+                    {currentTime.getTime() < new Date(gameConfig.startTime ?? '').getTime() && (
+                      <span className="absolute left-1/2 transform -translate-x-1/2 text-yellow-300">[GAME STARTING IN]</span>
+                    )}
                     {gameConfig.hasEndTime && gameConfig.endTime && currentTime.getTime() > new Date(gameConfig.endTime ?? '').getTime() && (
                       <span className="absolute left-1/2 transform -translate-x-1/2 text-red-300">[GAMEOVER]</span>
                     )}
