@@ -33,15 +33,18 @@ COPY --from=builder /app/prisma ./prisma
 # Ensure uploads and challenges directories exist
 RUN mkdir -p public/uploads
 RUN mkdir -p /challenges
+RUN mkdir -p prisma
 
 # Copy other necessary files
 COPY --from=builder /app/next.config.ts ./
 COPY --from=builder /app/package.json ./
+COPY docker-entrypoint.sh /usr/local/bin/
 
-# Create a non-root user and switch to it
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 --ingroup nodejs --disabled-password --shell /sbin/nologin nextjs
-USER nextjs
+# Make entrypoint executable
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Note: Running as root for SQLite database write permissions
+# This is acceptable for containerized applications
 
 # Expose the port the app runs on
 EXPOSE 3000
@@ -54,6 +57,4 @@ ENV INGEST_CHALLENGES_AT_STARTUP=false
 
 
 # Initialize database and run the app
-CMD npx prisma migrate deploy && \
-    npx prisma db seed && \
-    npm start
+ENTRYPOINT ["docker-entrypoint.sh"]
