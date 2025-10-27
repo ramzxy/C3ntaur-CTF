@@ -1,21 +1,21 @@
-# 🚀 Orbital CTF Platform
+# 🚀 C3ntaur CTF Platform
 
 <div align="center">
 
-![GitHub License](https://img.shields.io/github/license/asynchronous-x/orbital-ctf)
+![GitHub License](https://img.shields.io/github/license/asynchronous-x/C3ntaur-ctf)
 [![Made with Next.js](https://img.shields.io/badge/Made%20with-Next.js-000000?logo=next.js&logoWidth=20)](https://nextjs.org)
 [![Powered by Prisma](https://img.shields.io/badge/Powered%20by-Prisma-2D3748?logo=prisma&logoWidth=20)](https://www.prisma.io)
 [![Styled with Tailwind](https://img.shields.io/badge/Styled%20with-Tailwind-38B2AC?logo=tailwind-css&logoWidth=20)](https://tailwindcss.com)
 
-<img src="https://raw.githubusercontent.com/asynchronous-x/orbital-ctf/refs/heads/main/src/app/favicon.ico" alt="Orbital CTF Logo" width="200"/>
+<img src="https://raw.githubusercontent.com/asynchronous-x/C3ntaur-ctf/refs/heads/main/src/app/favicon.ico" alt="C3ntaur CTF Logo" width="200"/>
 
 A retro space-themed Capture The Flag platform built with modern tech stack that actually Just Works™️ 
 
 Experience a CTF in a sleek, dark-themed environment with real-time scoring and team collaboration.
 
-[Static Demo Site](https://asynchronous-x.github.io/orbital-ctf/) · [Report Bug](https://github.com/asynchronous-x/orbital-ctf/issues) · [Request Feature](https://github.com/asynchronous-x/orbital-ctf/issues)
+[Static Demo Site](https://asynchronous-x.github.io/C3ntaur-ctf/) · [Report Bug](https://github.com/asynchronous-x/C3ntaur-ctf/issues) · [Request Feature](https://github.com/asynchronous-x/C3ntaur-ctf/issues)
 
-[![Watch the demo](./orbital-ctf-promo.gif)](https://x.com/i/status/1922884608200188109)
+[![Watch the demo](./C3ntaur-ctf-promo.gif)](https://x.com/i/status/1922884608200188109)
 
 </div>
 
@@ -44,8 +44,8 @@ Before you begin, ensure you have the following installed:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/asynchronous-x/orbital-ctf.git
-   cd orbital-ctf
+   git clone https://github.com/asynchronous-x/C3ntaur-ctf.git
+   cd C3ntaur-ctf
    ```
 
 2. **Install dependencies**
@@ -84,7 +84,7 @@ Before you begin, ensure you have the following installed:
 ## 📁 Project Structure
 
 ```
-orbital-ctf/
+C3ntaur-ctf/
 ├── src/
 │   ├── app/            # Next.js app router pages
 │   ├── components/     # React components

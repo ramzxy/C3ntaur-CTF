@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 
   return {
-    title: config?.value || "Orbital CTF",
+    title: config?.value || "C3ntaur CTF",
     description: "Capture The Flag Platform",
   };
 }

@@ -511,11 +511,11 @@ async function main() {
   const siteConfigs = [
     {
       key: 'homepage_title',
-      value: 'Orbital CTF'
+      value: 'C3ntaur CTF'
     },
     {
       key: 'site_title',
-      value: 'Orbital CTF'
+      value: 'C3ntaur CTF'
     },
     {
       key: 'homepage_subtitle',

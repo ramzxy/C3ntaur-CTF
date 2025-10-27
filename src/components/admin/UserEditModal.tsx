@@ -15,6 +15,7 @@ export default function UserEditModal({ user, isOpen, onClose, onSave, teams, on
   const [name, setName] = React.useState(user?.name || '');
   const [selectedTeamId, setSelectedTeamId] = React.useState<string | null>(user?.teamId || null);
   const [isTeamLeader, setIsTeamLeader] = React.useState(user?.isTeamLeader || false);
+  const [isAdmin, setIsAdmin] = React.useState(user?.isAdmin || false);
   const [error, setError] = React.useState<string | null>(null);
   const [isSaving, setIsSaving] = React.useState(false);
 
@@ -25,6 +26,7 @@ export default function UserEditModal({ user, isOpen, onClose, onSave, teams, on
       setName(user.name || '');
       setSelectedTeamId(user.teamId || null);
       setIsTeamLeader(user.isTeamLeader || false);
+      setIsAdmin(user.isAdmin || false);
       setError(null);
     }
   }, [user]);
@@ -56,6 +58,7 @@ export default function UserEditModal({ user, isOpen, onClose, onSave, teams, on
         name: trimmedName,
         teamId: selectedTeamId,
         isTeamLeader: selectedTeamId ? isTeamLeader : false,
+        isAdmin: isAdmin,
       });
       onClose(); // Close modal on successful save
       // Call refresh function if provided
@@ -139,6 +142,22 @@ export default function UserEditModal({ user, isOpen, onClose, onSave, teams, on
               className={`ml-2 block text-sm text-gray-300 ${!selectedTeamId ? 'cursor-not-allowed' : ''}`}
             >
               Team Leader
+            </label>
+          </div>
+
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="isAdmin"
+              checked={isAdmin}
+              onChange={(e) => setIsAdmin(e.target.checked)}
+              className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600"
+            />
+            <label 
+              htmlFor="isAdmin" 
+              className="ml-2 block text-sm text-gray-300"
+            >
+              <span className="font-semibold text-purple-400">Admin</span> (Full access to admin panel)
             </label>
           </div>
 

@@ -85,7 +85,7 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    const { id, alias, name, teamId, isTeamLeader } = await req.json();
+    const { id, alias, name, teamId, isTeamLeader, isAdmin } = await req.json();
 
     if (!id) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
@@ -104,12 +104,14 @@ export async function PATCH(req: Request) {
       name?: string;
       teamId?: string | null;
       isTeamLeader?: boolean;
+      isAdmin?: boolean;
     } = {};
 
     if (alias !== undefined) updateData.alias = alias.trim();
     if (name !== undefined) updateData.name = name.trim();
     if (teamId !== undefined) updateData.teamId = teamId;
     if (isTeamLeader !== undefined) updateData.isTeamLeader = isTeamLeader;
+    if (isAdmin !== undefined) updateData.isAdmin = isAdmin;
 
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json({ error: 'No update data provided' }, { status: 400 });
